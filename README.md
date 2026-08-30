@@ -1,32 +1,61 @@
-# React + TypeScript + Vite
+# GMSoft — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Panel de administracion y app de reparto para GMSoft. React + Vite + TypeScript,
+contra el backend en [GMSoft-BE](https://github.com/MoeykensGabriel/GMSoft-BE).
 
-Currently, two official plugins are available:
+## Arquitectura
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Screaming Architecture: el arbol de `src/` cuenta de que se trata el negocio, no que
+tecnologia se uso.
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```
+src/
+  app/                  raiz de composicion: providers y router global
+  assets/               estaticos globales
+  modules/
+    core/               todo lo tecnico y agnostico al negocio
+      components/       primitivos de UI (Button, Field)
+      lib/              clientes e instancias globales (api, queryClient)
+      utils/            formateadores puros (dinero, fechas)
+    auth/               primer modulo de dominio
+      components/       UI propia del modulo
+      hooks/            logica de negocio del modulo
+      services/         llamadas a la API y contratos
+      states/           estado del modulo
+      views/            pantallas completas, mapeadas en el router global
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Tres reglas que sostienen esto:
+
+**Cada modulo se importa por su `index.ts`.** Lo que no se exporte ahi es privado,
+aunque el archivo exista.
+
+**`core` es puramente tecnico.** Si algo de ahi empieza a saber de envases, choferes o
+saldos, no pertenece a `core`.
+
+**Las carpetas se crean cuando hacen falta.** Un modulo que solo necesita
+`components/` y `hooks/` no lleva el resto vacias.
+
+Los limites no dependen del criterio de nadie: los verifica dependency-cruiser.
+
+```bash
+npm run arch
+```
+
+## Correr en local
+
+```bash
+npm install
+npm run dev
+```
+
+Levanta en `http://localhost:3000`, que es el origen que el backend permite por
+defecto en su CORS. La URL de la API va en `.env` (partir de `.env.example`).
+El backend tiene que estar corriendo.
+
+## Comandos
+
+- `npm run dev` — desarrollo
+- `npm run build` — chequeo de tipos y build de produccion
+- `npm run lint` — oxlint
+- `npm run arch` — limites entre modulos
