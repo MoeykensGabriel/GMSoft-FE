@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { ROLES, useAuth } from '../modules/auth'
 import { Button } from '../modules/core'
 
@@ -13,6 +13,13 @@ export function HomeView() {
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50 px-4">
       <h1 className="text-2xl font-semibold text-slate-900">Panel</h1>
       <p className="text-slate-600">{user.fullName || user.userName}</p>
+
+      <Link
+        to="/panel/salidas"
+        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+      >
+        Salidas de reparto
+      </Link>
       <Button variant="secondary" onClick={logout}>
         Salir
       </Button>

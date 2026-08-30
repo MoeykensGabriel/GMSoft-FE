@@ -1,7 +1,12 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { LoginView, ProtectedRoute, ROLES } from '../modules/auth'
 import { RegisterDeliveryView } from '../modules/deliveries'
-import { CloseSessionView, DeliveryRouteView } from '../modules/sessions'
+import {
+  CloseSessionView,
+  DeliveryRouteView,
+  SessionDetailView,
+  SessionListView,
+} from '../modules/sessions'
 import { HomeView } from './HomeView'
 
 /**
@@ -22,6 +27,11 @@ export function AppRouter() {
         <Route path="/reparto" element={<DeliveryRouteView />} />
         <Route path="/reparto/visita" element={<RegisterDeliveryView />} />
         <Route path="/reparto/cierre" element={<CloseSessionView />} />
+      </Route>
+
+      <Route element={<ProtectedRoute roles={[ROLES.admin]} />}>
+        <Route path="/panel/salidas" element={<SessionListView />} />
+        <Route path="/panel/salidas/:id" element={<SessionDetailView />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

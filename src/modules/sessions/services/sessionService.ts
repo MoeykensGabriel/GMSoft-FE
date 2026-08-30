@@ -1,4 +1,5 @@
 import { api } from '../../core'
+import type { PagedResult } from '../../core'
 
 export type SessionStatus = 'Open' | 'Closed'
 export type ContainerState = 'Full' | 'Empty'
@@ -46,6 +47,47 @@ export interface CloseSessionResult {
   faltante: SessionStockLine[]
 }
 
+export interface SessionDeliveryItem {
+  productId: string
+  productDetail: string
+  quantity: number
+  unitPrice: number
+}
+
+/** Positivo es lo que quedo en el cliente, negativo lo que devolvio. */
+export interface SessionDeliveryContainer {
+  productId: string
+  productDetail: string
+  quantity: number
+}
+
+export interface SessionDelivery {
+  deliveryId: string
+  customerId: string
+  customerName: string
+  customerAddress: string
+  type: 'Sale' | 'ContainerOnly'
+  deliveredAt: string
+  total: number
+  notes: string | null
+  items: SessionDeliveryItem[]
+  containers: SessionDeliveryContainer[]
+}
+
+export interface SessionSettlement {
+  sessionId: string
+  totalSold: number
+  totalCollected: number
+  /** Nulo mientras no se rindio. */
+  amountReceived: number | null
+  /** Vendido menos cobrado: deuda nueva, es normal. */
+  newDebt: number
+  /** Cobrado menos entregado: plata que no llego. Nulo si no se rindio. */
+  cashDifference: number | null
+  receivedAt: string | null
+  notes: string | null
+}
+
 export const sessionService = {
   /**
    * La sesion abierta del chofer, o null si no tiene ninguna. El backend devuelve
@@ -57,4 +99,18 @@ export const sessionService = {
 
   close: (sessionId: string, body: CloseSessionRequest) =>
     api.post<CloseSessionResult>(`/api/sessions/${sessionId}/close`, body),
+
+  list: (page = 1, pageSize = 20) =>
+    api.get<PagedResult<Session>>(`/api/sessions?page=${page}&pageSize=${pageSize}`),
+
+  getById: (sessionId: string) => api.get<Session>(`/api/sessions/${sessionId}`),
+
+  getDeliveries: (sessionId: string) =>
+    api.get<SessionDelivery[]>(`/api/sessions/${sessionId}/deliveries`),
+
+  getSettlement: (sessionId: string) =>
+    api.get<SessionSettlement>(`/api/sessions/${sessionId}/settlement`),
+
+  registerSettlement: (sessionId: string, amountReceived: number, notes: string | null) =>
+    api.post<SessionSettlement>(`/api/sessions/${sessionId}/settlement`, { amountReceived, notes }),
 }

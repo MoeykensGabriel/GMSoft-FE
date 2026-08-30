@@ -1,4 +1,6 @@
 export { DeliveryRouteView } from './views/DeliveryRouteView'
 export { CloseSessionView } from './views/CloseSessionView'
+export { SessionListView } from './views/SessionListView'
+export { SessionDetailView } from './views/SessionDetailView'
 export { useCurrentSession, SESION_ACTUAL } from './hooks/useCurrentSession'
 export type { Session, SessionStockLine } from './services/sessionService'
