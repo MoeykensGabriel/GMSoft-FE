@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { formatDateTime } from '../../core'
 import type { Session } from '../services/sessionService'
 
@@ -38,9 +39,14 @@ export function CurrentSessionView({ sesion }: { sesion: Session }) {
         )}
       </div>
 
-      <p className="text-sm text-slate-500">
-        Registrar visitas y cerrar la salida son los pasos que siguen.
-      </p>
+      <Link
+        to="/reparto/visita"
+        className="rounded-md bg-slate-900 px-4 py-2 text-center text-sm font-medium text-white hover:bg-slate-700"
+      >
+        Registrar visita
+      </Link>
+
+      <p className="text-sm text-slate-500">Cerrar la salida es el paso que sigue.</p>
     </div>
   )
 }

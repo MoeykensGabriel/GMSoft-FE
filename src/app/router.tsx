@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { LoginView, ProtectedRoute, ROLES } from '../modules/auth'
+import { RegisterDeliveryView } from '../modules/deliveries'
 import { DeliveryRouteView } from '../modules/sessions'
 import { HomeView } from './HomeView'
 
@@ -19,6 +20,7 @@ export function AppRouter() {
 
       <Route element={<ProtectedRoute roles={[ROLES.driver]} />}>
         <Route path="/reparto" element={<DeliveryRouteView />} />
+        <Route path="/reparto/visita" element={<RegisterDeliveryView />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
