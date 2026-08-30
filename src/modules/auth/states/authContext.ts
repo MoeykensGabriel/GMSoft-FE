@@ -3,7 +3,7 @@ import type { CurrentUser, Role } from '../services/authService'
 
 export interface AuthContextValue {
   user: CurrentUser | null
-  login: (email: string, password: string) => Promise<CurrentUser>
+  login: (userName: string, password: string) => Promise<CurrentUser>
   logout: () => void
   hasRole: (role: Role) => boolean
 }

@@ -18,7 +18,7 @@ export function HomeView() {
       <h1 className="text-2xl font-semibold text-slate-900">
         {esChofer ? 'Reparto' : 'Panel'}
       </h1>
-      <p className="text-slate-600">{user.fullName || user.email}</p>
+      <p className="text-slate-600">{user.fullName || user.userName}</p>
       <p className="text-sm text-slate-500">{user.roles.join(', ')}</p>
       <Button variant="secondary" onClick={logout}>
         Salir

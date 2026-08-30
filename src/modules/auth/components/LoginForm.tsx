@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 
 export function LoginForm({ onDone }: { onDone: () => void }) {
   const { login } = useAuth()
-  const [email, setEmail] = useState('')
+  const [userName, setUserName] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
@@ -16,7 +16,7 @@ export function LoginForm({ onDone }: { onDone: () => void }) {
     setEnviando(true)
 
     try {
-      await login(email, password)
+      await login(userName, password)
       onDone()
     } catch (err) {
       // El backend distingue credenciales malas (401) de cuenta bloqueada o
@@ -35,13 +35,16 @@ export function LoginForm({ onDone }: { onDone: () => void }) {
   return (
     <form onSubmit={onSubmit} className="flex w-full max-w-sm flex-col gap-4">
       <Field
-        label="Email"
-        name="email"
-        type="email"
+        label="Usuario"
+        name="userName"
+        type="text"
         autoComplete="username"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
         required
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        value={userName}
+        onChange={(e) => setUserName(e.target.value)}
       />
       <Field
         label="Contraseña"

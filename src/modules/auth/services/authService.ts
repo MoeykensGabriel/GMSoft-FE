@@ -12,7 +12,10 @@ export type Role = (typeof ROLES)[keyof typeof ROLES]
 export interface AuthResult {
   token: string
   userId: string
-  email: string
+  /** Con esto entra al sistema. Es la credencial. */
+  userName: string
+  /** Dato de contacto, no credencial. Puede no tener. */
+  email: string | null
   fullName: string
   roles: Role[]
   /** Presente solo si el usuario tiene perfil de chofer. */
@@ -22,6 +25,6 @@ export interface AuthResult {
 export type CurrentUser = Omit<AuthResult, 'token'>
 
 export const authService = {
-  login: (email: string, password: string) =>
-    api.post<AuthResult>('/api/auth/login', { email, password }),
+  login: (userName: string, password: string) =>
+    api.post<AuthResult>('/api/auth/login', { userName, password }),
 }

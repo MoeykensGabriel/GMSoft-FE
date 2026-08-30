@@ -14,7 +14,7 @@ export function LoginView() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-8 bg-slate-50 px-4">
-      <h1 className="text-2xl font-semibold text-slate-900">GMSoft</h1>
+      <h1 className="text-2xl font-semibold text-slate-900">Inicio de sesion</h1>
       <LoginForm onDone={() => navigate(destino, { replace: true })} />
     </main>
   )

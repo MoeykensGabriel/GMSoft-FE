@@ -38,8 +38,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setOnUnauthorized(logout)
   }, [logout])
 
-  const login = useCallback(async (email: string, password: string) => {
-    const { token, ...datos } = await authService.login(email, password)
+  const login = useCallback(async (userName: string, password: string) => {
+    const { token, ...datos } = await authService.login(userName, password)
 
     tokenStorage.set(token)
     localStorage.setItem(USER_KEY, JSON.stringify(datos))
