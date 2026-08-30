@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+/*
+ * La app define su propio fondo y color de texto en vez de heredar el esquema del
+ * navegador. Sin esto, en un celular en modo oscuro el texto queda negro sobre
+ * negro: no es un detalle estetico, es la pantalla que el chofer mira en la calle.
+ * Cuando haya tema oscuro propio se define aca, no se deja al azar del dispositivo.
+ */
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background-color: #f8fafc; /* slate-50 */
+  color: #0f172a;            /* slate-900 */
+  color-scheme: light;
+}
