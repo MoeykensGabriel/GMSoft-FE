@@ -34,6 +34,18 @@ export interface OpenSessionRequest {
   load: { productId: string; quantity: number }[]
 }
 
+export interface CloseSessionRequest {
+  kilometersAtClose: number
+  returns: { productId: string; state: ContainerState; quantity: number }[]
+}
+
+export interface CloseSessionResult {
+  sessionId: string
+  cuadraTodo: boolean
+  /** Lo que quedo colgado. Vacio si cuadro todo. */
+  faltante: SessionStockLine[]
+}
+
 export const sessionService = {
   /**
    * La sesion abierta del chofer, o null si no tiene ninguna. El backend devuelve
@@ -42,4 +54,7 @@ export const sessionService = {
   getCurrent: async () => (await api.get<Session | null>('/api/sessions/current')) ?? null,
 
   open: (body: OpenSessionRequest) => api.post<string>('/api/sessions/open', body),
+
+  close: (sessionId: string, body: CloseSessionRequest) =>
+    api.post<CloseSessionResult>(`/api/sessions/${sessionId}/close`, body),
 }

@@ -46,7 +46,12 @@ export function CurrentSessionView({ sesion }: { sesion: Session }) {
         Registrar visita
       </Link>
 
-      <p className="text-sm text-slate-500">Cerrar la salida es el paso que sigue.</p>
+      <Link
+        to="/reparto/cierre"
+        className="rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-900 hover:bg-slate-50"
+      >
+        Cerrar salida
+      </Link>
     </div>
   )
 }
