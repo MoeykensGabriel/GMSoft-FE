@@ -1,5 +1,5 @@
 export { DeliveryRouteView } from './views/DeliveryRouteView'
-export { CloseSessionView } from './views/CloseSessionView'
+export { ReceiveSessionView } from './views/ReceiveSessionView'
 export { SessionListView } from './views/SessionListView'
 export { SessionDetailView } from './views/SessionDetailView'
 export { RouteSettlementView } from './views/RouteSettlementView'

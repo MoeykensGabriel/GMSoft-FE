@@ -3,12 +3,13 @@ import { LoginView, ProtectedRoute, ROLES } from '../modules/auth'
 import { RegisterDeliveryView } from '../modules/deliveries'
 import { ProductFormView, ProductListView } from '../modules/products'
 import {
-  CloseSessionView,
   DeliveryRouteView,
+  ReceiveSessionView,
   RouteSettlementView,
   SessionDetailView,
   SessionListView,
 } from '../modules/sessions'
+import { VehicleLoadView } from '../modules/vehicles'
 import { ZoneFormView, ZoneListView } from '../modules/zones'
 import { HomeView } from './HomeView'
 
@@ -29,14 +30,16 @@ export function AppRouter() {
       <Route element={<ProtectedRoute roles={[ROLES.driver]} />}>
         <Route path="/reparto" element={<DeliveryRouteView />} />
         <Route path="/reparto/visita" element={<RegisterDeliveryView />} />
-        <Route path="/reparto/cierre" element={<CloseSessionView />} />
       </Route>
 
       <Route element={<ProtectedRoute roles={[ROLES.admin]} />}>
+        <Route path="/panel/carga" element={<VehicleLoadView />} />
+
         <Route path="/panel/liquidacion" element={<RouteSettlementView />} />
 
         <Route path="/panel/salidas" element={<SessionListView />} />
         <Route path="/panel/salidas/:id" element={<SessionDetailView />} />
+        <Route path="/panel/salidas/:id/recepcion" element={<ReceiveSessionView />} />
 
         {/* El segmento fijo le gana al dinamico en el router, asi que "nuevo" nunca
             se toma por un id. */}

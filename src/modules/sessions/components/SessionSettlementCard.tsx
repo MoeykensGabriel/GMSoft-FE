@@ -47,6 +47,15 @@ export function SessionSettlementCard({ sessionId }: { sessionId: string }) {
         </span>
       </div>
 
+      {!cerrada && (
+        <Link
+          to={`/panel/salidas/${s.id}/recepcion`}
+          className="rounded-md bg-slate-900 px-4 py-2 text-center text-sm font-medium text-white hover:bg-slate-700"
+        >
+          Recibir el camión
+        </Link>
+      )}
+
       <StockOnBoardPanel stock={s.stock} cerrada={cerrada} />
 
       <SettlementPanel sessionId={s.id} cerrada={cerrada} />

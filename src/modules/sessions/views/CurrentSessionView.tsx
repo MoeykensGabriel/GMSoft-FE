@@ -46,12 +46,9 @@ export function CurrentSessionView({ sesion }: { sesion: Session }) {
         Registrar visita
       </Link>
 
-      <Link
-        to="/reparto/cierre"
-        className="rounded-md border border-slate-300 bg-white px-4 py-2 text-center text-sm font-medium text-slate-900 hover:bg-slate-50"
-      >
-        Cerrar salida
-      </Link>
+      <p className="text-xs text-slate-500">
+        Cuando volvés, la oficina cuenta lo que traés y cierra la salida.
+      </p>
     </div>
   )
 }

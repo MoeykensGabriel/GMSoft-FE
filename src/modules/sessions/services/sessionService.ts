@@ -29,10 +29,10 @@ export interface Session {
   stock: SessionStockLine[]
 }
 
+/** Sin carga: la subio la oficina al camion y la salida se lleva lo que haya arriba. */
 export interface OpenSessionRequest {
   zoneId: string
   kilometersAtOpen: number
-  load: { productId: string; quantity: number }[]
 }
 
 export interface CloseSessionRequest {

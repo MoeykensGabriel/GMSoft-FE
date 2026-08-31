@@ -46,6 +46,15 @@ export function SessionDetailView() {
         </p>
       </div>
 
+      {!cerrada && (
+        <Link
+          to={`/panel/salidas/${id}/recepcion`}
+          className="rounded-md bg-slate-900 px-4 py-2 text-center text-sm font-medium text-white hover:bg-slate-700"
+        >
+          Recibir el camión
+        </Link>
+      )}
+
       <section className="flex flex-col gap-2">
         <h3 className="text-sm font-medium text-slate-700">
           Recorrido ({recorrido.data?.length ?? 0} visitas)
