@@ -24,8 +24,25 @@ export interface VehicleLoadLine {
   loadedAt: string
 }
 
+/**
+ * Como esta un camion de cara a la carga del deposito. Son las dos unicas cosas que
+ * deciden si se lo puede cargar.
+ */
+export interface VehicleLoadStatus {
+  id: string
+  name: string
+  licensePlate: string
+  /** Tiene una salida abierta: no esta en el deposito. */
+  isOnRoute: boolean
+  /** Unidades ya cargadas y sin salir. */
+  pendingUnits: number
+}
+
 export const vehicleService = {
   list: (pageSize = 100) => api.get<PagedResult<Vehicle>>(`/api/vehicles?pageSize=${pageSize}`),
+
+  /** La flota con su estado de carga, para saber a cual se puede cargar. */
+  getLoadStatus: () => api.get<VehicleLoadStatus[]>('/api/vehicles/load-status'),
 
   getById: (id: string) => api.get<Vehicle>(`/api/vehicles/${id}`),
 

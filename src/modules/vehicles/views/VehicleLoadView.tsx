@@ -21,8 +21,8 @@ export function VehicleLoadView() {
   const [tanda, setTanda] = useState<LoadLine[]>([])
 
   const vehiculos = useQuery({
-    queryKey: ['vehicles', 'all'],
-    queryFn: () => vehicleService.list(),
+    queryKey: ['vehicles', 'load-status'],
+    queryFn: vehicleService.getLoadStatus,
   })
 
   const productos = useQuery({
@@ -37,7 +37,9 @@ export function VehicleLoadView() {
   })
 
   function refrescar() {
-    queryClient.invalidateQueries({ queryKey: ['vehicles', 'load', vehicleId] })
+    // Tambien el estado de la flota: al cargar, el camion pasa de "disponible" a
+    // "ya cargado" y el selector tiene que reflejarlo.
+    queryClient.invalidateQueries({ queryKey: ['vehicles'] })
   }
 
   const cargar = useMutation({
@@ -59,6 +61,17 @@ export function VehicleLoadView() {
   }
 
   const lineas = carga.data ?? []
+  const flota = vehiculos.data ?? []
+
+  // El camion que esta en la calle no esta en el deposito: no se puede cargar y el
+  // backend lo rechaza igual. Queda afuera de la lista en vez de fallar al apretar.
+  const enLaCalle = flota.filter((v) => v.isOnRoute)
+  const enDeposito = flota.filter((v) => !v.isOnRoute)
+
+  // Los que ya tienen carga arriba se muestran aparte, no se esconden: se carga en
+  // varias tandas, y si una linea se cargo mal hay que poder entrar a bajarla.
+  const vacios = enDeposito.filter((v) => v.pendingUnits === 0)
+  const yaCargados = enDeposito.filter((v) => v.pendingUnits > 0)
 
   return (
     <main className="mx-auto flex max-w-2xl flex-col gap-5 p-6">
@@ -82,12 +95,37 @@ export function VehicleLoadView() {
         }}
       >
         <option value="">Elegí un vehículo</option>
-        {vehiculos.data?.items.map((v) => (
-          <option key={v.id} value={v.id}>
-            {v.name} ({v.licensePlate})
-          </option>
-        ))}
+
+        {vacios.length > 0 && (
+          <optgroup label="Vacíos, listos para cargar">
+            {vacios.map((v) => (
+              <option key={v.id} value={v.id}>
+                {v.name} ({v.licensePlate})
+              </option>
+            ))}
+          </optgroup>
+        )}
+
+        {yaCargados.length > 0 && (
+          <optgroup label="Ya tienen carga arriba">
+            {yaCargados.map((v) => (
+              <option key={v.id} value={v.id}>
+                {v.name} ({v.licensePlate}) · {v.pendingUnits} arriba
+              </option>
+            ))}
+          </optgroup>
+        )}
       </Select>
+
+      {/* Una ausencia sin explicar se lee como un error: si falta un camion de la
+          lista hay que decir por que, o el proximo paso es revisar si se borro. */}
+      {enLaCalle.length > 0 && (
+        <p className="text-xs text-slate-500">
+          No aparecen {enLaCalle.map((v) => v.licensePlate).join(', ')}: están en la calle con
+          una salida abierta. Si se quedaron sin stock, va como recarga en ruta sobre esa
+          salida.
+        </p>
+      )}
 
       {!vehicleId ? (
         <p className="text-sm text-slate-500">Elegí un vehículo para cargarlo.</p>
