@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
 import { formatDateTime, formatMoney } from '../../core'
 import { SettlementPanel } from '../components/SettlementPanel'
+import { StockOnBoardPanel } from '../components/StockOnBoardPanel'
 import { sessionService } from '../services/sessionService'
 
 /**
@@ -27,10 +28,6 @@ export function SessionDetailView() {
   const s = sesion.data
   const cerrada = s.status === 'Closed'
 
-  // En una salida cerrada, lo que sigue figurando a bordo es el faltante: nunca se
-  // descargo ni se entrego. Mientras esta abierta, es simplemente lo que lleva.
-  const pendiente = s.stock.filter((l) => l.fullOnBoard !== 0 || l.emptyOnBoard !== 0)
-
   return (
     <main className="mx-auto flex max-w-2xl flex-col gap-6 p-6">
       <div>
@@ -50,9 +47,9 @@ export function SessionDetailView() {
       </div>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-slate-700">
+        <h3 className="text-sm font-medium text-slate-700">
           Recorrido ({recorrido.data?.length ?? 0} visitas)
-        </h2>
+        </h3>
 
         {recorrido.data?.length === 0 ? (
           <p className="text-sm text-slate-500">No visitó a nadie.</p>
@@ -99,42 +96,7 @@ export function SessionDetailView() {
         )}
       </section>
 
-      <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-slate-700">
-          {cerrada ? 'Faltante al cerrar' : 'A bordo ahora'}
-        </h2>
-
-        {pendiente.length === 0 ? (
-          <p
-            className={`rounded-md border p-3 text-sm ${
-              cerrada
-                ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-                : 'border-slate-200 bg-white text-slate-600'
-            }`}
-          >
-            {cerrada ? 'Cuadró todo.' : 'Sin stock a bordo.'}
-          </p>
-        ) : (
-          <ul
-            className={`flex flex-col gap-1 rounded-md border p-3 text-sm ${
-              cerrada ? 'border-red-200 bg-red-50' : 'border-slate-200 bg-white'
-            }`}
-          >
-            {pendiente.map((l) => (
-              <li key={l.productId} className="flex justify-between">
-                <span className={cerrada ? 'text-red-700' : 'text-slate-700'}>
-                  {l.productDetail}
-                </span>
-                <span className={cerrada ? 'text-red-800' : 'text-slate-900'}>
-                  {l.fullOnBoard !== 0 && `${l.fullOnBoard} llenos`}
-                  {l.fullOnBoard !== 0 && l.emptyOnBoard !== 0 && ' · '}
-                  {l.emptyOnBoard !== 0 && `${l.emptyOnBoard} vacíos`}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <StockOnBoardPanel stock={s.stock} cerrada={cerrada} />
 
       <SettlementPanel sessionId={id} cerrada={cerrada} />
     </main>

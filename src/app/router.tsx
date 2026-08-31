@@ -5,6 +5,7 @@ import { ProductFormView, ProductListView } from '../modules/products'
 import {
   CloseSessionView,
   DeliveryRouteView,
+  RouteSettlementView,
   SessionDetailView,
   SessionListView,
 } from '../modules/sessions'
@@ -32,6 +33,8 @@ export function AppRouter() {
       </Route>
 
       <Route element={<ProtectedRoute roles={[ROLES.admin]} />}>
+        <Route path="/panel/liquidacion" element={<RouteSettlementView />} />
+
         <Route path="/panel/salidas" element={<SessionListView />} />
         <Route path="/panel/salidas/:id" element={<SessionDetailView />} />
 

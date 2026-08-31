@@ -103,6 +103,18 @@ export const sessionService = {
   list: (page = 1, pageSize = 20) =>
     api.get<PagedResult<Session>>(`/api/sessions?page=${page}&pageSize=${pageSize}`),
 
+  /**
+   * Las salidas de un vehiculo en un dia. La fecha va como YYYY-MM-DD y el backend
+   * la entiende como dia local del negocio, no como dia UTC.
+   *
+   * Devuelve una lista y no una sola salida: nada impide que el mismo camion salga
+   * dos veces en el dia, con dos choferes o en dos turnos.
+   */
+  listByVehicleAndDate: (vehicleId: string, date: string) =>
+    api.get<PagedResult<Session>>(
+      `/api/sessions?vehicleId=${vehicleId}&date=${date}&pageSize=50`,
+    ),
+
   getById: (sessionId: string) => api.get<Session>(`/api/sessions/${sessionId}`),
 
   getDeliveries: (sessionId: string) =>

@@ -5,6 +5,11 @@ import { Button } from '../modules/core'
 /** Las secciones del panel, en el orden en que se usan al arrancar de cero. */
 const SECCIONES = [
   {
+    to: '/panel/liquidacion',
+    titulo: 'Liquidación por reparto',
+    detalle: 'Elegís camión y día, y sale cómo cerró',
+  },
+  {
     to: '/panel/salidas',
     titulo: 'Salidas de reparto',
     detalle: 'El recorrido del día, el faltante y la rendición',

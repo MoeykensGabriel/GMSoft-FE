@@ -44,7 +44,7 @@ export function SettlementPanel({ sessionId, cerrada }: { sessionId: string; cer
 
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="text-sm font-medium text-slate-700">Liquidación</h2>
+      <h3 className="text-sm font-medium text-slate-700">Liquidación</h3>
 
       <div className="rounded-md border border-slate-200 bg-white p-3 text-sm">
         <div className="flex justify-between">
