@@ -10,30 +10,30 @@ export function SessionListView() {
     queryFn: () => sessionService.list(1, 30),
   })
 
-  if (salidas.isLoading) return <p className="p-6 text-slate-500">Cargando...</p>
+  if (salidas.isLoading) return <p className="p-6 text-neutral-500">Cargando...</p>
   if (salidas.isError) return <p className="p-6 text-red-600">No se pudieron leer las salidas.</p>
 
   const items = salidas.data?.items ?? []
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-4 p-6">
-      <h1 className="text-xl font-semibold text-slate-900">Salidas de reparto</h1>
+    <main className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
+      <h1 className="text-xl font-semibold text-neutral-900">Salidas de reparto</h1>
 
       {items.length === 0 ? (
-        <p className="text-sm text-slate-500">Todavía no hay salidas registradas.</p>
+        <p className="text-sm text-neutral-500">Todavía no hay salidas registradas.</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {items.map((s) => (
             <li key={s.id}>
               <Link
                 to={`/panel/salidas/${s.id}`}
-                className="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-3 hover:bg-slate-50"
+                className="flex items-center justify-between rounded-md border border-neutral-200 bg-white px-3 py-3 hover:bg-neutral-50"
               >
                 <div>
-                  <p className="text-sm font-medium text-slate-900">
+                  <p className="text-sm font-medium text-neutral-900">
                     {s.driverName} · {s.zoneName}
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-neutral-500">
                     {formatDateTime(s.openedAt)} · {s.vehicleLicensePlate}
                   </p>
                 </div>
@@ -42,7 +42,7 @@ export function SessionListView() {
                   className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                     s.status === 'Open'
                       ? 'bg-amber-100 text-amber-800'
-                      : 'bg-slate-100 text-slate-600'
+                      : 'bg-neutral-100 text-neutral-600'
                   }`}
                 >
                   {s.status === 'Open' ? 'En la calle' : 'Cerrada'}

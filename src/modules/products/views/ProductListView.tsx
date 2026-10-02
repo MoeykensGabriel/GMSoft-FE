@@ -46,7 +46,7 @@ export function ProductListView() {
     onError: (e) => setError(e),
   })
 
-  if (catalogo.isLoading) return <p className="p-6 text-slate-500">Cargando...</p>
+  if (catalogo.isLoading) return <p className="p-6 text-neutral-500">Cargando...</p>
   if (catalogo.isError) return <p className="p-6 text-red-600">No se pudo leer el catálogo.</p>
 
   const todos = catalogo.data?.items ?? []
@@ -62,16 +62,16 @@ export function ProductListView() {
     : todos
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-4 p-6">
+    <main className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
       <div>
-        <Link to="/" className="text-sm text-slate-500 hover:underline">
+        <Link to="/" className="text-sm text-neutral-500 hover:underline">
           ← Panel
         </Link>
         <div className="mt-2 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-slate-900">Catálogo</h1>
+          <h1 className="text-xl font-semibold text-neutral-900">Catálogo</h1>
           <Link
             to="/panel/catalogo/nuevo"
-            className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700"
+            className="rounded-md bg-green-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-800"
           >
             Nuevo producto
           </Link>
@@ -83,19 +83,19 @@ export function ProductListView() {
         placeholder="Buscar por detalle"
         value={busqueda}
         onChange={(e) => setBusqueda(e.target.value)}
-        className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-200"
+        className="rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-neutral-200"
       />
 
       <ErrorMessage error={error} />
 
       {total > todos.length && (
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-neutral-500">
           Se muestran los primeros {todos.length} de {total} productos.
         </p>
       )}
 
       {items.length === 0 ? (
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-neutral-500">
           {todos.length === 0 ? 'Todavía no hay productos cargados.' : 'Ningún producto coincide.'}
         </p>
       ) : (
@@ -103,38 +103,38 @@ export function ProductListView() {
           {items.map((p) => (
             <li
               key={p.id}
-              className="flex flex-col gap-2 rounded-md border border-slate-200 bg-white p-3"
+              className="flex flex-col gap-2 rounded-md border border-neutral-200 bg-white p-3"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-medium text-slate-900">{p.detail}</p>
+                  <p className="text-sm font-medium text-neutral-900">{p.detail}</p>
                   {p.commercialDetail && (
-                    <p className="text-xs text-slate-500">{p.commercialDetail}</p>
+                    <p className="text-xs text-neutral-500">{p.commercialDetail}</p>
                   )}
-                  <p className="mt-1 text-xs text-slate-500">{SEGUIMIENTO[p.tracking]}</p>
+                  <p className="mt-1 text-xs text-neutral-500">{SEGUIMIENTO[p.tracking]}</p>
                 </div>
 
                 <div className="flex flex-col items-end gap-1">
-                  <span className="text-sm font-medium text-slate-900">
+                  <span className="text-sm font-medium text-neutral-900">
                     {formatMoney(p.salePrice)}
                   </span>
                   {!p.isPublished && (
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+                    <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-600">
                       No publicado
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="flex gap-3 border-t border-slate-100 pt-2 text-xs">
-                <Link to={`/panel/catalogo/${p.id}`} className="text-slate-700 hover:underline">
+              <div className="flex gap-3 border-t border-neutral-100 pt-2 text-xs">
+                <Link to={`/panel/catalogo/${p.id}`} className="text-neutral-700 hover:underline">
                   Editar
                 </Link>
                 <button
                   type="button"
                   onClick={() => publicar.mutate(p)}
                   disabled={publicar.isPending}
-                  className="text-slate-700 hover:underline disabled:text-slate-400"
+                  className="text-neutral-700 hover:underline disabled:text-neutral-400"
                 >
                   {p.isPublished ? 'Despublicar' : 'Publicar'}
                 </button>
@@ -144,7 +144,7 @@ export function ProductListView() {
                     if (confirm(`¿Eliminar "${p.detail}"?`)) eliminar.mutate(p.id)
                   }}
                   disabled={eliminar.isPending}
-                  className="text-red-600 hover:underline disabled:text-slate-400"
+                  className="rounded-md bg-red-700 px-3 py-2 text-white hover:bg-red-800 disabled:bg-neutral-400"
                 >
                   Eliminar
                 </button>

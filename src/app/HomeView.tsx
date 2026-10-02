@@ -39,26 +39,26 @@ export function HomeView() {
   if (user.roles.includes(ROLES.driver)) return <Navigate to="/reparto" replace />
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-6 p-6">
+    <main className="mx-auto flex max-w-6xl flex-col gap-6 p-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Panel</h1>
-          <p className="text-sm text-slate-600">{user.fullName || user.userName}</p>
+          <h1 className="text-xl font-semibold text-neutral-900">Panel</h1>
+          <p className="text-sm text-neutral-600">{user.fullName || user.userName}</p>
         </div>
         <Button variant="secondary" onClick={logout}>
           Salir
         </Button>
       </div>
 
-      <ul className="flex flex-col gap-2">
+      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
         {SECCIONES.map((s) => (
           <li key={s.to}>
             <Link
               to={s.to}
-              className="block rounded-md border border-slate-200 bg-white px-3 py-3 hover:bg-slate-50"
+              className="block rounded-md border border-neutral-200 bg-white px-3 py-3 hover:bg-neutral-50"
             >
-              <span className="block text-sm font-medium text-slate-900">{s.titulo}</span>
-              <span className="block text-xs text-slate-500">{s.detalle}</span>
+              <span className="block text-sm font-medium text-neutral-900">{s.titulo}</span>
+              <span className="block text-xs text-neutral-500">{s.detalle}</span>
             </Link>
           </li>
         ))}

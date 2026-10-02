@@ -35,12 +35,12 @@ export function ReturnsEditor({ stock, lineas, onChange }: Props) {
     lineas.find((l) => l.productId === productId)?.[campo] ?? 0
 
   if (stock.length === 0) {
-    return <p className="text-sm text-slate-500">No queda nada a bordo para descargar.</p>
+    return <p className="text-sm text-neutral-500">No queda nada a bordo para descargar.</p>
   }
 
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-sm font-medium text-slate-700">Qué volvió en el camión</span>
+      <span className="text-sm font-medium text-neutral-700">Qué volvió en el camión</span>
 
       {stock.map((s) => {
         // Un campo que todavia no se toco no es un faltante, es un conteo pendiente.
@@ -52,8 +52,8 @@ export function ReturnsEditor({ stock, lineas, onChange }: Props) {
         const difVacios = contado ? valorDe(s.productId, 'vacios') - s.emptyOnBoard : 0
 
         return (
-          <div key={s.productId} className="rounded-md border border-slate-200 bg-white p-3">
-            <span className="text-sm font-medium text-slate-800">{s.productDetail}</span>
+          <div key={s.productId} className="rounded-md border border-neutral-200 bg-white p-3">
+            <span className="text-sm font-medium text-neutral-800">{s.productDetail}</span>
 
             <div className="mt-2 grid grid-cols-2 gap-2">
               {(
@@ -63,7 +63,7 @@ export function ReturnsEditor({ stock, lineas, onChange }: Props) {
                 ] as const
               ).map(([campo, etiqueta, esperado, diferencia]) => (
                 <label key={campo} className="flex flex-col gap-1">
-                  <span className="text-xs text-slate-600">
+                  <span className="text-xs text-neutral-600">
                     {etiqueta} · deberían ser {esperado}
                   </span>
                   <input
@@ -73,7 +73,7 @@ export function ReturnsEditor({ stock, lineas, onChange }: Props) {
                     placeholder="Contá y anotá"
                     value={valorDe(s.productId, campo) || ''}
                     onChange={(e) => set(s.productId, campo, Number(e.target.value) || 0)}
-                    className="rounded-md border border-slate-300 px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-slate-200"
+                    className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-neutral-200"
                   />
                   {diferencia !== 0 && (
                     <span

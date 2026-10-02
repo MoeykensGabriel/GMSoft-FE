@@ -19,20 +19,20 @@ export function SessionSettlementCard({ sessionId }: { sessionId: string }) {
     queryFn: () => sessionService.getById(sessionId),
   })
 
-  if (sesion.isLoading) return <p className="text-sm text-slate-500">Cargando la salida...</p>
+  if (sesion.isLoading) return <p className="text-sm text-neutral-500">Cargando la salida...</p>
   if (!sesion.data) return <p className="text-sm text-red-600">No se pudo leer la salida.</p>
 
   const s = sesion.data
   const cerrada = s.status === 'Closed'
 
   return (
-    <article className="flex flex-col gap-4 rounded-md border border-slate-200 bg-slate-50 p-4">
+    <article className="flex flex-col gap-4 rounded-md border border-neutral-200 bg-neutral-50 p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-base font-semibold text-slate-900">
+          <h2 className="text-base font-semibold text-neutral-900">
             {s.driverName} · {s.zoneName}
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-neutral-500">
             Salió {formatDateTime(s.openedAt)} con {s.kilometersAtOpen} km
             {s.closedAt && ` · Volvió ${formatDateTime(s.closedAt)} con ${s.kilometersAtClose} km`}
           </p>
@@ -40,7 +40,7 @@ export function SessionSettlementCard({ sessionId }: { sessionId: string }) {
 
         <span
           className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-            cerrada ? 'bg-slate-200 text-slate-700' : 'bg-amber-100 text-amber-800'
+            cerrada ? 'bg-neutral-200 text-neutral-700' : 'bg-amber-100 text-amber-800'
           }`}
         >
           {cerrada ? 'Cerrada' : 'En la calle'}
@@ -50,7 +50,7 @@ export function SessionSettlementCard({ sessionId }: { sessionId: string }) {
       {!cerrada && (
         <Link
           to={`/panel/salidas/${s.id}/recepcion`}
-          className="rounded-md bg-slate-900 px-4 py-2 text-center text-sm font-medium text-white hover:bg-slate-700"
+          className="rounded-md bg-green-700 px-4 py-2 text-center text-sm font-medium text-white hover:bg-green-800"
         >
           Recibir el camión
         </Link>
@@ -62,7 +62,7 @@ export function SessionSettlementCard({ sessionId }: { sessionId: string }) {
 
       <Link
         to={`/panel/salidas/${s.id}`}
-        className="text-xs text-slate-500 hover:underline"
+        className="text-xs text-neutral-500 hover:underline"
       >
         Ver el recorrido completo →
       </Link>

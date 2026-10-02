@@ -37,15 +37,15 @@ export function ReceiveSessionView() {
     },
   })
 
-  if (sesion.isLoading) return <p className="p-6 text-slate-500">Cargando...</p>
+  if (sesion.isLoading) return <p className="p-6 text-neutral-500">Cargando...</p>
   if (!sesion.data) return <p className="p-6 text-red-600">No se encontró la salida.</p>
 
   const s = sesion.data
 
   if (resultado) {
     return (
-      <main className="mx-auto flex max-w-md flex-col gap-4 p-6">
-        <h1 className="text-xl font-semibold text-slate-900">Camión recibido</h1>
+      <main className="mx-auto flex max-w-3xl flex-col gap-4 p-6">
+        <h1 className="text-xl font-semibold text-neutral-900">Camión recibido</h1>
 
         {resultado.cuadraTodo ? (
           <p className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
@@ -74,7 +74,7 @@ export function ReceiveSessionView() {
 
         <Link
           to={`/panel/salidas/${id}`}
-          className="rounded-md bg-slate-900 px-4 py-2 text-center text-sm font-medium text-white hover:bg-slate-700"
+          className="rounded-md bg-green-700 px-4 py-2 text-center text-sm font-medium text-white hover:bg-green-800"
         >
           Ver la salida y liquidar
         </Link>
@@ -84,12 +84,12 @@ export function ReceiveSessionView() {
 
   if (s.status === 'Closed') {
     return (
-      <main className="mx-auto flex max-w-md flex-col gap-3 p-6">
-        <h1 className="text-xl font-semibold text-slate-900">Ya recibido</h1>
-        <p className="text-sm text-slate-600">
+      <main className="mx-auto flex max-w-3xl flex-col gap-3 p-6">
+        <h1 className="text-xl font-semibold text-neutral-900">Ya recibido</h1>
+        <p className="text-sm text-neutral-600">
           Esta salida ya está cerrada. La recepción se hace una sola vez.
         </p>
-        <Link to={`/panel/salidas/${id}`} className="text-sm text-slate-900 underline">
+        <Link to={`/panel/salidas/${id}`} className="text-sm text-neutral-900 underline">
           Ver la salida
         </Link>
       </main>
@@ -115,16 +115,16 @@ export function ReceiveSessionView() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mx-auto flex max-w-md flex-col gap-5 p-6">
+    <form onSubmit={onSubmit} className="mx-auto flex max-w-3xl flex-col gap-5 p-6">
       <div>
-        <Link to={`/panel/salidas/${id}`} className="text-sm text-slate-500 hover:underline">
+        <Link to={`/panel/salidas/${id}`} className="text-sm text-neutral-500 hover:underline">
           ← Salida
         </Link>
-        <h1 className="mt-2 text-xl font-semibold text-slate-900">Recepción del camión</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="mt-2 text-xl font-semibold text-neutral-900">Recepción del camión</h1>
+        <p className="mt-1 text-sm text-neutral-600">
           {s.driverName} · {s.zoneName} · {s.vehicleName} ({s.vehicleLicensePlate})
         </p>
-        <p className="text-sm text-slate-500">Salió con {s.kilometersAtOpen} km</p>
+        <p className="text-sm text-neutral-500">Salió con {s.kilometersAtOpen} km</p>
       </div>
 
       <Field

@@ -16,8 +16,8 @@ export function NewCustomerFields({ valor, onChange }: Props) {
     onChange({ ...valor, [campo]: v === '' ? null : v })
 
   return (
-    <div className="flex flex-col gap-3 rounded-md border border-slate-200 bg-white p-3">
-      <span className="text-sm font-medium text-slate-700">Cliente nuevo</span>
+    <div className="flex flex-col gap-3 rounded-md border border-neutral-200 bg-white p-3">
+      <span className="text-sm font-medium text-neutral-700">Cliente nuevo</span>
 
       <Field
         label="Nombre de contacto"

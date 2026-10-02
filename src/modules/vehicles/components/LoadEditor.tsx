@@ -30,7 +30,7 @@ export function LoadEditor({ productos, valor, onChange }: Props) {
 
   if (productos.length === 0) {
     return (
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-neutral-500">
         No hay productos publicados. Publicalos en el catálogo antes de cargar el camión.
       </p>
     )

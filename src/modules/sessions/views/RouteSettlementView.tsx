@@ -53,12 +53,12 @@ export function RouteSettlementView() {
   const items = salidas.data?.items ?? []
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-5 p-6">
+    <main className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
       <div>
-        <Link to="/" className="text-sm text-slate-500 hover:underline">
+        <Link to="/" className="text-sm text-neutral-500 hover:underline">
           ← Panel
         </Link>
-        <h1 className="mt-2 text-xl font-semibold text-slate-900">Liquidación por reparto</h1>
+        <h1 className="mt-2 text-xl font-semibold text-neutral-900">Liquidación por reparto</h1>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -86,15 +86,15 @@ export function RouteSettlementView() {
       </div>
 
       {!vehicleId ? (
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-neutral-500">
           Elegí un vehículo para ver cómo cerró su reparto.
         </p>
       ) : salidas.isLoading ? (
-        <p className="text-sm text-slate-500">Buscando...</p>
+        <p className="text-sm text-neutral-500">Buscando...</p>
       ) : salidas.isError ? (
         <p className="text-sm text-red-600">No se pudieron leer las salidas.</p>
       ) : items.length === 0 ? (
-        <p className="rounded-md border border-slate-200 bg-white p-3 text-sm text-slate-600">
+        <p className="rounded-md border border-neutral-200 bg-white p-3 text-sm text-neutral-600">
           Ese vehículo no salió el {fechaLegible(fecha)}.
         </p>
       ) : (
@@ -102,7 +102,7 @@ export function RouteSettlementView() {
           {/* Casi siempre es una sola, pero nada impide que el mismo camion salga
               dos veces en el dia: se muestran todas y cada una rinde por separado. */}
           {items.length > 1 && (
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-neutral-600">
               {items.length} salidas ese día. Cada una se rinde por separado.
             </p>
           )}

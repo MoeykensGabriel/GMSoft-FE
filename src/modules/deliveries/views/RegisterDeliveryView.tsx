@@ -34,14 +34,14 @@ export function RegisterDeliveryView() {
   const [error, setError] = useState<string | null>(null)
   const [hecho, setHecho] = useState<RegisterDeliveryResult | null>(null)
 
-  if (isLoading) return <p className="p-6 text-slate-500">Cargando...</p>
+  if (isLoading) return <p className="p-6 text-neutral-500">Cargando...</p>
 
   // Sin salida abierta no hay visita posible: el backend la rechazaria igual.
   if (!sesion) {
     return (
       <div className="mx-auto max-w-md p-6">
-        <p className="text-slate-700">No tenés una salida abierta.</p>
-        <Link to="/reparto" className="mt-2 inline-block text-sm text-slate-900 underline">
+        <p className="text-neutral-700">No tenés una salida abierta.</p>
+        <Link to="/reparto" className="mt-2 inline-block text-sm text-neutral-900 underline">
           Volver
         </Link>
       </div>
@@ -51,20 +51,20 @@ export function RegisterDeliveryView() {
   if (hecho) {
     return (
       <div className="mx-auto flex max-w-md flex-col gap-4 p-6">
-        <h1 className="text-xl font-semibold text-slate-900">Visita registrada</h1>
-        <div className="rounded-md border border-slate-200 bg-white p-3 text-sm">
+        <h1 className="text-xl font-semibold text-neutral-900">Visita registrada</h1>
+        <div className="rounded-md border border-neutral-200 bg-white p-3 text-sm">
           <div className="flex justify-between">
-            <span className="text-slate-600">Total de la visita</span>
-            <span className="font-medium text-slate-900">{formatMoney(hecho.total)}</span>
+            <span className="text-neutral-600">Total de la visita</span>
+            <span className="font-medium text-neutral-900">{formatMoney(hecho.total)}</span>
           </div>
           <div className="mt-1 flex justify-between">
-            <span className="text-slate-600">Le queda debiendo</span>
-            <span className="font-medium text-slate-900">
+            <span className="text-neutral-600">Le queda debiendo</span>
+            <span className="font-medium text-neutral-900">
               {formatMoney(hecho.saldoCuentaCliente)}
             </span>
           </div>
         </div>
-        <Button onClick={() => navigate('/reparto')}>Volver a la salida</Button>
+        <Button variant="secondary" onClick={() => navigate('/reparto')}>Volver a la salida</Button>
       </div>
     )
   }
@@ -106,8 +106,8 @@ export function RegisterDeliveryView() {
   return (
     <form onSubmit={onSubmit} className="mx-auto flex max-w-md flex-col gap-5 p-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Registrar visita</h1>
-        <p className="mt-1 text-sm text-slate-600">{sesion.zoneName}</p>
+        <h1 className="text-xl font-semibold text-neutral-900">Registrar visita</h1>
+        <p className="mt-1 text-sm text-neutral-600">{sesion.zoneName}</p>
       </div>
 
       <CustomerPicker

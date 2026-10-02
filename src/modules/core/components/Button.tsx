@@ -1,10 +1,11 @@
 import type { ButtonHTMLAttributes } from 'react'
 
-type Variante = 'primary' | 'secondary'
+type Variante = 'primary' | 'secondary' | 'danger'
 
 const ESTILOS: Record<Variante, string> = {
-  primary: 'bg-slate-900 text-white hover:bg-slate-700 disabled:bg-slate-400',
-  secondary: 'bg-white text-slate-900 border border-slate-300 hover:bg-slate-50',
+  primary: 'bg-green-700 text-white hover:bg-green-800 disabled:bg-neutral-400',
+  secondary: 'bg-white text-neutral-900 border border-neutral-300 hover:bg-neutral-50',
+  danger: 'bg-red-700 text-white hover:bg-red-800 disabled:bg-neutral-400',
 }
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -15,7 +16,7 @@ export function Button({ variant = 'primary', className = '', ...props }: Props)
   return (
     <button
       {...props}
-      className={`rounded-md px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed ${ESTILOS[variant]} ${className}`}
+      className={`min-h-11 rounded-md px-4 py-2 text-base font-medium disabled:cursor-not-allowed ${ESTILOS[variant]} ${className}`}
     />
   )
 }

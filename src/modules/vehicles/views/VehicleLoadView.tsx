@@ -74,13 +74,13 @@ export function VehicleLoadView() {
   const yaCargados = enDeposito.filter((v) => v.pendingUnits > 0)
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-5 p-6">
+    <main className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
       <div>
-        <Link to="/" className="text-sm text-slate-500 hover:underline">
+        <Link to="/" className="text-sm text-neutral-500 hover:underline">
           ← Panel
         </Link>
-        <h1 className="mt-2 text-xl font-semibold text-slate-900">Cargar camión</h1>
-        <p className="text-sm text-slate-600">
+        <h1 className="mt-2 text-xl font-semibold text-neutral-900">Cargar camión</h1>
+        <p className="text-sm text-neutral-600">
           Lo que subas queda arriba del camión hasta que un chofer abra la salida con él.
         </p>
       </div>
@@ -120,7 +120,7 @@ export function VehicleLoadView() {
       {/* Una ausencia sin explicar se lee como un error: si falta un camion de la
           lista hay que decir por que, o el proximo paso es revisar si se borro. */}
       {enLaCalle.length > 0 && (
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-neutral-500">
           No aparecen {enLaCalle.map((v) => v.licensePlate).join(', ')}: están en la calle con
           una salida abierta. Si se quedaron sin stock, va como recarga en ruta sobre esa
           salida.
@@ -128,18 +128,18 @@ export function VehicleLoadView() {
       )}
 
       {!vehicleId ? (
-        <p className="text-sm text-slate-500">Elegí un vehículo para cargarlo.</p>
+        <p className="text-sm text-neutral-500">Elegí un vehículo para cargarlo.</p>
       ) : (
         <>
           <section className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium text-slate-700">Arriba del camión ahora</h2>
+            <h2 className="text-sm font-medium text-neutral-700">Arriba del camión ahora</h2>
 
             <ErrorMessage error={bajar.error} />
 
             {carga.isLoading ? (
-              <p className="text-sm text-slate-500">Cargando...</p>
+              <p className="text-sm text-neutral-500">Cargando...</p>
             ) : lineas.length === 0 ? (
-              <p className="rounded-md border border-slate-200 bg-white p-3 text-sm text-slate-600">
+              <p className="rounded-md border border-neutral-200 bg-white p-3 text-sm text-neutral-600">
                 El camión está vacío. Si sale así, la salida arranca sin stock.
               </p>
             ) : (
@@ -147,19 +147,19 @@ export function VehicleLoadView() {
                 {lineas.map((l) => (
                   <li
                     key={l.id}
-                    className="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2"
+                    className="flex items-center justify-between rounded-md border border-neutral-200 bg-white px-3 py-2"
                   >
                     <div>
-                      <p className="text-sm text-slate-900">
+                      <p className="text-sm text-neutral-900">
                         {l.quantity} × {l.productDetail}
                       </p>
-                      <p className="text-xs text-slate-500">{formatDateTime(l.loadedAt)}</p>
+                      <p className="text-xs text-neutral-500">{formatDateTime(l.loadedAt)}</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => bajar.mutate(l.id)}
                       disabled={bajar.isPending}
-                      className="text-xs text-red-600 hover:underline disabled:text-slate-400"
+                      className="rounded-md bg-red-700 px-3 py-2 text-white hover:bg-red-800 disabled:bg-neutral-400"
                     >
                       Bajar
                     </button>
@@ -170,7 +170,7 @@ export function VehicleLoadView() {
           </section>
 
           <form onSubmit={onSubmit} className="flex flex-col gap-3">
-            <h2 className="text-sm font-medium text-slate-700">Subir más</h2>
+            <h2 className="text-sm font-medium text-neutral-700">Subir más</h2>
 
             <LoadEditor
               productos={productos.data?.items ?? []}

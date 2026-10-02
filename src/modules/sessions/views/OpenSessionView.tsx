@@ -33,7 +33,7 @@ export function OpenSessionView() {
   const [error, setError] = useState<string | null>(null)
 
   if (perfil.isLoading || zonas.isLoading) {
-    return <p className="p-6 text-slate-500">Cargando...</p>
+    return <p className="p-6 text-neutral-500">Cargando...</p>
   }
 
   if (perfil.isError) {
@@ -47,7 +47,7 @@ export function OpenSessionView() {
   if (!chofer.vehicleId) {
     return (
       <div className="p-6">
-        <p className="text-slate-700">
+        <p className="text-neutral-700">
           No tenés un vehículo asignado. Pedile al admin que te asigne uno antes de salir.
         </p>
       </div>
@@ -74,17 +74,17 @@ export function OpenSessionView() {
   return (
     <form onSubmit={onSubmit} className="mx-auto flex max-w-md flex-col gap-5 p-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Abrir salida</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="text-xl font-semibold text-neutral-900">Abrir salida</h1>
+        <p className="mt-1 text-sm text-neutral-600">
           {chofer.firstName} {chofer.lastName} · {chofer.vehicleName} ({chofer.vehicleLicensePlate})
         </p>
       </div>
 
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium text-slate-700">Vas a salir con</span>
+        <span className="text-sm font-medium text-neutral-700">Vas a salir con</span>
 
         {carga.isLoading ? (
-          <p className="text-sm text-slate-500">Cargando...</p>
+          <p className="text-sm text-neutral-500">Cargando...</p>
         ) : lineas.length === 0 ? (
           <p className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
             El camión figura vacío. Si tenés mercadería arriba, avisale a la oficina antes de
@@ -95,10 +95,10 @@ export function OpenSessionView() {
             {lineas.map((l) => (
               <li
                 key={l.id}
-                className="flex justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
+                className="flex justify-between rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm"
               >
-                <span className="text-slate-700">{l.productDetail}</span>
-                <span className="text-slate-900">{l.quantity}</span>
+                <span className="text-neutral-700">{l.productDetail}</span>
+                <span className="text-neutral-900">{l.quantity}</span>
               </li>
             ))}
           </ul>

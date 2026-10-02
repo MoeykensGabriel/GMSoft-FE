@@ -50,18 +50,18 @@ export function DeliveryLinesEditor({ stock, lineas, onChange }: Props) {
   }
 
   if (stock.length === 0) {
-    return <p className="text-sm text-slate-500">No tenés nada a bordo para vender.</p>
+    return <p className="text-sm text-neutral-500">No tenés nada a bordo para vender.</p>
   }
 
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-sm font-medium text-slate-700">Qué pasó en la puerta</span>
+      <span className="text-sm font-medium text-neutral-700">Qué pasó en la puerta</span>
 
       {stock.map((s) => (
-        <div key={s.productId} className="rounded-md border border-slate-200 bg-white p-3">
+        <div key={s.productId} className="rounded-md border border-neutral-200 bg-white p-3">
           <div className="flex justify-between text-sm">
-            <span className="font-medium text-slate-800">{s.productDetail}</span>
-            <span className="text-slate-500">{s.fullOnBoard} a bordo</span>
+            <span className="font-medium text-neutral-800">{s.productDetail}</span>
+            <span className="text-neutral-500">{s.fullOnBoard} a bordo</span>
           </div>
 
           <div className="mt-2 grid grid-cols-3 gap-2">
@@ -73,7 +73,7 @@ export function DeliveryLinesEditor({ stock, lineas, onChange }: Props) {
               ] as const
             ).map(([campo, etiqueta]) => (
               <label key={campo} className="flex flex-col gap-1">
-                <span className="text-xs text-slate-600">{etiqueta}</span>
+                <span className="text-xs text-neutral-600">{etiqueta}</span>
                 <input
                   type="number"
                   min={0}
@@ -83,7 +83,7 @@ export function DeliveryLinesEditor({ stock, lineas, onChange }: Props) {
                   onChange={(e) =>
                     set(s.productId, s.productDetail, campo, Number(e.target.value) || 0)
                   }
-                  className="rounded-md border border-slate-300 px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-slate-200"
+                  className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-neutral-200"
                 />
               </label>
             ))}

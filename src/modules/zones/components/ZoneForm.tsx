@@ -56,11 +56,11 @@ export function ZoneForm({ inicial, guardando, error, onSubmit }: Props) {
             name="isActive"
             checked={isActive}
             onChange={(e) => setIsActive(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-slate-300"
+            className="mt-0.5 h-4 w-4 rounded border-neutral-300"
           />
           <span className="flex flex-col">
-            <span className="text-sm font-medium text-slate-700">Activa</span>
-            <span className="text-xs text-slate-500">
+            <span className="text-sm font-medium text-neutral-700">Activa</span>
+            <span className="text-xs text-neutral-500">
               Solo las activas se ofrecen al abrir una salida. Los clientes que ya tiene
               siguen donde están.
             </span>

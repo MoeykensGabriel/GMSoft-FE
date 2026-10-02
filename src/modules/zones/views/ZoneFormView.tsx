@@ -29,16 +29,16 @@ export function ZoneFormView() {
     },
   })
 
-  if (id && zona.isLoading) return <p className="p-6 text-slate-500">Cargando...</p>
+  if (id && zona.isLoading) return <p className="p-6 text-neutral-500">Cargando...</p>
   if (id && !zona.data) return <p className="p-6 text-red-600">No se encontró la zona.</p>
 
   return (
-    <main className="mx-auto flex max-w-md flex-col gap-4 p-6">
+    <main className="mx-auto flex max-w-3xl flex-col gap-4 p-6">
       <div>
-        <Link to="/panel/zonas" className="text-sm text-slate-500 hover:underline">
+        <Link to="/panel/zonas" className="text-sm text-neutral-500 hover:underline">
           ← Zonas
         </Link>
-        <h1 className="mt-2 text-xl font-semibold text-slate-900">
+        <h1 className="mt-2 text-xl font-semibold text-neutral-900">
           {id ? 'Editar zona' : 'Nueva zona'}
         </h1>
       </div>

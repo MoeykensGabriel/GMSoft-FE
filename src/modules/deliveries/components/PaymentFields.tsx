@@ -15,7 +15,7 @@ interface Props {
 export function PaymentFields({ monto, metodo, onMonto, onMetodo }: Props) {
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-sm font-medium text-slate-700">Cobro (opcional)</span>
+      <span className="text-sm font-medium text-neutral-700">Cobro (opcional)</span>
 
       <Field
         label="Monto"

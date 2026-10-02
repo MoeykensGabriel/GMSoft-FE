@@ -18,7 +18,7 @@ export function StockOnBoardPanel({ stock, cerrada }: Props) {
 
   return (
     <section className="flex flex-col gap-2">
-      <h3 className="text-sm font-medium text-slate-700">
+      <h3 className="text-sm font-medium text-neutral-700">
         {cerrada ? 'Faltante al cerrar' : 'A bordo ahora'}
       </h3>
 
@@ -27,7 +27,7 @@ export function StockOnBoardPanel({ stock, cerrada }: Props) {
           className={`rounded-md border p-3 text-sm ${
             cerrada
               ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-              : 'border-slate-200 bg-white text-slate-600'
+              : 'border-neutral-200 bg-white text-neutral-600'
           }`}
         >
           {cerrada ? 'Cuadró todo.' : 'Sin stock a bordo.'}
@@ -35,13 +35,13 @@ export function StockOnBoardPanel({ stock, cerrada }: Props) {
       ) : (
         <ul
           className={`flex flex-col gap-1 rounded-md border p-3 text-sm ${
-            cerrada ? 'border-red-200 bg-red-50' : 'border-slate-200 bg-white'
+            cerrada ? 'border-red-200 bg-red-50' : 'border-neutral-200 bg-white'
           }`}
         >
           {pendiente.map((l) => (
             <li key={l.productId} className="flex justify-between">
-              <span className={cerrada ? 'text-red-700' : 'text-slate-700'}>{l.productDetail}</span>
-              <span className={cerrada ? 'text-red-800' : 'text-slate-900'}>
+              <span className={cerrada ? 'text-red-700' : 'text-neutral-700'}>{l.productDetail}</span>
+              <span className={cerrada ? 'text-red-800' : 'text-neutral-900'}>
                 {l.fullOnBoard !== 0 && `${l.fullOnBoard} llenos`}
                 {l.fullOnBoard !== 0 && l.emptyOnBoard !== 0 && ' · '}
                 {l.emptyOnBoard !== 0 && `${l.emptyOnBoard} vacíos`}
