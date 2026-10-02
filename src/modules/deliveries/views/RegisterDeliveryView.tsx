@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueries } from '@tanstack/react-query'
+import { productService } from '../../products'
 import { customerService, CustomerAccountSummary } from '../../customers'
 import { ApiError, Button, Field, formatMoney } from '../../core'
 import { useCurrentSession } from '../../sessions'
@@ -26,9 +27,24 @@ export function RegisterDeliveryView() {
   const [params] = useSearchParams()
   const { data: sesion, isLoading } = useCurrentSession()
   const registrar = useRegisterDelivery()
+  const products = useQueries({ queries: (sesion?.stock ?? []).map((product) => ({
+    queryKey: ['products', 'sale', product.productId],
+    queryFn: () => productService.getById(product.productId),
+    staleTime: 0,
+  })) })
+  const prices = Object.fromEntries(products.filter((query) => query.data).map((query) => [query.data!.id, query.data!.salePrice]))
 
   const [customerId, setCustomerId] = useState<string | null>(params.get('customerId'))
   const [esNuevo, setEsNuevo] = useState(params.get('new') === '1')
+  const specialPrices = useQuery({
+    queryKey: ['customers', 'prices', customerId],
+    queryFn: () => customerService.getPrices(customerId!),
+    enabled: !esNuevo && Boolean(customerId),
+    staleTime: 0,
+  })
+  for (const price of (!esNuevo && customerId ? specialPrices.data ?? [] : [])) prices[price.productId] = price.price
+  const pricesReady = products.every((query) => query.isSuccess && Number.isFinite(query.data.salePrice))
+    && (esNuevo || Boolean(customerId && specialPrices.isSuccess))
   const directo = Boolean(params.get('customerId'))
   const cliente = useQuery({
     queryKey: ['customers', 'detail', customerId],
@@ -88,6 +104,7 @@ export function RegisterDeliveryView() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
+    if (registrar.isPending || (vendeAlgo && !pricesReady)) return
 
     try {
       const resultado = await registrar.mutateAsync({
@@ -140,7 +157,14 @@ export function RegisterDeliveryView() {
 
       {esNuevo && <NewCustomerFields valor={nuevo} onChange={setNuevo} />}
 
-      <DeliveryLinesEditor stock={sesion.stock} lineas={lineas} onChange={setLineas} />
+      {(products.some((query) => query.isError) || (!esNuevo && customerId && specialPrices.isError)) && <div role="alert">
+        <p>No se pudieron cargar los precios.</p>
+        <Button type="button" variant="secondary" onClick={() => {
+          products.forEach((query) => { void query.refetch() })
+          if (!esNuevo && customerId) void specialPrices.refetch()
+        }}>Reintentar</Button>
+      </div>}
+      <DeliveryLinesEditor stock={sesion.stock} prices={pricesReady ? prices : {}} lineas={lineas} onChange={setLineas} />
 
       <PaymentFields monto={monto} metodo={metodo} onMonto={setMonto} onMetodo={setMetodo} />
 
@@ -164,7 +188,7 @@ export function RegisterDeliveryView() {
       )}
 
       <div className="flex gap-2">
-        <Button type="submit" disabled={registrar.isPending || (!esNuevo && !customerId) || (directo && (!cliente.data || !cuenta.data || cliente.isError || cuenta.isError || cliente.data.zoneId !== sesion.zoneId || !cliente.data.isActive))}>
+        <Button type="submit" disabled={registrar.isPending || (vendeAlgo && !pricesReady) || (!esNuevo && !customerId) || (directo && (!cliente.data || !cuenta.data || cliente.isError || cuenta.isError || cliente.data.zoneId !== sesion.zoneId || !cliente.data.isActive))}>
           {registrar.isPending ? 'Registrando...' : 'Registrar visita'}
         </Button>
         <Button type="button" variant="secondary" onClick={() => navigate('/reparto')}>

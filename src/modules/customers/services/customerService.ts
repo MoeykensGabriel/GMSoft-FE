@@ -55,6 +55,8 @@ export interface CustomerAccount {
 }
 
 export const customerService = {
+  getPrices: (customerId: string) =>
+    api.get<{ productId: string; price: number }[]>(`/api/customers/${customerId}/prices`),
   /**
    * La hoja de ruta: filtrado por zona, el backend devuelve los clientes en orden
    * de recorrido. Sin zona ese orden no significa nada.
