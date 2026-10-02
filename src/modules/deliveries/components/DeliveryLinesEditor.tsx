@@ -5,8 +5,6 @@ export interface DeliveryLine {
   productDetail: string
   /** Cuanto se le vende. */
   vende: number
-  /** Envases que quedan en su poder. */
-  dejaEnvases: number
   /** Vacios que devuelve y suben al camion. */
   retiraEnvases: number
 }
@@ -18,11 +16,8 @@ interface Props {
 }
 
 /**
- * Una fila por producto que hay a bordo, con las tres cosas que pueden pasar en la
- * puerta: cuanto le vende, cuantos envases le deja y cuantos vacios le retira.
- *
- * Van los tres separados y no derivados de la venta porque el negocio los separo:
- * se puede dejar un envase sin venderlo, y se pueden retirar vacios sin vender nada.
+ * La venta entrega automáticamente los envases retornables correspondientes.
+ * El chofer solo indica cuántos llenos entrega y cuántos vacíos recibe.
  */
 export function DeliveryLinesEditor({ stock, lineas, onChange }: Props) {
   function set(productId: string, productDetail: string, campo: keyof DeliveryLine, valor: number) {
@@ -30,7 +25,6 @@ export function DeliveryLinesEditor({ stock, lineas, onChange }: Props) {
       productId,
       productDetail,
       vende: 0,
-      dejaEnvases: 0,
       retiraEnvases: 0,
     }
 
@@ -39,7 +33,7 @@ export function DeliveryLinesEditor({ stock, lineas, onChange }: Props) {
 
     // La fila que quedo toda en cero no aporta nada y no se manda.
     const vacia =
-      actualizada.vende === 0 && actualizada.dejaEnvases === 0 && actualizada.retiraEnvases === 0
+      actualizada.vende === 0 && actualizada.retiraEnvases === 0
 
     onChange(vacia ? resto : [...resto, actualizada])
   }
@@ -56,6 +50,7 @@ export function DeliveryLinesEditor({ stock, lineas, onChange }: Props) {
   return (
     <div className="flex flex-col gap-3">
       <span className="text-sm font-medium text-neutral-700">Qué pasó en la puerta</span>
+      <p className="text-sm text-neutral-600">Los envases entregados se registran automáticamente con la venta.</p>
 
       {stock.map((s) => (
         <div key={s.productId} className="rounded-md border border-neutral-200 bg-white p-3">
@@ -64,11 +59,10 @@ export function DeliveryLinesEditor({ stock, lineas, onChange }: Props) {
             <span className="text-neutral-500">{s.fullOnBoard} a bordo</span>
           </div>
 
-          <div className="mt-2 grid grid-cols-3 gap-2">
+          <div className="mt-2 grid grid-cols-2 gap-2">
             {(
               [
                 ['vende', 'Vende'],
-                ['dejaEnvases', 'Deja envases'],
                 ['retiraEnvases', 'Retira vacíos'],
               ] as const
             ).map(([campo, etiqueta]) => (
@@ -77,6 +71,8 @@ export function DeliveryLinesEditor({ stock, lineas, onChange }: Props) {
                 <input
                   type="number"
                   min={0}
+                  step={1}
+                  max={campo === 'vende' ? Math.max(0, s.fullOnBoard) : undefined}
                   inputMode="numeric"
                   placeholder="0"
                   value={valorDe(s.productId, campo) || ''}

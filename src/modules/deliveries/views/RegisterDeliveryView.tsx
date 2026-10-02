@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { customerService, CustomerAccountSummary } from '../../customers'
 import { ApiError, Button, Field, formatMoney } from '../../core'
 import { useCurrentSession } from '../../sessions'
 import { CustomerPicker } from '../components/CustomerPicker'
@@ -21,11 +23,23 @@ const CLIENTE_VACIO: NewCustomerLine = {
 
 export function RegisterDeliveryView() {
   const navigate = useNavigate()
+  const [params] = useSearchParams()
   const { data: sesion, isLoading } = useCurrentSession()
   const registrar = useRegisterDelivery()
 
-  const [customerId, setCustomerId] = useState<string | null>(null)
-  const [esNuevo, setEsNuevo] = useState(false)
+  const [customerId, setCustomerId] = useState<string | null>(params.get('customerId'))
+  const [esNuevo, setEsNuevo] = useState(params.get('new') === '1')
+  const directo = Boolean(params.get('customerId'))
+  const cliente = useQuery({
+    queryKey: ['customers', 'detail', customerId],
+    queryFn: () => customerService.getById(customerId!),
+    enabled: directo && Boolean(customerId),
+  })
+  const cuenta = useQuery({
+    queryKey: ['customers', 'account', customerId],
+    queryFn: () => customerService.getAccount(customerId!),
+    enabled: directo && Boolean(customerId),
+  })
   const [nuevo, setNuevo] = useState<NewCustomerLine>(CLIENTE_VACIO)
   const [lineas, setLineas] = useState<DeliveryLine[]>([])
   const [monto, setMonto] = useState('')
@@ -83,9 +97,7 @@ export function RegisterDeliveryView() {
         // una casilla aparte que el chofer se pueda olvidar de tildar.
         type: vendeAlgo ? 'Sale' : 'ContainerOnly',
         items: lineas.filter((l) => l.vende > 0).map((l) => ({ productId: l.productId, quantity: l.vende })),
-        containersOut: lineas
-          .filter((l) => l.dejaEnvases > 0)
-          .map((l) => ({ productId: l.productId, quantity: l.dejaEnvases })),
+        containersOut: [],
         containersIn: lineas
           .filter((l) => l.retiraEnvases > 0)
           .map((l) => ({ productId: l.productId, quantity: l.retiraEnvases })),
@@ -110,7 +122,13 @@ export function RegisterDeliveryView() {
         <p className="mt-1 text-sm text-neutral-600">{sesion.zoneName}</p>
       </div>
 
-      <CustomerPicker
+      {directo ? <div className="flex flex-col gap-3 rounded-md border border-neutral-200 p-3">
+        <h2 className="font-semibold">{cliente.data?.displayName ?? 'Cargando cliente…'}</h2>
+        <p className="text-sm">{cliente.data?.address}</p>
+        {cuenta.data && <CustomerAccountSummary account={cuenta.data} />}
+        {(cliente.isError || cuenta.isError) && <p role="alert">No se pudo cargar el cliente. Volvé al recorrido e intentá nuevamente.</p>}
+        {cliente.data && (cliente.data.zoneId !== sesion.zoneId || !cliente.data.isActive) && <p role="alert">Este cliente no pertenece al recorrido activo.</p>}
+      </div> : params.get('new') === '1' ? <h2 className="font-semibold">Cliente nuevo</h2> : <CustomerPicker
         zoneId={sesion.zoneId}
         customerId={customerId}
         esNuevo={esNuevo}
@@ -118,7 +136,7 @@ export function RegisterDeliveryView() {
           setCustomerId(id)
           setEsNuevo(nuevoElegido)
         }}
-      />
+      />}
 
       {esNuevo && <NewCustomerFields valor={nuevo} onChange={setNuevo} />}
 
@@ -146,7 +164,7 @@ export function RegisterDeliveryView() {
       )}
 
       <div className="flex gap-2">
-        <Button type="submit" disabled={registrar.isPending}>
+        <Button type="submit" disabled={registrar.isPending || (!esNuevo && !customerId) || (directo && (!cliente.data || !cuenta.data || cliente.isError || cuenta.isError || cliente.data.zoneId !== sesion.zoneId || !cliente.data.isActive))}>
           {registrar.isPending ? 'Registrando...' : 'Registrar visita'}
         </Button>
         <Button type="button" variant="secondary" onClick={() => navigate('/reparto')}>

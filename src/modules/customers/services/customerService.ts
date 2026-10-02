@@ -59,12 +59,13 @@ export const customerService = {
    * La hoja de ruta: filtrado por zona, el backend devuelve los clientes en orden
    * de recorrido. Sin zona ese orden no significa nada.
    */
-  listByZone: (zoneId: string, pageSize = 100) =>
+  listByZone: (zoneId: string, pageSize = 100, page = 1) =>
     api.get<PagedResult<Customer>>(
-      `/api/customers?zoneId=${zoneId}&onlyActive=true&pageSize=${pageSize}`,
+      `/api/customers?zoneId=${zoneId}&onlyActive=true&pageSize=${pageSize}&page=${page}`,
     ),
 
   /** Cuanto debe y que envases tiene. Es lo que el chofer necesita en la puerta. */
   getAccount: (customerId: string) =>
     api.get<CustomerAccount>(`/api/customers/${customerId}/account`),
+  getById: (customerId: string) => api.get<Customer>(`/api/customers/${customerId}`),
 }
