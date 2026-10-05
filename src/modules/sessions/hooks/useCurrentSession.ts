@@ -21,3 +21,11 @@ export function useOpenSession() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: SESION_ACTUAL }),
   })
 }
+
+export function usePostponeVisit() {
+  const cache = useQueryClient()
+  return useMutation({
+    mutationFn: sessionService.postponeVisit,
+    onSuccess: () => cache.invalidateQueries({ queryKey: SESION_ACTUAL }),
+  })
+}

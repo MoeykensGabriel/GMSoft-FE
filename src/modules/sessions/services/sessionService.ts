@@ -23,6 +23,7 @@ export interface Session {
   zoneName: string
   openedAt: string
   routeDays: number[]
+  deferredCustomerIds: string[]
   closedAt: string | null
   kilometersAtOpen: number
   kilometersAtClose: number | null
@@ -90,6 +91,7 @@ export interface SessionSettlement {
 }
 
 export const sessionService = {
+  postponeVisit: (customerId: string) => api.post<void>(`/api/sessions/current/customers/${customerId}/postpone`, {}),
   /**
    * La sesion abierta del chofer, o null si no tiene ninguna. El backend devuelve
    * 204 sin cuerpo cuando no hay, y el cliente lo traduce a undefined.

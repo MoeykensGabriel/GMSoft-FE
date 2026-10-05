@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { LoginView, ProtectedRoute, ROLES } from '../modules/auth'
-import { RegisterDeliveryView } from '../modules/deliveries'
+import { RegisterDeliveryView, CustomerVisitView } from '../modules/deliveries'
 import { ProductFormView, ProductListView } from '../modules/products'
 import {
   DeliveryRouteView,
@@ -31,6 +31,7 @@ export function AppRouter() {
       <Route element={<ProtectedRoute roles={[ROLES.driver]} />}>
         <Route path="/reparto" element={<DeliveryRouteView />} />
         <Route path="/reparto/visita" element={<RegisterDeliveryView />} />
+        <Route path="/reparto/clientes/:id" element={<CustomerVisitView />} />
       </Route>
 
       <Route element={<ProtectedRoute roles={[ROLES.admin]} />}>

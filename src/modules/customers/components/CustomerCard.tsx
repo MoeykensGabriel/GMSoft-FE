@@ -4,8 +4,9 @@ import type { Customer } from '../services/customerService'
 import { CustomerContainersSummary } from './CustomerContainersSummary'
 import { formatMoney } from '../../core'
 
-export function CustomerCard({ customer, onSelect }: {
+export function CustomerCard({ customer, onSelect, deferred = false }: {
   customer: Customer
+  deferred?: boolean
   onSelect: (id: string) => void
 }) {
   const account = useQuery({
@@ -16,7 +17,7 @@ export function CustomerCard({ customer, onSelect }: {
     <button
       type="button"
       onClick={() => onSelect(customer.id)}
-      aria-label={`Registrar visita a ${customer.displayName}`}
+      aria-label={`Abrir ficha de ${customer.displayName}`}
       className={`w-full border-b border-neutral-200 px-2 py-3 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${customer.activityStatus === 'Black' ? 'bg-neutral-900 text-white' : customer.activityStatus === 'Red' ? 'bg-red-50 text-neutral-900' : 'bg-white text-neutral-900 hover:bg-neutral-50'}`}
     >
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)_minmax(0,1fr)] items-start gap-2 text-sm">
@@ -31,6 +32,7 @@ export function CustomerCard({ customer, onSelect }: {
         <span className="min-w-0 break-words">{account.data ? <CustomerContainersSummary account={account.data} /> : account.isError ? 'No se pudieron leer los envases' : 'Cargando envases…'}</span>
       </div>
       {customer.visitDays == null && <span className="mt-1 block text-xs">Días pendientes de configurar</span>}
+      {deferred && <span className="mt-1 inline-block rounded-md border border-current px-2 py-1 text-xs font-semibold">Visita pendiente</span>}
     </button>
   )
 }

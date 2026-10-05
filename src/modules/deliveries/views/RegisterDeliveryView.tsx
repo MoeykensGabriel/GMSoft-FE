@@ -137,6 +137,7 @@ export function RegisterDeliveryView() {
       <div>
         <h1 className="text-xl font-semibold text-neutral-900">Registrar visita</h1>
         <p className="mt-1 text-sm text-neutral-600">{sesion.zoneName}</p>
+        {directo && customerId && <Link to={`/reparto/clientes/${encodeURIComponent(customerId)}`} className="inline-block py-2 text-sm underline">← Volver a la ficha</Link>}
       </div>
 
       {directo ? <div className="flex flex-col gap-3 rounded-md border border-neutral-200 p-3">
@@ -192,7 +193,7 @@ export function RegisterDeliveryView() {
         <Button type="submit" disabled={registrar.isPending || (vendeAlgo && !pricesReady) || (!esNuevo && !customerId) || (directo && (!cliente.data || !cuenta.data || cliente.isError || cuenta.isError || cliente.data.zoneId !== sesion.zoneId || !cliente.data.isActive))}>
           {registrar.isPending ? 'Registrando...' : 'Registrar visita'}
         </Button>
-        <Button type="button" variant="secondary" onClick={() => navigate('/reparto')}>
+        <Button type="button" variant="secondary" onClick={() => navigate(directo && customerId ? `/reparto/clientes/${encodeURIComponent(customerId)}` : '/reparto')}>
           Cancelar
         </Button>
       </div>
