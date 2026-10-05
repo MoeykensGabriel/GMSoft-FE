@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { customerService } from '../services/customerService'
 import type { Customer } from '../services/customerService'
-import { CustomerAccountSummary } from './CustomerAccountSummary'
+import { CustomerContainersSummary } from './CustomerContainersSummary'
+import { formatMoney } from '../../core'
 
 export function CustomerCard({ customer, onSelect }: {
   customer: Customer
@@ -16,26 +17,20 @@ export function CustomerCard({ customer, onSelect }: {
       type="button"
       onClick={() => onSelect(customer.id)}
       aria-label={`Registrar visita a ${customer.displayName}`}
-      className="w-full rounded-md border border-neutral-300 bg-white p-4 text-left hover:bg-neutral-50"
+      className={`w-full border-b border-neutral-200 px-2 py-3 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${customer.activityStatus === 'Black' ? 'bg-neutral-900 text-white' : customer.activityStatus === 'Red' ? 'bg-red-50 text-neutral-900' : 'bg-white text-neutral-900 hover:bg-neutral-50'}`}
     >
-      <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
-        <div className="min-w-0 break-words">
-          <h2 className="font-semibold">{customer.routeOrder}. {customer.displayName}</h2>
-          <p className="mt-1 text-sm">{customer.address}</p>
-          {customer.visitDays == null && <p className="mt-1 text-xs text-neutral-600">Días pendientes de configurar por admin</p>}
-          <p className="mt-2 text-sm text-neutral-600">
-            {customer.daysWithoutPurchase === null
-              ? 'Sin compras registradas'
-              : `Días sin comprar: ${customer.daysWithoutPurchase}`}
-          </p>
-        </div>
-        <div className="min-w-0 break-words">
-          {account.isError ? <p className="text-sm text-red-700">No se pudo leer el saldo. Se consultará al abrir la visita.</p>
-            : account.data ? <CustomerAccountSummary account={account.data} />
-              : <p className="text-sm text-neutral-600">Cargando saldos y envases…</p>}
-        </div>
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)_minmax(0,1fr)] items-start gap-2 text-sm">
+        <span className="min-w-0 break-words font-semibold">{customer.displayName}</span>
+        <span className="min-w-0 break-words">{customer.address}</span>
+        <span className="min-w-0 break-words text-right font-medium">
+          {account.isError ? 'Sin datos' : account.data ? <>{account.data.balance < 0 && <span className="block text-xs">A favor</span>}{formatMoney(Math.abs(account.data.balance))}</> : '…'}
+        </span>
       </div>
-      <span className="mt-3 block text-sm underline">Tocar para registrar visita</span>
+      <div className="mt-2 flex flex-wrap items-start justify-between gap-x-3 gap-y-1 text-xs">
+        <span>{customer.daysWithoutPurchase === null ? 'Sin compras registradas' : `${customer.daysWithoutPurchase} días sin comprar`}</span>
+        <span className="min-w-0 break-words">{account.data ? <CustomerContainersSummary account={account.data} /> : account.isError ? 'No se pudieron leer los envases' : 'Cargando envases…'}</span>
+      </div>
+      {customer.visitDays == null && <span className="mt-1 block text-xs">Días pendientes de configurar</span>}
     </button>
   )
 }

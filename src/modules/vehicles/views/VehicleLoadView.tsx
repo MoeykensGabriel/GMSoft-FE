@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { Button, ErrorMessage, Select, formatDateTime } from '../../core'
+import { Button, ErrorMessage, Select, WeekdaysField, formatDateTime } from '../../core'
 import { productService } from '../../products'
 import { driverService } from '../../drivers'
 import { VehicleAssignmentSummary } from '../components/VehicleAssignmentSummary'
@@ -22,6 +22,7 @@ export function VehicleLoadView() {
   const [vehicleId, setVehicleId] = useState('')
   const [tanda, setTanda] = useState<LoadLine[]>([])
   const [success, setSuccess] = useState(false)
+  const [editedDays, setEditedDays] = useState<number[] | null>(null)
   const drivers = useQuery({ queryKey: ['drivers', 'active'], queryFn: driverService.listActive })
 
   const vehiculos = useQuery({
@@ -40,18 +41,25 @@ export function VehicleLoadView() {
     enabled: Boolean(vehicleId),
   })
 
-  function refrescar() {
+  async function refrescar() {
     // Tambien el estado de la flota: al cargar, el camion pasa de "disponible" a
     // "ya cargado" y el selector tiene que reflejarlo.
-    queryClient.invalidateQueries({ queryKey: ['vehicles'] })
+    await queryClient.invalidateQueries({ queryKey: ['vehicles'] })
   }
 
+  const pendingDays = [...new Set((carga.data ?? []).flatMap((line) => line.routeDays ?? []))].sort((a, b) => a - b)
+  const today = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
+  const todayIso = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(today) + 1
+  const routeDays = editedDays ?? (pendingDays.length ? pendingDays : [todayIso])
+  const daysChanged = routeDays.join(',') !== pendingDays.join(',')
+
   const cargar = useMutation({
-    mutationFn: () => vehicleService.registerLoad(vehicleId, tanda),
-    onSuccess: () => {
+    mutationFn: () => tanda.length ? vehicleService.registerLoad(vehicleId, tanda, routeDays) : vehicleService.updateRouteDays(vehicleId, routeDays),
+    onSuccess: async () => {
+      await refrescar()
       setTanda([])
+      setEditedDays(null)
       setSuccess(true)
-      refrescar()
     },
   })
 
@@ -62,7 +70,8 @@ export function VehicleLoadView() {
 
   function onSubmit(e: FormEvent) {
     e.preventDefault()
-    if (cargar.isPending || bajar.isPending || !vehicleId || tanda.length === 0) return
+    if (cargar.isPending || bajar.isPending || !vehicleId || !routeDays.length || carga.isPending || carga.isError) return
+    if (!tanda.length && (!carga.data?.length || !daysChanged)) return
     cargar.mutate()
   }
 
@@ -100,6 +109,7 @@ export function VehicleLoadView() {
         onChange={(e) => {
           setVehicleId(e.target.value)
           setTanda([])
+          setEditedDays(null)
           setSuccess(false)
           cargar.reset()
           bajar.reset()
@@ -186,6 +196,10 @@ export function VehicleLoadView() {
           </section>
 
           <form onSubmit={onSubmit} className="flex flex-col gap-3">
+            <WeekdaysField label="Días de reparto que cubrirá esta salida" value={routeDays}
+              disabled={cargar.isPending || bajar.isPending || carga.isPending || carga.isError}
+              onChange={(days) => { setEditedDays(days); setSuccess(false) }} />
+            <p className="text-sm text-neutral-600">Podés combinar varios días para recuperar un reparto. Los clientes aparecerán una sola vez, en el orden habitual.</p>
             <h2 className="rounded-md border border-neutral-300 py-4 text-center font-semibold">{lineas.length ? 'Agregar productos a la carga' : 'Carga inicial'}</h2>
             <ErrorMessage error={productos.error ?? carga.error} />
 
@@ -200,8 +214,8 @@ export function VehicleLoadView() {
             <ErrorMessage error={cargar.error} />
 
             <p className="text-right font-medium">Total a cargar: {tanda.reduce((sum, line) => sum + line.quantity, 0)} unidades</p>
-            <Button type="submit" className="self-end" disabled={cargar.isPending || bajar.isPending || productos.isPending || productos.isError || carga.isPending || carga.isError || tanda.length === 0}>
-              {cargar.isPending ? 'Guardando...' : 'Confirmar carga'}
+            <Button type="submit" className="self-end" disabled={cargar.isPending || bajar.isPending || productos.isPending || productos.isError || carga.isPending || carga.isError || !routeDays.length || (!tanda.length && (!lineas.length || !daysChanged))}>
+              {cargar.isPending ? 'Guardando...' : tanda.length ? 'Confirmar carga' : 'Guardar días del recorrido'}
             </Button>
           </form>
         </>

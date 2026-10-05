@@ -12,6 +12,7 @@ export interface Customer {
   zoneName: string | null
   routeOrder: number
   visitDays: number[] | null
+  activityStatus: 'White' | 'Red' | 'Black'
   notes: string | null
   isActive: boolean
   displayName: string
@@ -77,9 +78,9 @@ export const customerService = {
    * La hoja de ruta: filtrado por zona, el backend devuelve los clientes en orden
    * de recorrido. Sin zona ese orden no significa nada.
    */
-  listByZone: (zoneId: string, pageSize = 100, page = 1) =>
+  listByZone: (zoneId: string, pageSize = 100, page = 1, routeDays?: number[], search = '') =>
     api.get<PagedResult<Customer>>(
-      `/api/customers?zoneId=${zoneId}&onlyActive=true&pageSize=${pageSize}&page=${page}&todayOnly=true`,
+      `/api/customers?zoneId=${zoneId}&onlyActive=true&pageSize=${pageSize}&page=${page}&search=${encodeURIComponent(search)}&${routeDays?.length ? routeDays.map((day) => `visitDays=${day}`).join('&') : 'todayOnly=true'}`,
     ),
 
   /** Cuanto debe y que envases tiene. Es lo que el chofer necesita en la puerta. */

@@ -6,6 +6,7 @@ const NUEVO = '__nuevo__'
 
 interface Props {
   zoneId: string
+  routeDays: number[]
   customerId: string | null
   esNuevo: boolean
   onChange: (valor: { customerId: string | null; esNuevo: boolean }) => void
@@ -16,12 +17,12 @@ interface Props {
  * de alta en la puerta. Al elegir uno existente muestra su cuenta, que es lo que el
  * chofer necesita saber antes de vender: cuanto debe y cuantos envases tiene.
  */
-export function CustomerPicker({ zoneId, customerId, esNuevo, onChange }: Props) {
+export function CustomerPicker({ zoneId, routeDays, customerId, esNuevo, onChange }: Props) {
   const clientes = useQuery({
-    queryKey: ['customers', 'zone', zoneId],
+    queryKey: ['customers', 'zone', zoneId, routeDays],
     refetchOnWindowFocus: true,
     refetchInterval: 60_000,
-    queryFn: () => customerService.listByZone(zoneId),
+    queryFn: () => customerService.listByZone(zoneId, 100, 1, routeDays),
   })
 
   const cuenta = useQuery({

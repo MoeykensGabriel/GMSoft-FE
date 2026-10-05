@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ApiError, Button, Field, Select } from '../../core'
+import { ApiError, Button, Field, Select, weekdayLabels } from '../../core'
 import { driverService } from '../../drivers'
 import { vehicleService } from '../../vehicles'
 import { zoneService } from '../../zones'
@@ -70,6 +70,7 @@ export function OpenSessionView() {
   }
 
   const lineas = carga.data ?? []
+  const routeDays = [...new Set(lineas.flatMap((line) => line.routeDays ?? []))]
 
   return (
     <form onSubmit={onSubmit} className="mx-auto flex max-w-md flex-col gap-5 p-6">
@@ -106,6 +107,7 @@ export function OpenSessionView() {
       </div>
 
       <Select
+        // Los días los configura admin y se copian al abrir la salida.
         label="Zona de reparto"
         name="zoneId"
         required
@@ -119,6 +121,7 @@ export function OpenSessionView() {
           </option>
         ))}
       </Select>
+      {routeDays.length > 0 && <p className="text-sm">Días del recorrido: <strong>{weekdayLabels(routeDays)}</strong></p>}
 
       <Field
         label="Kilometraje del vehículo"

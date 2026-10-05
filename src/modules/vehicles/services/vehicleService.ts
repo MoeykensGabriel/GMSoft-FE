@@ -22,6 +22,7 @@ export interface VehicleLoadLine {
   productDetail: string
   quantity: number
   loadedAt: string
+  routeDays: number[] | null
 }
 
 /**
@@ -51,8 +52,11 @@ export const vehicleService = {
     api.get<VehicleLoadLine[]>(`/api/vehicles/${vehicleId}/load`),
 
   /** Sube una tanda al camion. Falla con 409 si el camion ya esta en la calle. */
-  registerLoad: (vehicleId: string, items: { productId: string; quantity: number }[]) =>
-    api.post<void>(`/api/vehicles/${vehicleId}/load`, { vehicleId, items }),
+  registerLoad: (vehicleId: string, items: { productId: string; quantity: number }[], routeDays: number[]) =>
+    api.post<void>(`/api/vehicles/${vehicleId}/load`, { vehicleId, items, routeDays }),
+
+  updateRouteDays: (vehicleId: string, routeDays: number[]) =>
+    api.put<void>(`/api/vehicles/${vehicleId}/load/route-days`, { vehicleId, routeDays }),
 
   removeLoad: (vehicleId: string, loadId: string) =>
     api.del<void>(`/api/vehicles/${vehicleId}/load/${loadId}`),

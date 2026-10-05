@@ -22,6 +22,7 @@ export interface Session {
   zoneId: string
   zoneName: string
   openedAt: string
+  routeDays: number[]
   closedAt: string | null
   kilometersAtOpen: number
   kilometersAtClose: number | null

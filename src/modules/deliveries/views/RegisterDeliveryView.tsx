@@ -147,6 +147,7 @@ export function RegisterDeliveryView() {
         {cliente.data && (cliente.data.zoneId !== sesion.zoneId || !cliente.data.isActive) && <p role="alert">Este cliente no pertenece al recorrido activo.</p>}
       </div> : params.get('new') === '1' ? <h2 className="font-semibold">Cliente nuevo</h2> : <CustomerPicker
         zoneId={sesion.zoneId}
+        routeDays={sesion.routeDays}
         customerId={customerId}
         esNuevo={esNuevo}
         onChange={({ customerId: id, esNuevo: nuevoElegido }) => {
