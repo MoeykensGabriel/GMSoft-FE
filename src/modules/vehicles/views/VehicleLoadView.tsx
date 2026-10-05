@@ -4,6 +4,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { Button, ErrorMessage, Select, formatDateTime } from '../../core'
 import { productService } from '../../products'
+import { driverService } from '../../drivers'
+import { VehicleAssignmentSummary } from '../components/VehicleAssignmentSummary'
 import { LoadEditor } from '../components/LoadEditor'
 import type { LoadLine } from '../components/LoadEditor'
 import { vehicleService } from '../services/vehicleService'
@@ -19,6 +21,8 @@ export function VehicleLoadView() {
   const queryClient = useQueryClient()
   const [vehicleId, setVehicleId] = useState('')
   const [tanda, setTanda] = useState<LoadLine[]>([])
+  const [success, setSuccess] = useState(false)
+  const drivers = useQuery({ queryKey: ['drivers', 'active'], queryFn: driverService.listActive })
 
   const vehiculos = useQuery({
     queryKey: ['vehicles', 'load-status'],
@@ -46,6 +50,7 @@ export function VehicleLoadView() {
     mutationFn: () => vehicleService.registerLoad(vehicleId, tanda),
     onSuccess: () => {
       setTanda([])
+      setSuccess(true)
       refrescar()
     },
   })
@@ -57,11 +62,13 @@ export function VehicleLoadView() {
 
   function onSubmit(e: FormEvent) {
     e.preventDefault()
+    if (cargar.isPending || bajar.isPending || !vehicleId || tanda.length === 0) return
     cargar.mutate()
   }
 
   const lineas = carga.data ?? []
   const flota = vehiculos.data ?? []
+  const selectedVehicle = flota.find((vehicle) => vehicle.id === vehicleId)
 
   // El camion que esta en la calle no esta en el deposito: no se puede cargar y el
   // backend lo rechaza igual. Queda afuera de la lista en vez de fallar al apretar.
@@ -79,9 +86,9 @@ export function VehicleLoadView() {
         <Link to="/" className="text-sm text-neutral-500 hover:underline">
           ← Panel
         </Link>
-        <h1 className="mt-2 text-xl font-semibold text-neutral-900">Cargar camión</h1>
+        <h1 className="mt-2 border-b border-neutral-300 py-4 text-center text-2xl font-semibold text-neutral-900">Carga inicial de vehículos</h1>
         <p className="text-sm text-neutral-600">
-          Lo que subas queda arriba del camión hasta que un chofer abra la salida con él.
+          Prepará los productos llenos que llevará el vehículo antes de iniciar el reparto.
         </p>
       </div>
 
@@ -89,9 +96,13 @@ export function VehicleLoadView() {
         label="Vehículo"
         name="vehicleId"
         value={vehicleId}
+        disabled={cargar.isPending || bajar.isPending}
         onChange={(e) => {
           setVehicleId(e.target.value)
           setTanda([])
+          setSuccess(false)
+          cargar.reset()
+          bajar.reset()
         }}
       >
         <option value="">Elegí un vehículo</option>
@@ -116,6 +127,11 @@ export function VehicleLoadView() {
           </optgroup>
         )}
       </Select>
+      <ErrorMessage error={vehiculos.error ?? drivers.error} />
+      {selectedVehicle && !drivers.isPending && !drivers.isError && <VehicleAssignmentSummary
+        vehicleName={selectedVehicle.name} licensePlate={selectedVehicle.licensePlate}
+        drivers={(drivers.data ?? []).filter((driver) => driver.vehicleId === vehicleId)} />}
+      {success && <p role="status">Carga guardada correctamente.</p>}
 
       {/* Una ausencia sin explicar se lee como un error: si falta un camion de la
           lista hay que decir por que, o el proximo paso es revisar si se borro. */}
@@ -140,7 +156,7 @@ export function VehicleLoadView() {
               <p className="text-sm text-neutral-500">Cargando...</p>
             ) : lineas.length === 0 ? (
               <p className="rounded-md border border-neutral-200 bg-white p-3 text-sm text-neutral-600">
-                El camión está vacío. Si sale así, la salida arranca sin stock.
+                El camión está vacío. Registrá una carga para habilitar la salida del chofer.
               </p>
             ) : (
               <ul className="flex flex-col gap-2">
@@ -158,7 +174,7 @@ export function VehicleLoadView() {
                     <button
                       type="button"
                       onClick={() => bajar.mutate(l.id)}
-                      disabled={bajar.isPending}
+                      disabled={bajar.isPending || cargar.isPending}
                       className="rounded-md bg-red-700 px-3 py-2 text-white hover:bg-red-800 disabled:bg-neutral-400"
                     >
                       Bajar
@@ -170,18 +186,22 @@ export function VehicleLoadView() {
           </section>
 
           <form onSubmit={onSubmit} className="flex flex-col gap-3">
-            <h2 className="text-sm font-medium text-neutral-700">Subir más</h2>
+            <h2 className="rounded-md border border-neutral-300 py-4 text-center font-semibold">{lineas.length ? 'Agregar productos a la carga' : 'Carga inicial'}</h2>
+            <ErrorMessage error={productos.error ?? carga.error} />
 
+            <fieldset disabled={cargar.isPending || bajar.isPending}>
             <LoadEditor
               productos={productos.data?.items ?? []}
               valor={tanda}
               onChange={setTanda}
             />
+            </fieldset>
 
             <ErrorMessage error={cargar.error} />
 
-            <Button type="submit" disabled={cargar.isPending || tanda.length === 0}>
-              {cargar.isPending ? 'Cargando...' : 'Cargar al camión'}
+            <p className="text-right font-medium">Total a cargar: {tanda.reduce((sum, line) => sum + line.quantity, 0)} unidades</p>
+            <Button type="submit" className="self-end" disabled={cargar.isPending || bajar.isPending || productos.isPending || productos.isError || carga.isPending || carga.isError || tanda.length === 0}>
+              {cargar.isPending ? 'Guardando...' : 'Confirmar carga'}
             </Button>
           </form>
         </>

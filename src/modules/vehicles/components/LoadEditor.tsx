@@ -1,4 +1,4 @@
-import { Field } from '../../core'
+import { QuantityInput } from '../../core'
 import type { Product } from '../../products'
 
 export interface LoadLine {
@@ -37,19 +37,15 @@ export function LoadEditor({ productos, valor, onChange }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="mx-auto flex w-full max-w-xl flex-col gap-3">
       {productos.map((p) => (
-        <Field
-          key={p.id}
+        <div key={p.id} className="rounded-md border border-neutral-300 bg-white p-4">
+        <QuantityInput
           label={p.detail}
-          name={`carga-${p.id}`}
-          type="number"
-          min={0}
-          inputMode="numeric"
-          value={cantidadDe(p.id) || ''}
-          placeholder="0"
-          onChange={(e) => setCantidad(p.id, Number(e.target.value) || 0)}
+          value={cantidadDe(p.id)}
+          onChange={(quantity) => setCantidad(p.id, quantity)}
         />
+        </div>
       ))}
     </div>
   )
