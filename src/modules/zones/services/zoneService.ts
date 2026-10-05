@@ -16,6 +16,16 @@ export interface ZoneInput {
 }
 
 export const zoneService = {
+  listAll: async (): Promise<Zone[]> => {
+    const zones: Zone[] = []
+    let page = 1
+    while (true) {
+      const result = await api.get<PagedResult<Zone>>(`/api/zones?pageSize=100&page=${page}`)
+      zones.push(...result.items)
+      if (!result.hasNextPage) return zones
+      page += 1
+    }
+  },
   /** Solo las activas: no tiene sentido ofrecer una zona dada de baja al salir. */
   listActive: (pageSize = 100) =>
     api.get<PagedResult<Zone>>(`/api/zones?onlyActive=true&pageSize=${pageSize}`),

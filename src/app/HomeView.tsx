@@ -4,6 +4,7 @@ import { Button } from '../modules/core'
 
 /** Las secciones del panel, en el orden en que se usan al arrancar de cero. */
 const SECCIONES = [
+  { to: '/panel/clientes', titulo: 'Clientes', detalle: 'Alta, edición y días de visita por zona' },
   {
     to: '/panel/carga',
     titulo: 'Cargar camión',

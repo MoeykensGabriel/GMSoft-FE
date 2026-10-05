@@ -19,6 +19,8 @@ interface Props {
 export function CustomerPicker({ zoneId, customerId, esNuevo, onChange }: Props) {
   const clientes = useQuery({
     queryKey: ['customers', 'zone', zoneId],
+    refetchOnWindowFocus: true,
+    refetchInterval: 60_000,
     queryFn: () => customerService.listByZone(zoneId),
   })
 

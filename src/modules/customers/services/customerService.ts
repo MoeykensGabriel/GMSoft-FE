@@ -11,6 +11,7 @@ export interface Customer {
   zoneId: string
   zoneName: string | null
   routeOrder: number
+  visitDays: number[] | null
   notes: string | null
   isActive: boolean
   displayName: string
@@ -54,7 +55,22 @@ export interface CustomerAccount {
   movements: AccountMovement[]
 }
 
+export interface CustomerInput {
+  businessName: string | null
+  contactName: string
+  phone: string
+  address: string
+  email: string | null
+  zoneId: string
+  notes: string | null
+  visitDays: number[]
+  isActive: boolean
+}
+
 export const customerService = {
+  list: (page = 1, search = '') => api.get<PagedResult<Customer>>(`/api/customers?page=${page}&pageSize=20&search=${encodeURIComponent(search)}`),
+  create: (input: CustomerInput) => api.post<string>('/api/customers', input),
+  update: (id: string, input: CustomerInput) => api.put<void>(`/api/customers/${id}`, { ...input, id, routeOrder: null }),
   getPrices: (customerId: string) =>
     api.get<{ productId: string; price: number }[]>(`/api/customers/${customerId}/prices`),
   /**
@@ -63,7 +79,7 @@ export const customerService = {
    */
   listByZone: (zoneId: string, pageSize = 100, page = 1) =>
     api.get<PagedResult<Customer>>(
-      `/api/customers?zoneId=${zoneId}&onlyActive=true&pageSize=${pageSize}&page=${page}`,
+      `/api/customers?zoneId=${zoneId}&onlyActive=true&pageSize=${pageSize}&page=${page}&todayOnly=true`,
     ),
 
   /** Cuanto debe y que envases tiene. Es lo que el chofer necesita en la puerta. */

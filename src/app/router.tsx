@@ -12,6 +12,7 @@ import {
 import { VehicleLoadView } from '../modules/vehicles'
 import { ZoneFormView, ZoneListView } from '../modules/zones'
 import { HomeView } from './HomeView'
+import { CustomerFormView, CustomerListView } from '../modules/customers'
 
 /**
  * Router global. Ensambla las vistas que cada modulo expone por su index; las vistas
@@ -33,6 +34,9 @@ export function AppRouter() {
       </Route>
 
       <Route element={<ProtectedRoute roles={[ROLES.admin]} />}>
+        <Route path="/panel/clientes" element={<CustomerListView />} />
+        <Route path="/panel/clientes/nuevo" element={<CustomerFormView />} />
+        <Route path="/panel/clientes/:id" element={<CustomerFormView />} />
         <Route path="/panel/carga" element={<VehicleLoadView />} />
 
         <Route path="/panel/liquidacion" element={<RouteSettlementView />} />

@@ -10,6 +10,8 @@ export function CustomerRouteList({ zoneId, onSelect }: {
   const customers = useInfiniteQuery({
     queryKey: ['customers', 'route', zoneId],
     initialPageParam: 1,
+    refetchOnWindowFocus: true,
+    refetchInterval: 60_000,
     queryFn: ({ pageParam }) => customerService.listByZone(zoneId, 20, pageParam),
     getNextPageParam: (page) => page.hasNextPage ? page.page + 1 : undefined,
   })
@@ -22,8 +24,8 @@ export function CustomerRouteList({ zoneId, onSelect }: {
   const list = customers.data.pages.flatMap((page) => page.items)
   return (
     <section className="flex flex-col gap-3" aria-label="Clientes en orden de recorrido">
-      <h2 className="font-semibold">Clientes del recorrido</h2>
-      {list.length === 0 && <p className="text-sm text-neutral-600">Todavía no hay clientes en esta zona. Agregá el primero con una venta.</p>}
+      <h2 className="font-semibold">Clientes de hoy</h2>
+      {list.length === 0 && <p className="text-sm text-neutral-600">No hay clientes programados para hoy en esta zona.</p>}
       <ul className="flex flex-col gap-3">
         {list.map((customer) => <li key={customer.id}><CustomerCard customer={customer} onSelect={onSelect} /></li>)}
       </ul>

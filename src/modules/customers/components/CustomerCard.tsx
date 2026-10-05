@@ -22,6 +22,7 @@ export function CustomerCard({ customer, onSelect }: {
         <div className="min-w-0 break-words">
           <h2 className="font-semibold">{customer.routeOrder}. {customer.displayName}</h2>
           <p className="mt-1 text-sm">{customer.address}</p>
+          {customer.visitDays == null && <p className="mt-1 text-xs text-neutral-600">Días pendientes de configurar por admin</p>}
           <p className="mt-2 text-sm text-neutral-600">
             {customer.daysWithoutPurchase === null
               ? 'Sin compras registradas'
