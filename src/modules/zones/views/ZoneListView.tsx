@@ -41,9 +41,6 @@ export function ZoneListView() {
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
       <div>
-        <Link to="/" className="text-sm text-neutral-500 hover:underline">
-          ← Panel
-        </Link>
         <div className="mt-2 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-neutral-900">Zonas de reparto</h1>
           <Link

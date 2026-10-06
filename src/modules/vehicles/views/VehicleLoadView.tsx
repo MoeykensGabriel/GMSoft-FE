@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
 import { Button, ErrorMessage, Select, WeekdaysField, formatDateTime, currentBusinessWeekday } from '../../core'
 import { productService } from '../../products'
 import { driverService } from '../../drivers'
@@ -91,9 +90,6 @@ export function VehicleLoadView() {
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
       <div>
-        <Link to="/" className="text-sm text-neutral-500 hover:underline">
-          ← Panel
-        </Link>
         <h1 className="mt-2 border-b border-neutral-300 py-4 text-center text-2xl font-semibold text-neutral-900">Carga inicial de vehículos</h1>
         <p className="text-sm text-neutral-600">
           Prepará los productos llenos que llevará el vehículo antes de iniciar el reparto.

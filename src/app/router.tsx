@@ -12,6 +12,8 @@ import {
 import { VehicleLoadView } from '../modules/vehicles'
 import { ZoneFormView, ZoneListView } from '../modules/zones'
 import { HomeView } from './HomeView'
+import { AdminLayout } from './admin/AdminLayout'
+import { AdminHomeView } from './admin/AdminHomeView'
 import { CustomerFormView, CustomerListView } from '../modules/customers'
 
 /**
@@ -35,26 +37,29 @@ export function AppRouter() {
       </Route>
 
       <Route element={<ProtectedRoute roles={[ROLES.admin]} />}>
-        <Route path="/panel/clientes" element={<CustomerListView />} />
-        <Route path="/panel/clientes/nuevo" element={<CustomerFormView />} />
-        <Route path="/panel/clientes/:id" element={<CustomerFormView />} />
-        <Route path="/panel/carga" element={<VehicleLoadView />} />
+        <Route element={<AdminLayout />}>
+          <Route path="/panel" element={<AdminHomeView />} />
+          <Route path="/panel/clientes" element={<CustomerListView />} />
+          <Route path="/panel/clientes/nuevo" element={<CustomerFormView />} />
+          <Route path="/panel/clientes/:id" element={<CustomerFormView />} />
+          <Route path="/panel/carga" element={<VehicleLoadView />} />
 
-        <Route path="/panel/liquidacion" element={<RouteSettlementView />} />
+          <Route path="/panel/liquidacion" element={<RouteSettlementView />} />
 
-        <Route path="/panel/salidas" element={<SessionListView />} />
-        <Route path="/panel/salidas/:id" element={<SessionDetailView />} />
-        <Route path="/panel/salidas/:id/recepcion" element={<ReceiveSessionView />} />
+          <Route path="/panel/salidas" element={<SessionListView />} />
+          <Route path="/panel/salidas/:id" element={<SessionDetailView />} />
+          <Route path="/panel/salidas/:id/recepcion" element={<ReceiveSessionView />} />
 
-        {/* El segmento fijo le gana al dinamico en el router, asi que "nuevo" nunca
-            se toma por un id. */}
-        <Route path="/panel/catalogo" element={<ProductListView />} />
-        <Route path="/panel/catalogo/nuevo" element={<ProductFormView />} />
-        <Route path="/panel/catalogo/:id" element={<ProductFormView />} />
+          {/* El segmento fijo le gana al dinamico en el router, asi que "nuevo" nunca
+              se toma por un id. */}
+          <Route path="/panel/catalogo" element={<ProductListView />} />
+          <Route path="/panel/catalogo/nuevo" element={<ProductFormView />} />
+          <Route path="/panel/catalogo/:id" element={<ProductFormView />} />
 
-        <Route path="/panel/zonas" element={<ZoneListView />} />
-        <Route path="/panel/zonas/nueva" element={<ZoneFormView />} />
-        <Route path="/panel/zonas/:id" element={<ZoneFormView />} />
+          <Route path="/panel/zonas" element={<ZoneListView />} />
+          <Route path="/panel/zonas/nueva" element={<ZoneFormView />} />
+          <Route path="/panel/zonas/:id" element={<ZoneFormView />} />
+        </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

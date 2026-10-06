@@ -11,7 +11,6 @@ export function CustomerListView() {
   const [draft, setDraft] = useState('')
   const customers = useQuery({ queryKey: ['customers', 'admin', page, search], queryFn: () => customerService.list(page, search) })
   return <main className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
-    <Link to="/" className="text-sm underline">← Panel</Link>
     <div className="flex flex-wrap items-center justify-between gap-3">
       <h1 className="text-xl font-semibold">Clientes</h1>
       <Link to="/panel/clientes/nuevo" className="rounded-md bg-green-700 px-4 py-3 text-white">Nuevo cliente</Link>

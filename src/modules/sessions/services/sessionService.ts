@@ -12,6 +12,17 @@ export interface SessionStockLine {
   emptyOnBoard: number
 }
 
+export interface ActiveDeparture {
+  sessionId: string
+  vehicleId: string
+  vehicleName: string
+  vehicleLicensePlate: string
+  driverName: string
+  zoneName: string
+  openedAt: string
+  initialLoad: { productId: string; productDetail: string; quantity: number }[]
+}
+
 export interface Session {
   id: string
   driverId: string
@@ -91,6 +102,7 @@ export interface SessionSettlement {
 }
 
 export const sessionService = {
+  getActiveDepartures: () => api.get<ActiveDeparture[]>('/api/sessions/active-departures'),
   postponeVisit: (customerId: string) => api.post<void>(`/api/sessions/current/customers/${customerId}/postpone`, {}),
   /**
    * La sesion abierta del chofer, o null si no tiene ninguna. El backend devuelve

@@ -5,3 +5,5 @@ export { SessionDetailView } from './views/SessionDetailView'
 export { RouteSettlementView } from './views/RouteSettlementView'
 export { useCurrentSession, usePostponeVisit, SESION_ACTUAL } from './hooks/useCurrentSession'
 export type { Session, SessionStockLine } from './services/sessionService'
+
+export { ActiveDeparturesCard } from './components/ActiveDeparturesCard'

@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
 import { Field, Select } from '../../core'
 import { vehicleService } from '../../vehicles'
 import { SessionSettlementCard } from '../components/SessionSettlementCard'
@@ -55,9 +54,6 @@ export function RouteSettlementView() {
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
       <div>
-        <Link to="/" className="text-sm text-neutral-500 hover:underline">
-          ← Panel
-        </Link>
         <h1 className="mt-2 text-xl font-semibold text-neutral-900">Liquidación por reparto</h1>
       </div>
 
