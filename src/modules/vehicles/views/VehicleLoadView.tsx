@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { Button, ErrorMessage, Select, WeekdaysField, formatDateTime } from '../../core'
+import { Button, ErrorMessage, Select, WeekdaysField, formatDateTime, currentBusinessWeekday } from '../../core'
 import { productService } from '../../products'
 import { driverService } from '../../drivers'
 import { VehicleAssignmentSummary } from '../components/VehicleAssignmentSummary'
@@ -48,8 +48,7 @@ export function VehicleLoadView() {
   }
 
   const pendingDays = [...new Set((carga.data ?? []).flatMap((line) => line.routeDays ?? []))].sort((a, b) => a - b)
-  const today = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
-  const todayIso = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(today) + 1
+  const todayIso = currentBusinessWeekday()
   const routeDays = editedDays ?? (pendingDays.length ? pendingDays : [todayIso])
   const daysChanged = routeDays.join(',') !== pendingDays.join(',')
 

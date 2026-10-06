@@ -18,10 +18,11 @@ export function formatDate(fecha: string | Date): string {
   return new Intl.DateTimeFormat(LOCALE, { dateStyle: 'short' }).format(d)
 }
 
-export function formatDateTime(fecha: string | Date): string {
+export function formatDateTime(fecha: string | Date, timeZone?: string): string {
   const d = typeof fecha === 'string' ? new Date(fecha) : fecha
   return new Intl.DateTimeFormat(LOCALE, {
     dateStyle: 'short',
     timeStyle: 'short',
+    timeZone,
   }).format(d)
 }

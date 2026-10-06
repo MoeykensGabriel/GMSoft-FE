@@ -9,6 +9,7 @@ export interface NewCustomerLine {
   phone: string
   address: string
   notes: string | null
+  visitDays: number[]
 }
 
 export interface RegisterDeliveryRequest {

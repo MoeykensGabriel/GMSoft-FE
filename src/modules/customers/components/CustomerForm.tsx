@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { Button, Field, Select, ErrorMessage } from '../../core'
+import { Button, Field, Select, ErrorMessage, currentBusinessWeekday } from '../../core'
+import type { Vehicle } from '../../vehicles'
 import type { Zone } from '../../zones'
 import type { Customer, CustomerInput } from '../services/customerService'
 import { VisitDaysField } from './VisitDaysField'
@@ -9,17 +10,19 @@ import { VisitDaysField } from './VisitDaysField'
 interface Props {
   initial?: Customer
   zones: Zone[]
+  vehicles: Vehicle[]
   saving: boolean
   error: unknown
   onSave: (input: CustomerInput) => void
 }
 
-export function CustomerForm({ initial, zones, saving, error, onSave }: Props) {
+export function CustomerForm({ initial, zones, vehicles, saving, error, onSave }: Props) {
   const [input, setInput] = useState<CustomerInput>(() => ({
     businessName: initial?.businessName ?? '', contactName: initial?.contactName ?? '',
     phone: initial?.phone ?? '', address: initial?.address ?? '', email: initial?.email ?? '',
     zoneId: initial?.zoneId ?? '', notes: initial?.notes ?? '',
-    visitDays: initial?.visitDays ?? [], isActive: initial?.isActive ?? true,
+    vehicleId: initial?.vehicleId ?? '',
+    visitDays: initial ? initial.visitDays ?? [] : [currentBusinessWeekday()], isActive: initial?.isActive ?? true,
   }))
   const [missingDays, setMissingDays] = useState(false)
   function submit(event: FormEvent) {
@@ -42,7 +45,12 @@ export function CustomerForm({ initial, zones, saving, error, onSave }: Props) {
           <option value="">Seleccioná una zona</option>
           {zones.map((zone) => <option key={zone.id} value={zone.id}>{zone.name}{zone.isActive ? '' : ' (inactiva)'}</option>)}
         </Select>
+        <Select label="Camión asignado" name="vehicleId" required value={input.vehicleId} onChange={(e) => setInput({ ...input, vehicleId: e.target.value })}>
+          <option value="">Seleccioná un camión</option>
+          {vehicles.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.name} · {vehicle.licensePlate}</option>)}
+        </Select>
       </div>
+      {initial && !initial.vehicleId && <p className="text-sm">Este cliente está pendiente de asignación. Seleccioná su camión para incluirlo en el reparto.</p>}
       <VisitDaysField value={input.visitDays} onChange={(days) => { setInput({ ...input, visitDays: days }); setMissingDays(false) }} />
       {missingDays && <p role="alert" className="text-red-700">Seleccioná al menos un día de visita.</p>}
       <label className="flex flex-col gap-1 text-sm font-medium">Indicaciones para el chofer (opcional)

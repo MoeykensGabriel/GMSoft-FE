@@ -29,6 +29,7 @@ export function CustomerListView() {
             <h2 className="font-semibold">{customer.displayName}{!customer.isActive && ' (inactivo)'}</h2>
             <p>{customer.address} · {customer.phone}</p>
             <p className="text-sm">{customer.zoneName} · Orden {customer.routeOrder}</p>
+            <p className="text-sm">Camión: {customer.vehicleId ? `${customer.vehicleName} · ${customer.vehicleLicensePlate}` : 'Sin camión asignado'}</p>
             <p className="text-sm">{visitDaysLabel(customer.visitDays)}</p>
             <Link to={`/panel/clientes/${customer.id}`} className="self-start py-2 underline">Editar cliente</Link>
           </li>)}

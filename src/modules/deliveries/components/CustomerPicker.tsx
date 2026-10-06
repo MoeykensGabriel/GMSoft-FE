@@ -5,6 +5,7 @@ import { customerService } from '../../customers'
 const NUEVO = '__nuevo__'
 
 interface Props {
+  vehicleId: string
   zoneId: string
   routeDays: number[]
   customerId: string | null
@@ -17,12 +18,12 @@ interface Props {
  * de alta en la puerta. Al elegir uno existente muestra su cuenta, que es lo que el
  * chofer necesita saber antes de vender: cuanto debe y cuantos envases tiene.
  */
-export function CustomerPicker({ zoneId, routeDays, customerId, esNuevo, onChange }: Props) {
+export function CustomerPicker({ vehicleId, zoneId, routeDays, customerId, esNuevo, onChange }: Props) {
   const clientes = useQuery({
-    queryKey: ['customers', 'zone', zoneId, routeDays],
+    queryKey: ['customers', 'zone', vehicleId, zoneId, routeDays],
     refetchOnWindowFocus: true,
     refetchInterval: 60_000,
-    queryFn: () => customerService.listByZone(zoneId, 100, 1, routeDays),
+    queryFn: () => customerService.listByZone(zoneId, 100, 1, routeDays, '', vehicleId),
   })
 
   const cuenta = useQuery({

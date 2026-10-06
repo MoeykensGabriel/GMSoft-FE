@@ -10,6 +10,10 @@ export interface Customer {
   email: string | null
   zoneId: string
   zoneName: string | null
+  vehicleId: string | null
+  vehicleName: string | null
+  vehicleLicensePlate: string | null
+  lastVisitAt: string | null
   routeOrder: number
   visitDays: number[] | null
   activityStatus: 'White' | 'Red' | 'Black'
@@ -65,6 +69,7 @@ export interface CustomerInput {
   zoneId: string
   notes: string | null
   visitDays: number[]
+  vehicleId: string
   isActive: boolean
 }
 
@@ -78,9 +83,9 @@ export const customerService = {
    * La hoja de ruta: filtrado por zona, el backend devuelve los clientes en orden
    * de recorrido. Sin zona ese orden no significa nada.
    */
-  listByZone: (zoneId: string, pageSize = 100, page = 1, routeDays?: number[], search = '') =>
+  listByZone: (zoneId: string, pageSize = 100, page = 1, routeDays?: number[], search = '', vehicleId?: string) =>
     api.get<PagedResult<Customer>>(
-      `/api/customers?zoneId=${zoneId}&onlyActive=true&pageSize=${pageSize}&page=${page}&search=${encodeURIComponent(search)}&${routeDays?.length ? routeDays.map((day) => `visitDays=${day}`).join('&') : 'todayOnly=true'}`,
+      `/api/customers?vehicleId=${vehicleId ?? ''}&zoneId=${zoneId}&onlyActive=true&pageSize=${pageSize}&page=${page}&search=${encodeURIComponent(search)}&${routeDays?.length ? routeDays.map((day) => `visitDays=${day}`).join('&') : 'todayOnly=true'}`,
     ),
 
   /** Cuanto debe y que envases tiene. Es lo que el chofer necesita en la puerta. */

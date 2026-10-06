@@ -13,7 +13,7 @@ export function CurrentSessionView({ sesion }: { sesion: Session }) {
     <div className="mx-auto flex max-w-3xl flex-col gap-3 p-3">
       <RouteHeader zoneName={sesion.zoneName ?? 'Zona'} date={new Date().toISOString()} userName={user?.userName ?? sesion.driverName} routeDays={sesion.routeDays} />
       <Link to="/reparto/visita?new=1" className="flex min-h-14 items-center justify-center rounded-md bg-green-700 px-4 py-3 text-center font-medium text-white hover:bg-green-800">+ Agregar cliente</Link>
-      <CustomerRouteList zoneId={sesion.zoneId} routeDays={sesion.routeDays} deferredCustomerIds={sesion.deferredCustomerIds} onSelect={(id) => navigate(`/reparto/clientes/${encodeURIComponent(id)}`)} />
+      <CustomerRouteList vehicleId={sesion.vehicleId} zoneId={sesion.zoneId} routeDays={sesion.routeDays} deferredCustomerIds={sesion.deferredCustomerIds} onSelect={(id) => navigate(`/reparto/clientes/${encodeURIComponent(id)}`)} />
       <details className="rounded-md border border-neutral-300 p-3">
         <summary className="cursor-pointer py-1 text-sm font-medium">Vehículo y carga a bordo</summary>
       <div className="mt-3">

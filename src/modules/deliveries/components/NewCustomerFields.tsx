@@ -1,4 +1,4 @@
-import { Field } from '../../core'
+import { Field, WeekdaysField } from '../../core'
 import type { NewCustomerLine } from '../services/deliveryService'
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
  * repartiendo y al final de ese recorrido.
  */
 export function NewCustomerFields({ valor, onChange }: Props) {
-  const set = (campo: keyof NewCustomerLine, v: string) =>
+  const set = (campo: 'businessName' | 'notes', v: string) =>
     onChange({ ...valor, [campo]: v === '' ? null : v })
 
   return (
@@ -46,6 +46,8 @@ export function NewCustomerFields({ valor, onChange }: Props) {
         value={valor.address}
         onChange={(e) => onChange({ ...valor, address: e.target.value })}
       />
+      <WeekdaysField label="Días de visita" value={valor.visitDays} onChange={(visitDays) => onChange({ ...valor, visitDays })} />
+      {!valor.visitDays.length && <p role="alert" className="text-sm text-red-700">Seleccioná al menos un día de visita.</p>}
     </div>
   )
 }

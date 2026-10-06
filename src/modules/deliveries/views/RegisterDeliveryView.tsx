@@ -4,7 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useQueries } from '@tanstack/react-query'
 import { productService } from '../../products'
 import { customerService, CustomerAccountSummary } from '../../customers'
-import { ApiError, Button, Field, formatMoney } from '../../core'
+import { ApiError, Button, Field, formatMoney, currentBusinessWeekday } from '../../core'
 import { useCurrentSession } from '../../sessions'
 import { CustomerPicker } from '../components/CustomerPicker'
 import { DeliveryLinesEditor } from '../components/DeliveryLinesEditor'
@@ -20,6 +20,7 @@ const CLIENTE_VACIO: NewCustomerLine = {
   phone: '',
   address: '',
   notes: null,
+  visitDays: [],
 }
 
 export function RegisterDeliveryView() {
@@ -56,7 +57,7 @@ export function RegisterDeliveryView() {
     queryFn: () => customerService.getAccount(customerId!),
     enabled: directo && Boolean(customerId),
   })
-  const [nuevo, setNuevo] = useState<NewCustomerLine>(CLIENTE_VACIO)
+  const [nuevo, setNuevo] = useState<NewCustomerLine>(() => ({ ...CLIENTE_VACIO, visitDays: [currentBusinessWeekday()] }))
   const [lineas, setLineas] = useState<DeliveryLine[]>([])
   const [monto, setMonto] = useState('')
   const [metodo, setMetodo] = useState<PaymentMethod>('Cash')
@@ -106,6 +107,10 @@ export function RegisterDeliveryView() {
     setError(null)
     if (registrar.isPending || (vendeAlgo && !pricesReady)) return
 
+    if (esNuevo && !nuevo.visitDays.length) {
+      setError('Seleccioná al menos un día de visita.')
+      return
+    }
     try {
       const resultado = await registrar.mutateAsync({
         customerId: esNuevo ? null : customerId,
@@ -149,6 +154,7 @@ export function RegisterDeliveryView() {
       </div> : params.get('new') === '1' ? <h2 className="font-semibold">Cliente nuevo</h2> : <CustomerPicker
         zoneId={sesion.zoneId}
         routeDays={sesion.routeDays}
+        vehicleId={sesion.vehicleId}
         customerId={customerId}
         esNuevo={esNuevo}
         onChange={({ customerId: id, esNuevo: nuevoElegido }) => {

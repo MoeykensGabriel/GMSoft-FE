@@ -1,4 +1,4 @@
-import { weekdayLabels } from '../../core'
+import { weekdayLabels, formatDateTime } from '../../core'
 import type { Customer } from '../services/customerService'
 
 export function CustomerProfileCard({ customer }: { customer: Customer }) {
@@ -10,6 +10,8 @@ export function CustomerProfileCard({ customer }: { customer: Customer }) {
     <p><strong>Zona:</strong> {customer.zoneName ?? 'Sin nombre de zona'}</p>
     <p><strong>Teléfono:</strong> {phone ? <a className="inline-flex min-h-11 items-center underline" href={`tel:${phone}`}>{customer.phone}</a> : customer.phone || 'Sin teléfono'}</p>
     <p><strong>Días de visita:</strong> {customer.visitDays?.length ? weekdayLabels(customer.visitDays) : 'Pendientes de configurar por ADMIN'}</p>
+    <p><strong>Camión:</strong> {customer.vehicleId ? `${customer.vehicleName} · ${customer.vehicleLicensePlate}` : 'Sin camión asignado'}</p>
+    <p><strong>Última visita:</strong> {customer.lastVisitAt ? formatDateTime(customer.lastVisitAt, 'America/Argentina/Buenos_Aires') : 'Sin visitas registradas'}</p>
     {customer.notes && <p className="whitespace-pre-wrap break-words"><strong>Indicaciones:</strong> {customer.notes}</p>}
     <p>{customer.daysWithoutPurchase === null ? 'Sin compras registradas' : `${customer.daysWithoutPurchase} días sin comprar`}</p>
   </section>

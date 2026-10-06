@@ -7,3 +7,11 @@ export const WEEKDAYS = [
 export function weekdayLabels(days: number[]) {
   return WEEKDAYS.filter((day) => days.includes(day.value)).map((day) => day.label).join(', ')
 }
+
+/** Día del negocio, independiente de la zona horaria del teléfono. */
+export function currentBusinessWeekday(now = new Date()): number {
+  const weekday = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Argentina/Buenos_Aires', weekday: 'short',
+  }).format(now)
+  return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(weekday) + 1
+}

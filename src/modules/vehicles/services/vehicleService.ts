@@ -40,6 +40,16 @@ export interface VehicleLoadStatus {
 }
 
 export const vehicleService = {
+  listAll: async (): Promise<Vehicle[]> => {
+    const rows: Vehicle[] = []
+    let page = 1
+    while (true) {
+      const result = await api.get<PagedResult<Vehicle>>(`/api/vehicles?pageSize=100&page=${page}`)
+      rows.push(...result.items)
+      if (!result.hasNextPage) return rows
+      page++
+    }
+  },
   list: (pageSize = 100) => api.get<PagedResult<Vehicle>>(`/api/vehicles?pageSize=${pageSize}`),
 
   /** La flota con su estado de carga, para saber a cual se puede cargar. */
