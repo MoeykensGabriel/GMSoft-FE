@@ -7,7 +7,7 @@ import { driverService } from '../../drivers'
 import { VehicleAssignmentSummary } from '../components/VehicleAssignmentSummary'
 import { LoadEditor } from '../components/LoadEditor'
 import type { LoadLine } from '../components/LoadEditor'
-import { vehicleService } from '../services/vehicleService'
+import { vehicleService } from '../../vehicles'
 
 /**
  * Cargar el camion, de manana, antes de que salga el chofer.

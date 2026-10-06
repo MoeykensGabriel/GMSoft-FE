@@ -53,6 +53,29 @@ Levanta en `http://localhost:3000`, que es el origen que el backend permite por
 defecto en su CORS. La URL de la API va en `.env` (partir de `.env.example`).
 El backend tiene que estar corriendo.
 
+## Preparar el reparto desde ADMIN
+
+En el menú lateral:
+
+1. **Vehículos**: crear nombre, patente, tipo y kilometraje. Se pueden editar;
+   el kilometraje no puede retroceder.
+2. **Choferes**: crear la ficha con nombre, apellido, documento y teléfono,
+   asignar un vehículo y definir usuario y contraseña. El email es opcional.
+   La cuenta con rol Driver se crea junto con la ficha. Desde la edición se puede
+   cambiar el vehículo, activar/desactivar el acceso y restablecer la contraseña.
+   Usuario y email son de consulta después del alta.
+3. **Productos** y **Zonas de reparto**: configurar el catálogo y las zonas.
+4. **Clientes**: cargar los clientes, su vehículo, zona y días de visita.
+5. **Carga inicial**: preparar los productos llenos y los días que cubrirá la salida.
+
+Con un vehículo asignado y cargado, el chofer puede iniciar sesión, ingresar los
+kilómetros y elegir su zona. **Home** muestra los camiones con salida abierta.
+**Salidas y recepción** permite recibir los llenos sobrantes y los vacíos al volver.
+
+Las altas y las asignaciones pertenecen a `vehicles` y `drivers`. La preparación
+de la carga se compone en `vehicleLoads`, para evitar dependencias circulares
+entre los módulos de choferes y vehículos.
+
 ## Comandos
 
 - `npm run dev` — desarrollo

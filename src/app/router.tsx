@@ -9,7 +9,9 @@ import {
   SessionDetailView,
   SessionListView,
 } from '../modules/sessions'
-import { VehicleLoadView } from '../modules/vehicles'
+import { VehicleLoadView } from '../modules/vehicleLoads'
+import { VehicleListView, VehicleFormView } from '../modules/vehicles'
+import { DriverListView, DriverFormView } from '../modules/drivers'
 import { ZoneFormView, ZoneListView } from '../modules/zones'
 import { HomeView } from './HomeView'
 import { AdminLayout } from './admin/AdminLayout'
@@ -39,6 +41,12 @@ export function AppRouter() {
       <Route element={<ProtectedRoute roles={[ROLES.admin]} />}>
         <Route element={<AdminLayout />}>
           <Route path="/panel" element={<AdminHomeView />} />
+          <Route path="/panel/vehiculos" element={<VehicleListView />} />
+          <Route path="/panel/vehiculos/nuevo" element={<VehicleFormView />} />
+          <Route path="/panel/vehiculos/:id" element={<VehicleFormView />} />
+          <Route path="/panel/choferes" element={<DriverListView />} />
+          <Route path="/panel/choferes/nuevo" element={<DriverFormView />} />
+          <Route path="/panel/choferes/:id" element={<DriverFormView />} />
           <Route path="/panel/clientes" element={<CustomerListView />} />
           <Route path="/panel/clientes/nuevo" element={<CustomerFormView />} />
           <Route path="/panel/clientes/:id" element={<CustomerFormView />} />

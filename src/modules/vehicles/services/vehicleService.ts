@@ -11,6 +11,8 @@ export interface Vehicle {
   currentKilometers: number
 }
 
+export type VehicleInput = Omit<Vehicle, 'id'>
+
 /**
  * Una carga puesta arriba del camion y todavia sin salir. Va linea por linea y no
  * sumada por producto porque cada una se baja por separado: la oficina carga en
@@ -40,6 +42,10 @@ export interface VehicleLoadStatus {
 }
 
 export const vehicleService = {
+  listPage: (page: number, search: string) => api.get<PagedResult<Vehicle>>(
+    `/api/vehicles?page=${page}&pageSize=20&search=${encodeURIComponent(search)}`),
+  create: (input: VehicleInput) => api.post<string>('/api/vehicles', input),
+  update: (id: string, input: VehicleInput) => api.put<void>(`/api/vehicles/${id}`, { id, ...input }),
   listAll: async (): Promise<Vehicle[]> => {
     const rows: Vehicle[] = []
     let page = 1

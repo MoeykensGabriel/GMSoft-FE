@@ -3,6 +3,8 @@ import { Button } from '../../modules/core'
 
 const sections = [
   { to: '/panel', label: 'Home', end: true },
+  { to: '/panel/vehiculos', label: 'Vehículos' },
+  { to: '/panel/choferes', label: 'Choferes' },
   { to: '/panel/clientes', label: 'Clientes' },
   { to: '/panel/carga', label: 'Carga inicial' },
   { to: '/panel/salidas', label: 'Salidas y recepción' },
