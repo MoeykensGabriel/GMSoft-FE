@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
-import { BUSINESS_TIME_ZONE, Button, ErrorMessage, Field, Pagination, currentBusinessDate, formatDateTime } from '../../core'
+import { Badge, DataTable, LinkButton, BUSINESS_TIME_ZONE, Button, ErrorMessage, Field, Pagination, currentBusinessDate, formatDateTime, Page, PageHeader } from '../../core'
 import { sessionService } from '../services/sessionService'
 
 /** YYYY-MM-DD para leer. Se parte el texto: un Date lo tomaria como medianoche UTC. */
@@ -33,10 +32,10 @@ export function SessionListView() {
   const items = salidas.data?.items ?? []
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
-      <h1 className="text-xl font-semibold text-neutral-900">Salidas de reparto</h1>
+    <Page className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
+      <PageHeader title={<>Salidas de reparto</>} />
 
-      <div className="flex flex-wrap items-end gap-2">
+      <div className="ui-toolbar flex flex-wrap items-end gap-3">
         <Field
           label="Recibidas el día"
           name="fecha"
@@ -48,9 +47,9 @@ export function SessionListView() {
       </div>
 
       {!fecha ? (
-        <p className="text-sm text-neutral-500">Elegí un día para ver sus recepciones.</p>
+        <p className="text-sm text-muted">Elegí un día para ver sus recepciones.</p>
       ) : salidas.isPending ? (
-        <p className="text-sm text-neutral-500">Cargando...</p>
+        <p className="text-sm text-muted">Cargando...</p>
       ) : salidas.isError ? (
         <div className="flex flex-col items-start gap-2">
           <ErrorMessage error={salidas.error} />
@@ -59,41 +58,20 @@ export function SessionListView() {
       ) : (
         <>
           {!items.some((s) => s.status === 'Closed') && (
-            <p className="rounded-md border border-neutral-200 bg-white p-3 text-sm text-neutral-600">
+            <p className="ui-card bg-surface p-3 text-sm text-muted">
               {esHoy ? 'Todavía no hubo recepciones hoy.' : `No hubo recepciones el ${fechaLegible(fecha)}.`}
             </p>
           )}
 
-          <ul className="flex flex-col gap-2">
-            {items.map((s) => (
-              <li key={s.id}>
-                <Link
-                  to={`/panel/salidas/${s.id}`}
-                  className="flex items-center justify-between gap-3 rounded-md border border-neutral-200 bg-white px-3 py-3 hover:bg-neutral-50"
-                >
-                  <div>
-                    <p className="text-sm font-medium text-neutral-900">
-                      {s.driverName} · {s.zoneName}
-                    </p>
-                    <p className="text-xs text-neutral-500">
-                      {s.vehicleLicensePlate} · Salió {formatDateTime(s.openedAt, BUSINESS_TIME_ZONE)}
-                      {s.closedAt && ` · Recibida ${formatDateTime(s.closedAt, BUSINESS_TIME_ZONE)}`}
-                    </p>
-                  </div>
-
-                  <span
-                    className={`shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium ${
-                      s.status === 'Open'
-                        ? 'border-neutral-900 bg-neutral-900 text-white'
-                        : 'border-neutral-300 bg-white text-neutral-700'
-                    }`}
-                  >
-                    {s.status === 'Open' ? 'En la calle' : 'Recibida'}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {items.length > 0 && <DataTable label="Salidas y recepciones del día" className="min-w-[50rem]">
+            <thead><tr><th scope="col">Chofer</th><th scope="col">Camión / zona</th><th scope="col">Salida</th><th scope="col">Recepción</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+            <tbody>{items.map((s) => <tr key={s.id}>
+              <td className="font-semibold">{s.driverName}</td><td>{s.vehicleLicensePlate}<span className="block text-xs text-muted">{s.zoneName}</span></td>
+              <td>{formatDateTime(s.openedAt, BUSINESS_TIME_ZONE)}</td><td>{s.closedAt ? formatDateTime(s.closedAt, BUSINESS_TIME_ZONE) : 'Pendiente'}</td>
+              <td><Badge tone={s.status === 'Open' ? 'info' : 'neutral'}>{s.status === 'Open' ? 'En la calle' : 'Recibida'}</Badge></td>
+              <td><LinkButton to={`/panel/salidas/${s.id}`} aria-label={`Ver salida de ${s.driverName}`}>Ver salida</LinkButton></td>
+            </tr>)}</tbody>
+          </DataTable>}
 
           {salidas.data.totalPages > 1 && (
             <Pagination
@@ -106,6 +84,6 @@ export function SessionListView() {
           )}
         </>
       )}
-    </main>
+    </Page>
   )
 }

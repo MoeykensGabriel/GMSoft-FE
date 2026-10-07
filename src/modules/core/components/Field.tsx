@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import type { InputHTMLAttributes } from 'react'
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
@@ -6,22 +7,23 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export function Field({ label, error, id, className = '', ...props }: Props) {
-  const inputId = id ?? props.name
+  const generatedId = useId()
+  const inputId = id ?? generatedId
+  const errorId = `${inputId}-error`
 
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={inputId} className="text-sm font-medium text-neutral-700">
+      <label htmlFor={inputId} className="text-sm font-medium text-muted">
         {label}
       </label>
       <input
         {...props}
         id={inputId}
         aria-invalid={error ? true : undefined}
-        className={`rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 ${
-          error ? 'border-red-500 focus:ring-red-200' : 'border-neutral-300 focus:ring-neutral-200'
-        } ${className}`}
+        aria-describedby={[props['aria-describedby'], error ? errorId : null].filter(Boolean).join(' ') || undefined}
+        className={`ui-input ${className}`}
       />
-      {error && <span className="text-xs text-red-600">{error}</span>}
+      {error && <span id={errorId} className="text-xs text-danger">{error}</span>}
     </div>
   )
 }

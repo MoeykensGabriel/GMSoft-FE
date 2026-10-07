@@ -58,27 +58,27 @@ export function CustomerPicker({ vehicleId, zoneId, routeDays, customerId, esNue
       </Select>
 
       {cuenta.data && (
-        <div className="rounded-md border border-neutral-200 bg-white p-3 text-sm">
+        <div className="ui-card bg-surface p-3 text-sm">
           <div className="flex justify-between">
-            <span className="text-neutral-600">Debe</span>
-            <span className="font-medium text-neutral-900">{formatMoney(cuenta.data.balance)}</span>
+            <span className="text-muted">Debe</span>
+            <span className="font-medium text-ink">{formatMoney(cuenta.data.balance)}</span>
           </div>
 
           <div className="mt-1 flex justify-between">
-            <span className="text-neutral-600">Compras</span>
-            <span className="text-neutral-900">
+            <span className="text-muted">Compras</span>
+            <span className="text-ink">
               {purchaseActivityLabel(cuenta.data.weeksWithoutPurchase, cuenta.data.lastPurchaseAt === null)}
             </span>
           </div>
 
           {cuenta.data.containers.length > 0 && (
-            <div className="mt-2 border-t border-neutral-100 pt-2">
-              <span className="text-neutral-600">Envases en su poder</span>
+            <div className="mt-2 border-t border-line pt-2">
+              <span className="text-muted">Envases en su poder</span>
               <ul className="mt-1">
                 {cuenta.data.containers.map((c) => (
                   <li key={c.productId} className="flex justify-between">
-                    <span className="text-neutral-700">{c.productDetail}</span>
-                    <span className="text-neutral-900">{c.quantity}</span>
+                    <span className="text-muted">{c.productDetail}</span>
+                    <span className="text-ink">{c.quantity}</span>
                   </li>
                 ))}
               </ul>

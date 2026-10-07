@@ -1,3 +1,4 @@
+import { Page, PageHeader } from '../../core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ProductForm } from '../components/ProductForm'
@@ -32,18 +33,18 @@ export function ProductFormView() {
     },
   })
 
-  if (id && producto.isLoading) return <p className="p-6 text-neutral-500">Cargando...</p>
-  if (id && !producto.data) return <p className="p-6 text-red-600">No se encontró el producto.</p>
+  if (id && producto.isLoading) return <p className="p-6 text-muted">Cargando...</p>
+  if (id && !producto.data) return <p className="p-6 text-danger">No se encontró el producto.</p>
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-4 p-6">
+    <Page className="mx-auto flex max-w-3xl flex-col gap-4 p-6">
       <div>
-        <Link to="/panel/catalogo" className="text-sm text-neutral-500 hover:underline">
+        <Link to="/panel/catalogo" className="text-sm text-muted hover:underline">
           ← Catálogo
         </Link>
-        <h1 className="mt-2 text-xl font-semibold text-neutral-900">
+        <PageHeader title={<>
           {id ? 'Editar producto' : 'Nuevo producto'}
-        </h1>
+        </>} />
       </div>
 
       <ProductForm
@@ -52,6 +53,6 @@ export function ProductFormView() {
         error={guardar.error}
         onSubmit={(input) => guardar.mutate(input)}
       />
-    </main>
+    </Page>
   )
 }

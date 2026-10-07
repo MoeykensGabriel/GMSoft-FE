@@ -84,7 +84,7 @@ export function DriverSessionLayout() {
   </div>
 
   return <>
-    {sessionId && status.isError && <p role="status" className="mx-auto max-w-3xl border-b border-neutral-300 p-3 text-sm">Se perdió la conexión. Tu salida permanece abierta; se comprobará al reconectar.</p>}
+    {sessionId && status.isError && <p role="status" className="mx-auto max-w-3xl border-b border-line p-3 text-sm">Se perdió la conexión. Tu salida permanece abierta; se comprobará al reconectar.</p>}
     <Outlet />
   </>
 }

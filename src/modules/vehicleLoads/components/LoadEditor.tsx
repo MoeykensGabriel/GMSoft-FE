@@ -30,7 +30,7 @@ export function LoadEditor({ productos, valor, onChange }: Props) {
 
   if (productos.length === 0) {
     return (
-      <p className="text-sm text-neutral-500">
+      <p className="text-sm text-muted">
         No hay productos publicados. Publicalos en el catálogo antes de cargar el camión.
       </p>
     )
@@ -39,7 +39,7 @@ export function LoadEditor({ productos, valor, onChange }: Props) {
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-3">
       {productos.map((p) => (
-        <div key={p.id} className="rounded-md border border-neutral-300 bg-white p-4">
+        <div key={p.id} className="ui-card bg-surface p-4">
         <QuantityInput
           label={p.detail}
           value={cantidadDe(p.id)}

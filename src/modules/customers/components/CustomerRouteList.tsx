@@ -28,15 +28,15 @@ export function CustomerRouteList({ vehicleId, zoneId, routeDays, onSelect, defe
   const list = customers.data?.pages.flatMap((page) => page.items) ?? []
   return (
     <section className="flex flex-col gap-3" aria-label="Clientes en orden de recorrido">
-      <div className="rounded-md border border-neutral-300 bg-white p-3">
+      <div className="ui-card bg-surface p-3">
         <Field label="Buscar clientes del recorrido" name="route-search" type="search" placeholder="Nombre, dirección o teléfono" value={search} onChange={(event) => setSearch(event.target.value)} />
       </div>
-      <p className="text-xs text-neutral-600">Tocá un cliente para abrir su ficha.</p>
+      <p className="text-xs text-muted">Tocá un cliente para abrir su ficha.</p>
       {customers.isPending && <p role="status">Cargando clientes…</p>}
       {customers.isError && <div role="alert"><p>No se pudieron cargar los clientes.</p><Button variant="secondary" onClick={() => customers.refetch()}>Reintentar</Button></div>}
-      {customers.isSuccess && list.length === 0 && <p className="text-sm text-neutral-600">{debouncedSearch ? 'No se encontraron clientes con esa búsqueda.' : 'No hay clientes programados para los días de esta salida en la zona.'}</p>}
-      {list.length > 0 && <div aria-hidden="true" className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)_minmax(0,1fr)] gap-2 border-b border-neutral-300 px-2 py-2 text-xs font-semibold"><span>Cliente</span><span>Dirección</span><span className="text-right">Deuda</span></div>}
-      <ul className="flex flex-col">
+      {customers.isSuccess && list.length === 0 && <p className="text-sm text-muted">{debouncedSearch ? 'No se encontraron clientes con esa búsqueda.' : 'No hay clientes programados para los días de esta salida en la zona.'}</p>}
+      {list.length > 0 && <div aria-hidden="true" className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)_minmax(0,1fr)] gap-2 rounded-t bg-accent px-2 py-3 text-xs font-semibold text-white"><span>Cliente</span><span>Dirección</span><span className="text-right">Deuda</span></div>}
+      <ul className="ui-card flex flex-col overflow-hidden">
         {list.map((customer) => <li key={customer.id}><CustomerCard customer={customer} onSelect={onSelect} deferred={deferredCustomerIds.includes(customer.id)} /></li>)}
       </ul>
       {customers.isFetchNextPageError && <p role="alert">No se pudo cargar la siguiente página. Podés reintentar.</p>}

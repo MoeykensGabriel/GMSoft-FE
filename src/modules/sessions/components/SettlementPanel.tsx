@@ -27,7 +27,7 @@ export function SettlementPanel({ sessionId, cerrada }: { sessionId: string; cer
   const [monto, setMonto] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  if (liquidacion.isLoading) return <p className="text-sm text-neutral-500">Cargando liquidación...</p>
+  if (liquidacion.isLoading) return <p className="text-sm text-muted">Cargando liquidación...</p>
   if (!liquidacion.data) return null
 
   const l = liquidacion.data
@@ -44,35 +44,35 @@ export function SettlementPanel({ sessionId, cerrada }: { sessionId: string; cer
 
   return (
     <section className="flex flex-col gap-3">
-      <h3 className="text-sm font-medium text-neutral-700">Liquidación</h3>
+      <h3 className="text-sm font-medium text-muted">Liquidación</h3>
 
-      <div className="rounded-md border border-neutral-200 bg-white p-3 text-sm">
+      <div className="ui-card bg-surface p-3 text-sm">
         <div className="flex justify-between">
-          <span className="text-neutral-600">Vendió</span>
-          <span className="text-neutral-900">{formatMoney(l.totalSold)}</span>
+          <span className="text-muted">Vendió</span>
+          <span className="text-ink">{formatMoney(l.totalSold)}</span>
         </div>
         <div className="mt-1 flex justify-between">
-          <span className="text-neutral-600">Cobró</span>
-          <span className="text-neutral-900">{formatMoney(l.totalCollected)}</span>
+          <span className="text-muted">Cobró</span>
+          <span className="text-ink">{formatMoney(l.totalCollected)}</span>
         </div>
-        <div className="mt-1 flex justify-between border-t border-neutral-100 pt-1">
-          <span className="text-neutral-600">Quedó a cuenta</span>
-          <span className="text-neutral-900">{formatMoney(l.newDebt)}</span>
+        <div className="mt-1 flex justify-between border-t border-line pt-1">
+          <span className="text-muted">Quedó a cuenta</span>
+          <span className="text-ink">{formatMoney(l.newDebt)}</span>
         </div>
 
         {l.amountReceived === null ? (
-          <p className="mt-2 text-xs text-neutral-500">Todavía no se rindió.</p>
+          <p className="mt-2 text-xs text-muted">Todavía no se rindió.</p>
         ) : (
           <>
-            <div className="mt-2 flex justify-between border-t border-neutral-100 pt-2">
-              <span className="text-neutral-600">Entregó</span>
-              <span className="text-neutral-900">{formatMoney(l.amountReceived)}</span>
+            <div className="mt-2 flex justify-between border-t border-line pt-2">
+              <span className="text-muted">Entregó</span>
+              <span className="text-ink">{formatMoney(l.amountReceived)}</span>
             </div>
             <div className="mt-1 flex justify-between">
-              <span className="text-neutral-600">Diferencia de caja</span>
+              <span className="text-muted">Diferencia de caja</span>
               <span
                 className={
-                  l.cashDifference === 0 ? 'font-medium text-emerald-700' : 'font-medium text-red-700'
+                  l.cashDifference === 0 ? 'font-medium text-success' : 'font-medium text-danger'
                 }
               >
                 {formatMoney(l.cashDifference ?? 0)}
@@ -96,7 +96,7 @@ export function SettlementPanel({ sessionId, cerrada }: { sessionId: string; cer
             onChange={(e) => setMonto(e.target.value)}
           />
           {error && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-danger">
               {error}
             </p>
           )}
@@ -107,7 +107,7 @@ export function SettlementPanel({ sessionId, cerrada }: { sessionId: string; cer
       )}
 
       {l.amountReceived === null && !cerrada && (
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-muted">
           Se rinde cuando el chofer volvió y cerró la salida.
         </p>
       )}

@@ -19,7 +19,7 @@ export function CustomerCard({ customer, onSelect, deferred = false }: {
       type="button"
       onClick={() => onSelect(customer.id)}
       aria-label={`Abrir ficha de ${customer.displayName}`}
-      className={`w-full border-b border-neutral-200 px-2 py-3 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700 ${customer.activityStatus === 'Black' ? 'bg-neutral-900 text-white' : customer.activityStatus === 'Red' ? 'bg-red-50 text-neutral-900' : 'bg-white text-neutral-900 hover:bg-neutral-50'}`}
+      className={`w-full border-b border-line px-2 py-3 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${customer.activityStatus === 'Black' ? 'bg-neutral-900 text-white' : customer.activityStatus === 'Red' ? 'bg-danger-soft text-ink' : 'bg-surface text-ink hover:bg-canvas'}`}
     >
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)_minmax(0,1fr)] items-start gap-2 text-sm">
         <span className="min-w-0 break-words font-semibold">{customer.displayName}</span>
@@ -33,7 +33,7 @@ export function CustomerCard({ customer, onSelect, deferred = false }: {
         <span className="min-w-0 break-words">{account.data ? <CustomerContainersSummary account={account.data} /> : account.isError ? 'No se pudieron leer los envases' : 'Cargando envases…'}</span>
       </div>
       {customer.visitDays == null && <span className="mt-1 block text-xs">Días pendientes de configurar</span>}
-      {deferred && <span className="mt-1 inline-block rounded-md border border-current px-2 py-1 text-xs font-semibold">Visita pendiente</span>}
+      {deferred && <span className="mt-1 inline-block rounded border border-current px-2 py-1 text-xs font-semibold">Visita pendiente</span>}
     </button>
   )
 }

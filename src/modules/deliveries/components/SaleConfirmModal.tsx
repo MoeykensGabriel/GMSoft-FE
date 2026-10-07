@@ -38,19 +38,16 @@ export function SaleConfirmModal({
   lines, total, cobro, metodo, onCobro, onMetodo, sending, error, onBack, onConfirm,
 }: Props) {
   const opcion = (valor: Cobro, texto: string) => (
-    <button
+    <Button
       type="button"
+      variant={cobro === valor ? 'navigation' : 'secondary'}
       aria-pressed={cobro === valor}
       disabled={sending}
       onClick={() => onCobro(valor)}
-      className={`min-h-11 flex-1 rounded-md border-2 px-3 py-2 text-base font-medium ${
-        cobro === valor
-          ? 'border-neutral-900 bg-neutral-900 text-white'
-          : 'border-neutral-300 bg-white text-neutral-900'
-      }`}
+      className="min-h-11 flex-1 text-base"
     >
       {texto}
-    </button>
+    </Button>
   )
 
   return (
@@ -74,12 +71,12 @@ export function SaleConfirmModal({
         ))}
       </ul>
 
-      <div className="flex justify-between rounded-md border-2 border-neutral-900 p-3 text-lg font-semibold">
+      <div className="flex justify-between rounded border-2 border-brand p-3 text-lg font-semibold">
         <span>Total a cobrar</span><span>{formatMoney(total)}</span>
       </div>
 
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium text-neutral-700">¿Cobraste esta venta?</span>
+        <span className="text-sm font-medium text-muted">¿Cobraste esta venta?</span>
         <div className="flex gap-2">
           {opcion('cobrada', 'Sí, cobré')}
           {opcion('deuda', 'No, queda a deuda')}
@@ -102,13 +99,13 @@ export function SaleConfirmModal({
 
       {/* La eleccion escrita entera antes de confirmar: registrar como cobrada una
           venta a deuda es el error que esta pantalla tiene que evitar. */}
-      <p role="status" className="rounded-md border border-neutral-300 p-3 text-sm font-medium text-neutral-900">
+      <p role="status" className="ui-card p-3 text-sm font-medium text-ink">
         {cobro === null && 'Elegí si la cobraste o queda a deuda.'}
         {cobro === 'cobrada' && `Se registra COBRADA: ${formatMoney(total)} en ${METODOS[metodo]}.`}
         {cobro === 'deuda' && `Se registra A DEUDA: ${formatMoney(total)} quedan en la cuenta del cliente.`}
       </p>
 
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+      {error && <p role="alert" className="text-sm text-danger">{error}</p>}
     </Modal>
   )
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { BUSINESS_TIME_ZONE, Button, ErrorMessage, Select, WeekdaysField, formatDateTime, currentBusinessWeekday, newRequestId } from '../../core'
+import { BUSINESS_TIME_ZONE, Button, ErrorMessage, Select, WeekdaysField, formatDateTime, currentBusinessWeekday, newRequestId, Page, PageHeader } from '../../core'
 import { productService } from '../../products'
 import { driverService } from '../../drivers'
 import { VehicleAssignmentSummary } from '../components/VehicleAssignmentSummary'
@@ -112,10 +112,10 @@ export function VehicleLoadView() {
   const yaCargados = enDeposito.filter((v) => v.pendingUnits > 0)
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
+    <Page className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
       <div>
-        <h1 className="mt-2 border-b border-neutral-300 py-4 text-center text-2xl font-semibold text-neutral-900">Carga inicial de vehículos</h1>
-        <p className="text-sm text-neutral-600">
+        <PageHeader title={<>Carga inicial de vehículos</>} />
+        <p className="text-sm text-muted">
           Prepará los productos llenos que llevará el vehículo antes de iniciar el reparto.
         </p>
       </div>
@@ -170,7 +170,7 @@ export function VehicleLoadView() {
       {/* Una ausencia sin explicar se lee como un error: si falta un camion de la
           lista hay que decir por que, o el proximo paso es revisar si se borro. */}
       {enLaCalle.length > 0 && (
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-muted">
           No aparecen {enLaCalle.map((v) => v.licensePlate).join(', ')}: están en la calle con
           una salida abierta. Si se quedaron sin stock, va como recarga en ruta sobre esa
           salida.
@@ -178,18 +178,18 @@ export function VehicleLoadView() {
       )}
 
       {!vehicleId ? (
-        <p className="text-sm text-neutral-500">Elegí un vehículo para cargarlo.</p>
+        <p className="text-sm text-muted">Elegí un vehículo para cargarlo.</p>
       ) : (
         <>
           <section className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium text-neutral-700">Arriba del camión ahora</h2>
+            <h2 className="text-sm font-medium text-muted">Arriba del camión ahora</h2>
 
             <ErrorMessage error={bajar.error} />
 
             {carga.isLoading ? (
-              <p className="text-sm text-neutral-500">Cargando...</p>
+              <p className="text-sm text-muted">Cargando...</p>
             ) : lineas.length === 0 ? (
-              <p className="rounded-md border border-neutral-200 bg-white p-3 text-sm text-neutral-600">
+              <p className="ui-card bg-surface p-3 text-sm text-muted">
                 El camión está vacío. Registrá una carga para habilitar la salida del chofer.
               </p>
             ) : (
@@ -197,22 +197,22 @@ export function VehicleLoadView() {
                 {lineas.map((l) => (
                   <li
                     key={l.id}
-                    className="flex items-center justify-between rounded-md border border-neutral-200 bg-white px-3 py-2"
+                    className="flex items-center justify-between ui-card bg-surface px-3 py-2"
                   >
                     <div>
-                      <p className="text-sm text-neutral-900">
+                      <p className="text-sm text-ink">
                         {l.quantity} × {l.productDetail}
                       </p>
-                      <p className="text-xs text-neutral-500">{formatDateTime(l.loadedAt)}</p>
+                      <p className="text-xs text-muted">{formatDateTime(l.loadedAt)}</p>
                     </div>
-                    <button
+                    <Button variant="danger"
                       type="button"
                       onClick={() => bajar.mutate(l.id)}
                       disabled={bajar.isPending || cargar.isPending}
-                      className="rounded-md bg-red-700 px-3 py-2 text-white hover:bg-red-800 disabled:bg-neutral-400"
+
                     >
                       Bajar
-                    </button>
+                    </Button>
                   </li>
                 ))}
               </ul>
@@ -223,8 +223,8 @@ export function VehicleLoadView() {
             <WeekdaysField label="Días de reparto que cubrirá esta salida" value={routeDays}
               disabled={cargar.isPending || bajar.isPending || carga.isPending || carga.isError}
               onChange={(days) => { setEditedDays(days); setSuccess(false); setRequestId(newRequestId()) }} />
-            <p className="text-sm text-neutral-600">Podés combinar varios días para recuperar un reparto. Los clientes aparecerán una sola vez, en el orden habitual.</p>
-            <h2 className="rounded-md border border-neutral-300 py-4 text-center font-semibold">{lineas.length ? 'Agregar productos a la carga' : 'Carga inicial'}</h2>
+            <p className="text-sm text-muted">Podés combinar varios días para recuperar un reparto. Los clientes aparecerán una sola vez, en el orden habitual.</p>
+            <h2 className="ui-card py-4 text-center font-semibold">{lineas.length ? 'Agregar productos a la carga' : 'Carga inicial'}</h2>
             <ErrorMessage error={productos.error ?? carga.error} />
 
             <fieldset disabled={cargar.isPending || bajar.isPending}>
@@ -268,6 +268,6 @@ export function VehicleLoadView() {
           onConfirm={() => { if (!cargar.isPending) cargar.mutate() }}
         />
       )}
-    </main>
+    </Page>
   )
 }

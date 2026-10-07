@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Button, ErrorMessage } from '../../core'
+import { Button, ErrorMessage, Page, PageHeader } from '../../core'
 import { vehicleService } from '../../vehicles'
 import { zoneService } from '../../zones'
 import { CustomerForm } from '../components/CustomerForm'
@@ -24,9 +24,9 @@ export function CustomerFormView() {
       navigate('/panel/clientes')
     },
   })
-  return <main className="mx-auto flex max-w-4xl flex-col gap-5 p-6">
+  return <Page className="mx-auto flex max-w-4xl flex-col gap-5 p-6">
     <Link to="/panel/clientes" className="text-sm underline">← Clientes</Link>
-    <h1 className="text-xl font-semibold">{id ? 'Editar cliente' : 'Nuevo cliente'}</h1>
+    <PageHeader title={<>{id ? 'Editar cliente' : 'Nuevo cliente'}</>} />
     {(zones.isPending || vehicles.isPending || (id && customer.isPending)) ? <p>Cargando…</p>
       : (zones.isError || vehicles.isError || (id && customer.isError)) ? <div>
         <ErrorMessage error={zones.error ?? vehicles.error ?? customer.error} />
@@ -34,5 +34,5 @@ export function CustomerFormView() {
       </div> : zones.data?.length === 0 ? <p>Primero <Link to="/panel/zonas/nueva" className="underline">creá una zona de reparto</Link>.</p>
       : vehicles.data?.length === 0 ? <p>Primero cargá un camión desde el panel de administración.</p>
       : <CustomerForm key={id ?? 'new'} initial={customer.data} zones={zones.data ?? []} vehicles={vehicles.data ?? []} saving={save.isPending} error={save.error} onSave={(input) => save.mutate(input)} />}
-  </main>
+  </Page>
 }

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router-dom'
-import { Button, Field, Select, ErrorMessage, currentBusinessWeekday } from '../../core'
+import { LinkButton, Button, Field, Select, Textarea, ErrorMessage, currentBusinessWeekday } from '../../core'
 import type { Vehicle } from '../../vehicles'
 import type { Zone } from '../../zones'
 import type { Customer, CustomerInput } from '../services/customerService'
@@ -33,7 +32,7 @@ export function CustomerForm({ initial, zones, vehicles, saving, error, onSave }
     onSave({ ...input, contactName: input.contactName.trim(), phone: input.phone.trim(), address: input.address.trim(),
       businessName: input.businessName?.trim() || null, email: input.email?.trim() || null, notes: input.notes?.trim() || null })
   }
-  return <form onSubmit={submit} className="flex flex-col gap-5">
+  return <form onSubmit={submit} className="ui-card p-4 flex flex-col gap-5">
     <fieldset disabled={saving} className="flex flex-col gap-5 disabled:opacity-60">
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Nombre y apellido" name="contactName" required maxLength={150} value={input.contactName} onChange={(e) => setInput({ ...input, contactName: e.target.value })} />
@@ -52,14 +51,12 @@ export function CustomerForm({ initial, zones, vehicles, saving, error, onSave }
       </div>
       {initial && !initial.vehicleId && <p className="text-sm">Este cliente está pendiente de asignación. Seleccioná su camión para incluirlo en el reparto.</p>}
       <VisitDaysField value={input.visitDays} onChange={(days) => { setInput({ ...input, visitDays: days }); setMissingDays(false) }} />
-      {missingDays && <p role="alert" className="text-red-700">Seleccioná al menos un día de visita.</p>}
-      <label className="flex flex-col gap-1 text-sm font-medium">Indicaciones para el chofer (opcional)
-        <textarea name="notes" rows={3} maxLength={1000} placeholder="Piso, departamento, casa de atrás, timbre…" value={input.notes ?? ''}
-          onChange={(e) => setInput({ ...input, notes: e.target.value })} className="rounded-md border border-neutral-300 p-3 text-base" />
-      </label>
+      {missingDays && <p role="alert" className="text-danger">Seleccioná al menos un día de visita.</p>}
+      <Textarea label="Indicaciones para el chofer (opcional)" name="notes" rows={3} maxLength={1000} placeholder="Piso, departamento, casa de atrás, timbre…" value={input.notes ?? ''}
+        onChange={(e) => setInput({ ...input, notes: e.target.value })} />
       {initial && <label className="flex min-h-11 items-center gap-2"><input type="checkbox" checked={input.isActive} onChange={(e) => setInput({ ...input, isActive: e.target.checked })} />Cliente activo</label>}
       <ErrorMessage error={error} />
-      <div className="flex items-center gap-4"><Button type="submit">{saving ? 'Guardando…' : 'Guardar cliente'}</Button><Link to="/panel/clientes" className="text-sm underline">Cancelar</Link></div>
+      <div className="flex items-center gap-4"><Button type="submit">{saving ? 'Guardando…' : 'Guardar cliente'}</Button><LinkButton to="/panel/clientes" variant="danger">Cancelar</LinkButton></div>
     </fieldset>
   </form>
 }

@@ -19,20 +19,19 @@ export function AdminSidebar({ userName, expanded, onNavigate, onLogout }: {
   onNavigate: () => void
   onLogout: () => void
 }) {
-  return <aside className="border-b border-neutral-300 bg-white md:sticky md:top-0 md:flex md:h-screen md:flex-col md:border-r md:border-b-0">
-    <div className="hidden border-b border-neutral-300 p-5 md:block">
-      <p className="text-lg font-semibold">GMSoft</p>
-      <p className="mt-1 text-sm text-neutral-600">Administración</p>
+  return <aside className="border-b border-line bg-surface md:sticky md:top-14 md:flex md:h-[calc(100dvh-3.5rem)] md:flex-col md:border-r md:border-b-0">
+    <div className="hidden border-b border-line p-5 md:block">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted">Menú principal</p>
     </div>
     <div id="admin-navigation" className={`${expanded ? 'flex' : 'hidden'} flex-col md:flex md:min-h-0 md:flex-1 md:overflow-y-auto`}>
       <nav aria-label="Administración" className="flex flex-col gap-1 p-3">
         {sections.map((section) => <NavLink key={section.to} to={section.to} end={section.end} onClick={onNavigate}
-          className={({ isActive }) => `flex min-h-11 items-center rounded-md px-3 py-3 text-sm font-medium ${isActive ? 'bg-neutral-900 text-white' : 'text-neutral-800 hover:bg-neutral-100'}`}>
+          className={({ isActive }) => `flex min-h-11 items-center rounded border-l-3 px-3 py-2 text-sm font-medium ${isActive ? 'border-accent bg-accent-soft text-brand-dark' : 'border-transparent text-muted hover:bg-canvas hover:text-brand'}`}>
           {section.label}
         </NavLink>)}
       </nav>
-      <div className="mt-auto flex flex-col gap-3 border-t border-neutral-300 p-4">
-        <p className="break-words text-sm text-neutral-600">{userName}</p>
+      <div className="mt-auto flex flex-col gap-3 border-t border-line p-4">
+        <p className="break-words text-sm text-muted">{userName}</p>
         <Button variant="secondary" onClick={onLogout}>Cerrar sesión</Button>
       </div>
     </div>

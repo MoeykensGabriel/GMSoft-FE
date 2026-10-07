@@ -23,7 +23,7 @@ export function ErrorMessage({ error, fallback = 'No se pudo conectar con el ser
   return (
     <div
       role="alert"
-      className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+      className="rounded border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
     >
       {porCampo.length > 0 ? (
         <ul className="flex flex-col gap-0.5">

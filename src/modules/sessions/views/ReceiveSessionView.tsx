@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
-import { Button, ErrorMessage, Field } from '../../core'
+import { Button, ErrorMessage, Field, Page, PageHeader } from '../../core'
 import { ReturnsEditor } from '../components/ReturnsEditor'
 import type { ReturnLine } from '../components/ReturnsEditor'
 import { sessionService } from '../services/sessionService'
@@ -37,26 +37,26 @@ export function ReceiveSessionView() {
     },
   })
 
-  if (sesion.isLoading) return <p className="p-6 text-neutral-500">Cargando...</p>
-  if (!sesion.data) return <p className="p-6 text-red-600">No se encontró la salida.</p>
+  if (sesion.isLoading) return <p className="p-6 text-muted">Cargando...</p>
+  if (!sesion.data) return <p className="p-6 text-danger">No se encontró la salida.</p>
 
   const s = sesion.data
 
   if (resultado) {
     return (
-      <main className="mx-auto flex max-w-3xl flex-col gap-4 p-6">
-        <h1 className="text-xl font-semibold text-neutral-900">Camión recibido</h1>
+      <Page className="ui-card mx-auto flex max-w-3xl flex-col gap-4 p-6">
+        <PageHeader title={<>Camión recibido</>} />
 
         {resultado.cuadraTodo ? (
-          <p className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+          <p className="rounded border border-success/30 bg-success-soft p-3 text-sm text-success-dark">
             Cuadra todo: no falta nada.
           </p>
         ) : (
-          <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm">
-            <p className="font-medium text-red-800">Faltante</p>
+          <div className="rounded border border-danger/30 bg-danger-soft p-3 text-sm">
+            <p className="font-medium text-danger-dark">Faltante</p>
             <ul className="mt-1">
               {resultado.faltante.map((l) => (
-                <li key={l.productId} className="flex justify-between text-red-700">
+                <li key={l.productId} className="flex justify-between text-danger">
                   <span>{l.productDetail}</span>
                   <span>
                     {l.fullOnBoard !== 0 && `${l.fullOnBoard} llenos`}
@@ -66,7 +66,7 @@ export function ReceiveSessionView() {
                 </li>
               ))}
             </ul>
-            <p className="mt-2 text-xs text-red-700">
+            <p className="mt-2 text-xs text-danger">
               Queda registrado en la salida. No se le descuenta a nadie.
             </p>
           </div>
@@ -74,25 +74,25 @@ export function ReceiveSessionView() {
 
         <Link
           to={`/panel/salidas/${id}`}
-          className="rounded-md bg-green-700 px-4 py-2 text-center text-sm font-medium text-white hover:bg-green-800"
+          className="rounded bg-success px-4 py-2 text-center text-sm font-medium text-white hover:bg-success-dark"
         >
           Ver la salida y liquidar
         </Link>
-      </main>
+      </Page>
     )
   }
 
   if (s.status === 'Closed') {
     return (
-      <main className="mx-auto flex max-w-3xl flex-col gap-3 p-6">
-        <h1 className="text-xl font-semibold text-neutral-900">Ya recibido</h1>
-        <p className="text-sm text-neutral-600">
+      <Page className="ui-card mx-auto flex max-w-3xl flex-col gap-3 p-6">
+        <PageHeader title={<>Ya recibido</>} />
+        <p className="text-sm text-muted">
           Esta salida ya está cerrada. La recepción se hace una sola vez.
         </p>
-        <Link to={`/panel/salidas/${id}`} className="text-sm text-neutral-900 underline">
+        <Link to={`/panel/salidas/${id}`} className="text-sm text-ink underline">
           Ver la salida
         </Link>
-      </main>
+      </Page>
     )
   }
 
@@ -115,16 +115,16 @@ export function ReceiveSessionView() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mx-auto flex max-w-3xl flex-col gap-5 p-6">
+    <form onSubmit={onSubmit} className="ui-card mx-auto flex max-w-3xl flex-col gap-5 p-6">
       <div>
-        <Link to={`/panel/salidas/${id}`} className="text-sm text-neutral-500 hover:underline">
+        <Link to={`/panel/salidas/${id}`} className="text-sm text-muted hover:underline">
           ← Salida
         </Link>
-        <h1 className="mt-2 text-xl font-semibold text-neutral-900">Recepción del camión</h1>
-        <p className="mt-1 text-sm text-neutral-600">
+        <PageHeader title={<>Recepción del camión</>} />
+        <p className="mt-1 text-sm text-muted">
           {s.driverName} · {s.zoneName} · {s.vehicleName} ({s.vehicleLicensePlate})
         </p>
-        <p className="text-sm text-neutral-500">Salió con {s.kilometersAtOpen} km</p>
+        <p className="text-sm text-muted">Salió con {s.kilometersAtOpen} km</p>
       </div>
 
       <Field

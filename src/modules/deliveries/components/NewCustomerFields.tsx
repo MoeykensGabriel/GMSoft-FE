@@ -16,8 +16,8 @@ export function NewCustomerFields({ valor, onChange }: Props) {
     onChange({ ...valor, [campo]: v === '' ? null : v })
 
   return (
-    <div className="flex flex-col gap-3 rounded-md border border-neutral-200 bg-white p-3">
-      <span className="text-sm font-medium text-neutral-700">Cliente nuevo</span>
+    <div className="flex flex-col gap-3 ui-card bg-surface p-3">
+      <span className="text-sm font-medium text-muted">Cliente nuevo</span>
 
       <Field
         label="Nombre de contacto"
@@ -47,7 +47,7 @@ export function NewCustomerFields({ valor, onChange }: Props) {
         onChange={(e) => onChange({ ...valor, address: e.target.value })}
       />
       <WeekdaysField label="Días de visita" value={valor.visitDays} onChange={(visitDays) => onChange({ ...valor, visitDays })} />
-      {!valor.visitDays.length && <p role="alert" className="text-sm text-red-700">Seleccioná al menos un día de visita.</p>}
+      {!valor.visitDays.length && <p role="alert" className="text-sm text-danger">Seleccioná al menos un día de visita.</p>}
     </div>
   )
 }

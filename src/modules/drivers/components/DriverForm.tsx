@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { Button, ErrorMessage, Field, Select } from '../../core'
+import { LinkButton, Button, ErrorMessage, Field, Select } from '../../core'
 import type { Vehicle } from '../../vehicles'
 import type { DriverInput, DriverProfile } from '../services/driverService'
 import { PasswordFields } from './PasswordFields'
@@ -30,7 +30,7 @@ export function DriverForm({ initial, vehicles, saving, error, onSubmit }: {
       vehicleId: vehicleId || null, isActive, userName: userName.trim(), email: email.trim() || null, password })
   }
 
-  return <form onSubmit={submit} className="flex flex-col gap-5">
+  return <form onSubmit={submit} className="ui-card p-4 flex flex-col gap-5">
     <fieldset disabled={saving} className="flex flex-col gap-4">
       <legend className="mb-3 font-semibold">Datos del chofer</legend>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -44,23 +44,23 @@ export function DriverForm({ initial, vehicles, saving, error, onSubmit }: {
         {assignedVehicleUnavailable && <option value={vehicleId} disabled>Vehículo anterior no disponible</option>}
         {vehicles.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.name} · {vehicle.licensePlate}</option>)}
       </Select>
-      {!vehicleId && <p className="text-sm text-neutral-600">Sin un vehículo asignado, el chofer no podrá iniciar el reparto. <Link to="/panel/vehiculos" className="underline">Administrar vehículos</Link></p>}
-      {assignedVehicleUnavailable && <p role="alert" className="text-sm text-red-700">Seleccioná un vehículo disponible o quitá la asignación anterior.</p>}
+      {!vehicleId && <p className="text-sm text-muted">Sin un vehículo asignado, el chofer no podrá iniciar el reparto. <Link to="/panel/vehiculos" className="underline">Administrar vehículos</Link></p>}
+      {assignedVehicleUnavailable && <p role="alert" className="text-sm text-danger">Seleccioná un vehículo disponible o quitá la asignación anterior.</p>}
       {initial && <label className="flex min-h-11 items-center gap-3"><input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />Chofer activo (puede iniciar sesión)</label>}
     </fieldset>
-    <fieldset disabled={saving} className="flex flex-col gap-4 border-t border-neutral-300 pt-4">
+    <fieldset disabled={saving} className="flex flex-col gap-4 border-t border-line pt-4">
       <legend className="font-semibold">Usuario de acceso</legend>
       <Field label="Usuario" name="userName" autoComplete="off" required={!initial} readOnly={Boolean(initial)} maxLength={50}
         pattern="[a-zA-Z0-9._\-]+" title="Letras, números, punto, guion y guion bajo, sin espacios."
         value={userName} onChange={(e) => setUserName(e.target.value)} />
       <Field label="Email (opcional)" name="email" type="email" readOnly={Boolean(initial)} maxLength={150} value={email} onChange={(e) => setEmail(e.target.value)} />
-      {initial ? <p className="text-sm text-neutral-600">El usuario y el email se establecen al crear el chofer. Podés cambiar su contraseña más abajo.</p>
-        : <><p className="text-sm text-neutral-600">El chofer ingresará con este usuario. Su cuenta se crea junto con la ficha.</p>
+      {initial ? <p className="text-sm text-muted">El usuario y el email se establecen al crear el chofer. Podés cambiar su contraseña más abajo.</p>
+        : <><p className="text-sm text-muted">El chofer ingresará con este usuario. Su cuenta se crea junto con la ficha.</p>
           <PasswordFields password={password} confirmation={confirmation} onPasswordChange={setPassword} onConfirmationChange={setConfirmation} /></>}
     </fieldset>
     <ErrorMessage error={error} />
     <div className="flex flex-wrap items-center justify-end gap-4">
-      <Link to="/panel/choferes" className="text-sm underline">Cancelar</Link>
+      <LinkButton to="/panel/choferes" variant="danger">Cancelar</LinkButton>
       <Button type="submit" disabled={saving || assignedVehicleUnavailable}>{saving ? 'Guardando...' : initial ? 'Guardar chofer' : 'Crear chofer y usuario'}</Button>
     </div>
   </form>

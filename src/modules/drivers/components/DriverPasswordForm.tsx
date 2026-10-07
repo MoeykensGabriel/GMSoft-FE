@@ -16,9 +16,9 @@ export function DriverPasswordForm({ driverId, userName, disabled }: { driverId:
     event.preventDefault()
     if (!disabled && !reset.isPending && password === confirmation) reset.mutate(password)
   }
-  return <section className="border-t border-neutral-300 pt-5">
+  return <section className="border-t border-line pt-5">
     <h2 className="mb-2 font-semibold">Cambiar contraseña</h2>
-    <p className="mb-4 text-sm text-neutral-600">Nueva contraseña para el usuario {userName}. No hace falta conocer la anterior.</p>
+    <p className="mb-4 text-sm text-muted">Nueva contraseña para el usuario {userName}. No hace falta conocer la anterior.</p>
     <form onSubmit={submit} className="flex flex-col gap-4">
       <fieldset disabled={disabled || reset.isPending}>
         <PasswordFields password={password} confirmation={confirmation} onPasswordChange={(value) => { setPassword(value); reset.reset() }} onConfirmationChange={(value) => { setConfirmation(value); reset.reset() }} />

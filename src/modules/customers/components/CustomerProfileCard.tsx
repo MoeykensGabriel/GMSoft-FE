@@ -4,8 +4,8 @@ import { purchaseActivityLabel } from '../utils/activity'
 
 export function CustomerProfileCard({ customer }: { customer: Customer }) {
   const phone = customer.phone.replace(/[^+\d]/g, '')
-  return <section className="flex flex-col gap-2 text-sm" aria-label="Datos del cliente">
-    <h1 className="text-lg font-semibold break-words">{customer.displayName}</h1>
+  return <section className="ui-card flex flex-col gap-2 p-3 text-sm" aria-label="Datos del cliente">
+    <h1 className="ui-section-heading -mx-3 -mt-3 mb-1 break-words">{customer.displayName}</h1>
     {customer.businessName && <p>Contacto: {customer.contactName}</p>}
     <p className="break-words"><strong>Dirección:</strong> {customer.address}</p>
     <p><strong>Zona:</strong> {customer.zoneName ?? 'Sin nombre de zona'}</p>

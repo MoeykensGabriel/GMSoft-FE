@@ -1,4 +1,4 @@
-import { BUSINESS_TIME_ZONE, Button, ErrorMessage, Modal, formatDateTime, weekdayLabels } from '../../core'
+import { BUSINESS_TIME_ZONE, Button, ErrorMessage, Modal, formatDateTime, weekdayLabels, DataTable } from '../../core'
 
 export interface LoadConfirmLine {
   productId: string
@@ -45,38 +45,38 @@ export function LoadConfirmModal({
       </>}
     >
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-        <dt className="text-neutral-600">Camión</dt>
-        <dd className="font-medium text-neutral-900">{vehicleName} · {licensePlate}</dd>
-        <dt className="text-neutral-600">Chofer</dt>
-        <dd className="font-medium text-neutral-900">
+        <dt className="text-muted">Camión</dt>
+        <dd className="font-medium text-ink">{vehicleName} · {licensePlate}</dd>
+        <dt className="text-muted">Chofer</dt>
+        <dd className="font-medium text-ink">
           {driverNames.length ? driverNames.join(', ') : 'Sin chofer activo asignado'}
         </dd>
-        <dt className="text-neutral-600">Días</dt>
-        <dd className="font-medium text-neutral-900">{weekdayLabels(routeDays)}</dd>
-        <dt className="text-neutral-600">Fecha y hora</dt>
-        <dd className="font-medium text-neutral-900">{formatDateTime(openedAt, BUSINESS_TIME_ZONE)}</dd>
+        <dt className="text-muted">Días</dt>
+        <dd className="font-medium text-ink">{weekdayLabels(routeDays)}</dd>
+        <dt className="text-muted">Fecha y hora</dt>
+        <dd className="font-medium text-ink">{formatDateTime(openedAt, BUSINESS_TIME_ZONE)}</dd>
       </dl>
 
-      <table className="w-full text-sm">
+      <DataTable label="Productos de la carga a confirmar" className="w-full text-sm">
         <thead>
-          <tr className="border-b border-neutral-900 text-left">
-            <th className="py-1 font-semibold">Producto</th>
-            <th className="py-1 text-right font-semibold">Se carga</th>
-            {yaTeniaCarga && <th className="py-1 text-right font-semibold">Queda arriba</th>}
+          <tr className="border-b border-brand text-left">
+            <th scope="col" className="py-1 font-semibold">Producto</th>
+            <th scope="col" className="py-1 text-right font-semibold">Se carga</th>
+            {yaTeniaCarga && <th scope="col" className="py-1 text-right font-semibold">Queda arriba</th>}
           </tr>
         </thead>
         <tbody>
           {lines.map((line) => (
-            <tr key={line.productId} className="border-b border-neutral-200">
+            <tr key={line.productId} className="border-b border-line">
               <td className="py-1">{line.productDetail}</td>
               <td className="py-1 text-right">{line.quantity}</td>
               {yaTeniaCarga && <td className="py-1 text-right">{line.totalOnBoard}</td>}
             </tr>
           ))}
         </tbody>
-      </table>
+      </DataTable>
 
-      <p className="text-xs text-neutral-600">
+      <p className="text-xs text-muted">
         La hora definitiva la registra el sistema al confirmar. La salida la abre el chofer con
         su zona y kilometraje.
       </p>

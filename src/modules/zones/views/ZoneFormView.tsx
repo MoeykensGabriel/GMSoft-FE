@@ -1,3 +1,4 @@
+import { Page, PageHeader } from '../../core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ZoneForm } from '../components/ZoneForm'
@@ -29,18 +30,18 @@ export function ZoneFormView() {
     },
   })
 
-  if (id && zona.isLoading) return <p className="p-6 text-neutral-500">Cargando...</p>
-  if (id && !zona.data) return <p className="p-6 text-red-600">No se encontró la zona.</p>
+  if (id && zona.isLoading) return <p className="p-6 text-muted">Cargando...</p>
+  if (id && !zona.data) return <p className="p-6 text-danger">No se encontró la zona.</p>
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-4 p-6">
+    <Page className="mx-auto flex max-w-3xl flex-col gap-4 p-6">
       <div>
-        <Link to="/panel/zonas" className="text-sm text-neutral-500 hover:underline">
+        <Link to="/panel/zonas" className="text-sm text-muted hover:underline">
           ← Zonas
         </Link>
-        <h1 className="mt-2 text-xl font-semibold text-neutral-900">
+        <PageHeader title={<>
           {id ? 'Editar zona' : 'Nueva zona'}
-        </h1>
+        </>} />
       </div>
 
       <ZoneForm
@@ -49,6 +50,6 @@ export function ZoneFormView() {
         error={guardar.error}
         onSubmit={(input) => guardar.mutate(input)}
       />
-    </main>
+    </Page>
   )
 }

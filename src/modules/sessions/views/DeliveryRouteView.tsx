@@ -10,8 +10,8 @@ import { OpenSessionView } from './OpenSessionView'
 export function DeliveryRouteView() {
   const { data: sesion, isLoading, isError } = useCurrentSession()
 
-  if (isLoading) return <p className="p-6 text-neutral-500">Cargando...</p>
-  if (isError) return <p className="p-6 text-red-600">No se pudo leer tu salida.</p>
+  if (isLoading) return <p className="p-6 text-muted">Cargando...</p>
+  if (isError) return <p className="p-6 text-danger">No se pudo leer tu salida.</p>
 
   return sesion ? <CurrentSessionView sesion={sesion} /> : <OpenSessionView />
 }

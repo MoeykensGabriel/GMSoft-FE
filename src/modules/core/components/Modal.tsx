@@ -1,4 +1,4 @@
-import { useEffect, useId } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import type { ReactNode } from 'react'
 
 interface Props {
@@ -18,30 +18,25 @@ interface Props {
  */
 export function Modal({ title, onClose, busy = false, children, footer }: Props) {
   const titleId = useId()
+  const dialogRef = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
-    function onKey(event: KeyboardEvent) {
-      if (event.key === 'Escape' && !busy) onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [busy, onClose])
+    const dialog = dialogRef.current
+    dialog?.showModal()
+    return () => dialog?.close()
+  }, [])
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center"
-      onClick={(event) => { if (event.target === event.currentTarget && !busy) onClose() }}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className="flex max-h-full w-full max-w-md flex-col gap-4 overflow-y-auto rounded-md border border-neutral-900 bg-white p-5"
-      >
-        <h2 id={titleId} className="text-lg font-semibold text-neutral-900">{title}</h2>
-        {children}
-        <div className="flex flex-wrap justify-end gap-2">{footer}</div>
-      </div>
-    </div>
+    <dialog ref={dialogRef} aria-labelledby={titleId} aria-modal="true" aria-busy={busy} className="ui-dialog"
+      onCancel={(event) => { event.preventDefault(); if (!busy) onClose() }}
+      onClick={(event) => {
+        if (busy || event.target !== event.currentTarget) return
+        const bounds = event.currentTarget.getBoundingClientRect()
+        if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) onClose()
+      }}>
+      <h2 id={titleId} className="border-b border-brand bg-brand px-4 py-3 text-base font-semibold text-white">{title}</h2>
+      <div className="flex flex-col gap-4 p-4">{children}</div>
+      <div className="flex flex-wrap justify-end gap-2 border-t border-line bg-canvas p-4">{footer}</div>
+    </dialog>
   )
 }

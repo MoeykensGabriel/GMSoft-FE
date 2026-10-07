@@ -9,7 +9,7 @@ export function CustomerAccountSummary({ account }: { account: CustomerAccount }
         <span className="font-medium">Envases pendientes</span>
         <p><CustomerContainersSummary account={account} /></p>
       </div>
-      <p className="rounded-md border border-neutral-300 px-3 py-2">
+      <p className="ui-card px-3 py-2">
         {account.balance < 0 ? 'Saldo a favor' : 'Debe'}: <strong>{formatMoney(Math.abs(account.balance))}</strong>
       </p>
     </div>

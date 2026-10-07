@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { LoginForm } from '../components/LoginForm'
 import { useAuth } from '../hooks/useAuth'
+import { PageHeader } from '../../core'
 
 interface EstadoDeRuta {
   from?: { pathname: string }
@@ -24,10 +25,15 @@ export function LoginView() {
   if (user) return <Navigate to="/" replace />
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-8 bg-neutral-50 px-4">
-      <h1 className="text-2xl font-semibold text-neutral-900">Inicio de sesion</h1>
-      {receptionCompleted && <p role="status" className="max-w-sm text-center">ADMIN recibió el camión. Tu salida terminó y se cerró tu sesión.</p>}
-      <LoginForm onDone={() => navigate(destino, { replace: true })} />
+    <main className="flex min-h-screen flex-col bg-canvas">
+      <div className="bg-brand-dark px-5 py-4 font-semibold text-white">GMSoft <span className="ml-2 text-sm font-normal">Gestión de reparto</span></div>
+      <div className="flex flex-1 items-center justify-center px-4 py-8">
+        <section className="ui-card flex w-full max-w-md flex-col gap-5 p-5">
+          <PageHeader title="Inicio de sesión" description="Ingresá con tu usuario y contraseña." />
+          {receptionCompleted && <p role="status" className="ui-card bg-accent-soft p-3 text-sm">ADMIN recibió el camión. Tu salida terminó y se cerró tu sesión.</p>}
+          <LoginForm onDone={() => navigate(destino, { replace: true })} />
+        </section>
+      </div>
     </main>
   )
 }

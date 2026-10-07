@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Field, Select } from '../../core'
+import { Field, Select, Page, PageHeader } from '../../core'
 import { vehicleService } from '../../vehicles'
 import { SessionSettlementCard } from '../components/SessionSettlementCard'
 import { sessionService } from '../services/sessionService'
@@ -52,9 +52,9 @@ export function RouteSettlementView() {
   const items = salidas.data?.items ?? []
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
+    <Page className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
       <div>
-        <h1 className="mt-2 text-xl font-semibold text-neutral-900">Liquidación por reparto</h1>
+        <PageHeader title={<>Liquidación por reparto</>} />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -82,15 +82,15 @@ export function RouteSettlementView() {
       </div>
 
       {!vehicleId ? (
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-muted">
           Elegí un vehículo para ver cómo cerró su reparto.
         </p>
       ) : salidas.isLoading ? (
-        <p className="text-sm text-neutral-500">Buscando...</p>
+        <p className="text-sm text-muted">Buscando...</p>
       ) : salidas.isError ? (
-        <p className="text-sm text-red-600">No se pudieron leer las salidas.</p>
+        <p className="text-sm text-danger">No se pudieron leer las salidas.</p>
       ) : items.length === 0 ? (
-        <p className="rounded-md border border-neutral-200 bg-white p-3 text-sm text-neutral-600">
+        <p className="ui-card bg-surface p-3 text-sm text-muted">
           Ese vehículo no salió el {fechaLegible(fecha)}.
         </p>
       ) : (
@@ -98,7 +98,7 @@ export function RouteSettlementView() {
           {/* Casi siempre es una sola, pero nada impide que el mismo camion salga
               dos veces en el dia: se muestran todas y cada una rinde por separado. */}
           {items.length > 1 && (
-            <p className="text-sm text-neutral-600">
+            <p className="text-sm text-muted">
               {items.length} salidas ese día. Cada una se rinde por separado.
             </p>
           )}
@@ -108,6 +108,6 @@ export function RouteSettlementView() {
           ))}
         </div>
       )}
-    </main>
+    </Page>
   )
 }

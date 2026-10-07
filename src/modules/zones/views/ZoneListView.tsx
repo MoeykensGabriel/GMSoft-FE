@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { ErrorMessage } from '../../core'
+import { ErrorMessage, Page, Badge, Button, DataTable, ManagementHeader } from '../../core'
 import { zoneService } from '../services/zoneService'
 import type { Zone } from '../services/zoneService'
 
@@ -33,77 +33,28 @@ export function ZoneListView() {
     onError: (e) => setError(e),
   })
 
-  if (zonas.isLoading) return <p className="p-6 text-neutral-500">Cargando...</p>
-  if (zonas.isError) return <p className="p-6 text-red-600">No se pudieron leer las zonas.</p>
+  if (zonas.isLoading) return <p className="p-6 text-muted">Cargando...</p>
+  if (zonas.isError) return <p className="p-6 text-danger">No se pudieron leer las zonas.</p>
 
   const items = zonas.data?.items ?? []
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
-      <div>
-        <div className="mt-2 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-neutral-900">Zonas de reparto</h1>
-          <Link
-            to="/panel/zonas/nueva"
-            className="rounded-md bg-green-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-800"
-          >
-            Nueva zona
-          </Link>
-        </div>
-      </div>
-
+    <Page className="mx-auto flex max-w-6xl flex-col gap-4 p-4 md:p-6">
+      <ManagementHeader title="Zonas de reparto" description="Localidades y zonas disponibles para organizar el recorrido." createTo="/panel/zonas/nueva" createLabel="Nueva zona" />
       <ErrorMessage error={error} />
-
-      {items.length === 0 ? (
-        <p className="text-sm text-neutral-500">
-          Todavía no hay zonas. Sin al menos una, el chofer no puede abrir su salida.
-        </p>
-      ) : (
-        <ul className="flex flex-col gap-2">
-          {items.map((z) => (
-            <li
-              key={z.id}
-              className="flex flex-col gap-2 rounded-md border border-neutral-200 bg-white p-3"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-medium text-neutral-900">{z.name}</p>
-                  {z.notes && <p className="text-xs text-neutral-500">{z.notes}</p>}
-                </div>
-                {!z.isActive && (
-                  <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-600">
-                    Inactiva
-                  </span>
-                )}
-              </div>
-
-              <div className="flex gap-3 border-t border-neutral-100 pt-2 text-xs">
-                <Link to={`/panel/zonas/${z.id}`} className="text-neutral-700 hover:underline">
-                  Editar
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => activar.mutate(z)}
-                  disabled={activar.isPending}
-                  className="text-neutral-700 hover:underline disabled:text-neutral-400"
-                >
-                  {z.isActive ? 'Desactivar' : 'Activar'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (confirm(`¿Eliminar la zona "${z.name}"?`)) eliminar.mutate(z.id)
-                  }}
-                  disabled={eliminar.isPending}
-                  className="rounded-md bg-red-700 px-3 py-2 text-white hover:bg-red-800 disabled:bg-neutral-400"
-                >
-                  Eliminar
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </main>
+      {items.length === 0 ? <p className="text-sm text-muted">Todavía no hay zonas. Sin al menos una, el chofer no puede abrir su salida.</p> :
+        <DataTable label="Zonas de reparto" className="min-w-[36rem]">
+          <thead><tr><th scope="col">Zona</th><th scope="col">Notas</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+          <tbody>{items.map((z) => <tr key={z.id}>
+            <td className="font-semibold">{z.name}</td><td>{z.notes || '—'}</td>
+            <td><Badge tone={z.isActive ? 'success' : 'neutral'}>{z.isActive ? 'Activa' : 'Inactiva'}</Badge></td>
+            <td><div className="flex flex-wrap items-center gap-2">
+              <Link to={`/panel/zonas/${z.id}`} className="ui-link inline-flex min-h-11 items-center" aria-label={`Editar zona ${z.name}`}>Editar</Link>
+              <Button type="button" variant="secondary" onClick={() => activar.mutate(z)} disabled={activar.isPending}>{z.isActive ? 'Desactivar' : 'Activar'}</Button>
+              <Button type="button" variant="danger" disabled={eliminar.isPending} onClick={() => { if (confirm(`¿Eliminar la zona "${z.name}"?`)) eliminar.mutate(z.id) }}>Eliminar</Button>
+            </div></td>
+          </tr>)}</tbody>
+        </DataTable>}
+    </Page>
   )
 }

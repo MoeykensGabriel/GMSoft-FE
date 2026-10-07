@@ -45,7 +45,7 @@ export function ProductForm({ inicial, guardando, error, onSubmit }: Props) {
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-4">
+    <form onSubmit={submit} className="ui-card p-4 flex flex-col gap-4">
       <Field
         label="Detalle"
         name="detail"
@@ -90,7 +90,7 @@ export function ProductForm({ inicial, guardando, error, onSubmit }: Props) {
             </option>
           ))}
         </Select>
-        <span className="text-xs text-neutral-500">
+        <span className="text-xs text-muted">
           Una vez que hay envases de este producto en la calle ya no se puede cambiar: los
           que están afuera quedarían contados de una forma que el producto ya no usa.
         </span>
@@ -102,11 +102,11 @@ export function ProductForm({ inicial, guardando, error, onSubmit }: Props) {
           name="isPublished"
           checked={isPublished}
           onChange={(e) => setIsPublished(e.target.checked)}
-          className="mt-0.5 h-4 w-4 rounded border-neutral-300"
+          className="mt-0.5 h-4 w-4 rounded border-line"
         />
         <span className="flex flex-col">
-          <span className="text-sm font-medium text-neutral-700">Publicado</span>
-          <span className="text-xs text-neutral-500">
+          <span className="text-sm font-medium text-muted">Publicado</span>
+          <span className="text-xs text-muted">
             Solo los publicados aparecen para cargar el camión y vender.
           </span>
         </span>

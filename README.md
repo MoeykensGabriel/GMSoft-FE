@@ -42,6 +42,13 @@ Los limites no dependen del criterio de nadie: los verifica dependency-cruiser.
 npm run arch
 ```
 
+## Sistema visual
+
+La identidad visual, los componentes reutilizables y las reglas para ampliar
+pantallas están documentados en [docs/design-system.md](docs/design-system.md).
+Los colores se centralizan en `src/index.css`; los componentes técnicos se
+importan desde `modules/core`.
+
 ## Correr en local
 
 ```bash

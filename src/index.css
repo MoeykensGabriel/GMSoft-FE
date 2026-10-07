@@ -1,41 +1,69 @@
 @import "tailwindcss";
 
-/*
- * La app define su propio fondo y color de texto en vez de heredar el esquema del
- * navegador. Sin esto, en un celular en modo oscuro el texto queda negro sobre
- * negro: no es un detalle estetico, es la pantalla que el chofer mira en la calle.
- * Cuando haya tema oscuro propio se define aca, no se deja al azar del dispositivo.
- */
-html,
-body,
-#root {
-  min-height: 100%;
+/* Tokens semánticos: la identidad se cambia aquí, no pantalla por pantalla. */
+@theme {
+  --color-brand: #075985;
+  --color-brand-dark: #064568;
+  --color-accent: #0e7490;
+  --color-accent-soft: #e5f3f7;
+  --color-canvas: #f3f6f8;
+  --color-surface: #ffffff;
+  --color-surface-alternate: #f8fbfc;
+  --color-ink: #172b3a;
+  --color-muted: #526775;
+  --color-line: #d4dfe5;
+  --color-success: #15803d;
+  --color-success-dark: #166534;
+  --color-success-soft: #f0fdf4;
+  --color-danger: #b91c1c;
+  --color-danger-dark: #991b1b;
+  --color-danger-soft: #fef2f2;
+  --color-warning: #92400e;
+  --color-warning-soft: #fffbeb;
+  --font-sans: Arial, Helvetica, sans-serif;
 }
 
-body {
-  background-color: #ffffff;
-  color: #000000;
-  font-family: Arial, Helvetica, sans-serif;
-  color-scheme: light;
+@layer base {
+  html, body, #root { min-height: 100%; }
+  body { --control-height: 44px; margin: 0; background: var(--color-canvas); color: var(--color-ink); font-family: var(--font-sans); color-scheme: light; }
+  button, input:not([type="checkbox"]):not([type="radio"]), select, textarea { min-height: 44px; }
+  input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px; max-width: 100%; }
+  input[type="checkbox"], input[type="radio"] { accent-color: var(--color-brand); width: 1rem; height: 1rem; }
+  button, a, summary { -webkit-tap-highlight-color: transparent; }
+  button:not(:disabled), summary { cursor: pointer; }
+  button:disabled { cursor: not-allowed; }
+  :where(button, a, input, select, textarea, summary):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+  :where(input, select, textarea):disabled { background: var(--color-canvas); color: var(--color-muted); cursor: not-allowed; }
 }
 
-/* Controles legibles y faciles de tocar en el telefono, sin animaciones. */
-button,
-input:not([type="checkbox"]):not([type="radio"]),
-select,
-textarea {
-  min-height: 44px;
-}
-
-input:not([type="checkbox"]):not([type="radio"]),
-select,
-textarea {
-  font-size: 16px;
-  max-width: 100%;
-}
-
-button:focus-visible,
-a:focus-visible {
-  outline: 2px solid black;
-  outline-offset: 3px;
+@layer components {
+  .ui-page { width: 100%; }
+  .ui-action { min-height: var(--control-height); }
+  .ui-card { border: 1px solid var(--color-line); border-radius: 4px; background: var(--color-surface); }
+  .ui-toolbar { border: 1px solid var(--color-line); border-radius: 4px; background: var(--color-surface); padding: 12px; }
+  .ui-input { width: 100%; min-width: 0; border: 1px solid var(--color-line); border-radius: 4px; background: var(--color-surface); padding: 9px 12px; color: var(--color-ink); }
+  .ui-input:focus { border-color: var(--color-accent); outline: 2px solid var(--color-accent-soft); outline-offset: 0; }
+  .ui-input[aria-invalid="true"] { border-color: var(--color-danger); }
+  .ui-input::placeholder { color: var(--color-muted); opacity: .8; }
+  .ui-section-heading { border-bottom: 1px solid var(--color-line); background: var(--color-accent-soft); padding: 10px 12px; color: var(--color-brand-dark); font-size: .9375rem; font-weight: 600; }
+  .ui-table { width: 100%; border-collapse: collapse; text-align: left; font-size: .875rem; }
+  .ui-table caption { padding: 10px 12px; text-align: left; color: var(--color-muted); }
+  .ui-table thead th { background: var(--color-accent); color: white; font-size: .8125rem; font-weight: 600; text-align: left; }
+  .ui-table th, .ui-table td { border-bottom: 1px solid var(--color-line); padding: 10px 12px; vertical-align: middle; overflow-wrap: anywhere; }
+  .ui-table tbody tr:nth-child(even) { background: var(--color-surface-alternate); }
+  .ui-table tbody tr:hover { background: var(--color-accent-soft); }
+  .ui-table tbody tr:last-child td { border-bottom: 0; }
+  .ui-table th.text-right, .ui-table td.text-right { text-align: right; }
+  .ui-table th.text-center, .ui-table td.text-center { text-align: center; }
+  .ui-link { color: var(--color-brand); text-decoration: underline; text-underline-offset: 3px; }
+  .ui-link:hover { color: var(--color-brand-dark); }
+  .ui-choice { border: 1px solid var(--color-line); border-radius: 4px; background: var(--color-surface); }
+  .ui-choice:has(input:checked) { border-color: var(--color-accent); background: var(--color-accent-soft); color: var(--color-brand-dark); }
+  .ui-dialog { margin: auto; width: calc(100% - 2rem); max-width: 28rem; max-height: calc(100dvh - 2rem); overflow-y: auto; border: 1px solid var(--color-line); border-radius: 4px; background: var(--color-surface); color: var(--color-ink); padding: 0; }
+  .ui-dialog::backdrop { background: rgb(6 35 53 / 55%); }
+  @media (min-width: 768px) {
+    .admin-shell { --control-height: 36px; }
+    .admin-shell :where(button, input:not([type="checkbox"]):not([type="radio"]), select) { min-height: 36px; }
+    .admin-shell :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) { font-size: 14px; }
+  }
 }

@@ -4,7 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useQueries } from '@tanstack/react-query'
 import { productService } from '../../products'
 import { customerService, CustomerAccountSummary } from '../../customers'
-import { ApiError, Button, Field, formatMoney, currentBusinessWeekday, newRequestId } from '../../core'
+import { ApiError, Button, Field, formatMoney, currentBusinessWeekday, newRequestId, PageHeader } from '../../core'
 import { useCurrentSession } from '../../sessions'
 import { CustomerPicker } from '../components/CustomerPicker'
 import { DeliveryLinesEditor } from '../components/DeliveryLinesEditor'
@@ -71,14 +71,14 @@ export function RegisterDeliveryView() {
   const [error, setError] = useState<string | null>(null)
   const [hecho, setHecho] = useState<RegisterDeliveryResult | null>(null)
 
-  if (isLoading) return <p className="p-6 text-neutral-500">Cargando...</p>
+  if (isLoading) return <p className="p-6 text-muted">Cargando...</p>
 
   // Sin salida abierta no hay visita posible: el backend la rechazaria igual.
   if (!sesion) {
     return (
       <div className="mx-auto max-w-md p-6">
-        <p className="text-neutral-700">No tenés una salida abierta.</p>
-        <Link to="/reparto" className="mt-2 inline-block text-sm text-neutral-900 underline">
+        <p className="text-muted">No tenés una salida abierta.</p>
+        <Link to="/reparto" className="mt-2 inline-block text-sm text-ink underline">
           Volver
         </Link>
       </div>
@@ -87,16 +87,16 @@ export function RegisterDeliveryView() {
 
   if (hecho) {
     return (
-      <div className="mx-auto flex max-w-md flex-col gap-4 p-6">
-        <h1 className="text-xl font-semibold text-neutral-900">Visita registrada</h1>
-        <div className="rounded-md border border-neutral-200 bg-white p-3 text-sm">
+      <div className="ui-card mx-auto flex max-w-md flex-col gap-4 p-6">
+        <PageHeader title={<>Visita registrada</>} />
+        <div className="ui-card bg-surface p-3 text-sm">
           <div className="flex justify-between">
-            <span className="text-neutral-600">Total de la visita</span>
-            <span className="font-medium text-neutral-900">{formatMoney(hecho.total)}</span>
+            <span className="text-muted">Total de la visita</span>
+            <span className="font-medium text-ink">{formatMoney(hecho.total)}</span>
           </div>
           <div className="mt-1 flex justify-between">
-            <span className="text-neutral-600">Le queda debiendo</span>
-            <span className="font-medium text-neutral-900">
+            <span className="text-muted">Le queda debiendo</span>
+            <span className="font-medium text-ink">
               {formatMoney(hecho.saldoCuentaCliente)}
             </span>
           </div>
@@ -168,14 +168,14 @@ export function RegisterDeliveryView() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mx-auto flex max-w-md flex-col gap-5 p-6">
+    <form onSubmit={onSubmit} className="ui-card mx-auto flex max-w-md flex-col gap-5 p-6">
       <div>
-        <h1 className="text-xl font-semibold text-neutral-900">Registrar visita</h1>
-        <p className="mt-1 text-sm text-neutral-600">{sesion.zoneName}</p>
+        <PageHeader title={<>Registrar visita</>} />
+        <p className="mt-1 text-sm text-muted">{sesion.zoneName}</p>
         {directo && customerId && <Link to={`/reparto/clientes/${encodeURIComponent(customerId)}`} className="inline-block py-2 text-sm underline">← Volver a la ficha</Link>}
       </div>
 
-      {directo ? <div className="flex flex-col gap-3 rounded-md border border-neutral-200 p-3">
+      {directo ? <div className="flex flex-col gap-3 ui-card p-3">
         <h2 className="font-semibold">{cliente.data?.displayName ?? 'Cargando cliente…'}</h2>
         <p className="text-sm">{cliente.data?.address}</p>
         {cuenta.data && <CustomerAccountSummary account={cuenta.data} />}
@@ -212,13 +212,13 @@ export function RegisterDeliveryView() {
       />
 
       {esNuevo && !vendeAlgo && (
-        <p className="text-sm text-amber-700">
+        <p className="text-sm text-warning">
           A un cliente nuevo hay que venderle algo para darlo de alta.
         </p>
       )}
 
       {error && !confirmando && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}
@@ -227,7 +227,7 @@ export function RegisterDeliveryView() {
         <Button type="submit" disabled={registrar.isPending || (vendeAlgo && !pricesReady) || (!esNuevo && !customerId) || (directo && (!cliente.data || !cuenta.data || cliente.isError || cuenta.isError || cliente.data.zoneId !== sesion.zoneId || !cliente.data.isActive))}>
           {registrar.isPending ? 'Registrando...' : vendeAlgo ? 'Confirmar venta' : 'Registrar visita'}
         </Button>
-        <Button type="button" variant="secondary" onClick={() => navigate(directo && customerId ? `/reparto/clientes/${encodeURIComponent(customerId)}` : '/reparto')}>
+        <Button type="button" variant="danger" onClick={() => navigate(directo && customerId ? `/reparto/clientes/${encodeURIComponent(customerId)}` : '/reparto')}>
           Cancelar
         </Button>
       </div>
