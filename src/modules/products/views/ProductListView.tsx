@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { ErrorMessage, formatMoney, Page, Badge, Button, DataTable, Field, ManagementHeader } from '../../core'
+import { ErrorMessage, formatMoney, Page, Badge, Button, DataTable, ManagementHeader } from '../../core'
 import { productService } from '../services/productService'
 import type { ContainerTracking, Product } from '../services/productService'
 
@@ -15,7 +15,6 @@ const SEGUIMIENTO: Record<ContainerTracking, string> = {
 /** El catálogo del admin: qué se vende, a cuánto y cómo se sigue su envase. */
 export function ProductListView() {
   const queryClient = useQueryClient()
-  const [busqueda, setBusqueda] = useState('')
   const [error, setError] = useState<unknown>(null)
 
   const catalogo = useQuery({
@@ -49,25 +48,15 @@ export function ProductListView() {
   if (catalogo.isLoading) return <p className="p-6 text-muted">Cargando...</p>
   if (catalogo.isError) return <p className="p-6 text-danger">No se pudo leer el catálogo.</p>
 
-  const todos = catalogo.data?.items ?? []
+  const items = catalogo.data?.items ?? []
   const total = catalogo.data?.totalCount ?? 0
-
-  const termino = busqueda.trim().toLowerCase()
-  const items = termino
-    ? todos.filter(
-        (p) =>
-          p.detail.toLowerCase().includes(termino) ||
-          (p.commercialDetail ?? '').toLowerCase().includes(termino),
-      )
-    : todos
 
   return (
     <Page className="mx-auto flex max-w-6xl flex-col gap-4 p-4 md:p-6">
       <ManagementHeader title="Catálogo" description="Productos, precios de venta y seguimiento de envases." createTo="/panel/catalogo/nuevo" createLabel="Nuevo producto" />
-      <div className="ui-toolbar"><Field label="Buscar por detalle" name="productSearch" type="search" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} /></div>
       <ErrorMessage error={error} />
-      {total > todos.length && <p className="text-sm text-muted">Se muestran los primeros {todos.length} de {total} productos.</p>}
-      {items.length === 0 ? <p className="text-sm text-muted">{todos.length === 0 ? 'Todavía no hay productos cargados.' : 'Ningún producto coincide.'}</p> :
+      {total > items.length && <p className="text-sm text-muted">Se muestran los primeros {items.length} de {total} productos.</p>}
+      {items.length === 0 ? <p className="text-sm text-muted">Todavía no hay productos cargados.</p> :
         <DataTable label="Catálogo de productos" className="min-w-[44rem]">
           <thead><tr><th scope="col">Producto</th><th scope="col">Envases</th><th scope="col" className="text-right">Precio</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
           <tbody>{items.map((p) => <tr key={p.id}>
