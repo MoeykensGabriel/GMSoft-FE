@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Select, formatMoney } from '../../core'
-import { customerService } from '../../customers'
+import { customerService, purchaseActivityLabel } from '../../customers'
 
 const NUEVO = '__nuevo__'
 
@@ -65,11 +65,9 @@ export function CustomerPicker({ vehicleId, zoneId, routeDays, customerId, esNue
           </div>
 
           <div className="mt-1 flex justify-between">
-            <span className="text-neutral-600">Sin comprar hace</span>
+            <span className="text-neutral-600">Compras</span>
             <span className="text-neutral-900">
-              {cuenta.data.daysWithoutPurchase === null
-                ? 'nunca compró'
-                : `${cuenta.data.daysWithoutPurchase} días`}
+              {purchaseActivityLabel(cuenta.data.weeksWithoutPurchase, cuenta.data.lastPurchaseAt === null)}
             </span>
           </div>
 

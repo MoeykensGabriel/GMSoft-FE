@@ -15,3 +15,9 @@ export function currentBusinessWeekday(now = new Date()): number {
   }).format(now)
   return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(weekday) + 1
 }
+
+/** Día ISO (lunes=1 a domingo=7) de una fecha de calendario `YYYY-MM-DD`. */
+export function weekdayOfDate(date: string): number {
+  const [year, month, day] = date.split('-').map(Number)
+  return new Date(year, month - 1, day).getDay() || 7
+}

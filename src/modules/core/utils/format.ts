@@ -1,5 +1,15 @@
 const LOCALE = 'es-AR'
 
+/** La zona horaria del negocio. Lo que es "hoy" se decide aca, no en el dispositivo. */
+export const BUSINESS_TIME_ZONE = 'America/Argentina/Buenos_Aires'
+
+/** El dia del negocio como YYYY-MM-DD, que es lo que espera un input de fecha. */
+export function currentBusinessDate(now = new Date()): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: BUSINESS_TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(now)
+}
+
 /** Importes en pesos. El backend manda decimal, aca solo se muestra. */
 export function formatMoney(monto: number): string {
   return new Intl.NumberFormat(LOCALE, {

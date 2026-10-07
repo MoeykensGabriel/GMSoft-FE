@@ -102,6 +102,30 @@ export interface SessionSettlement {
   notes: string | null
 }
 
+export interface CustomerSettlementLine {
+  date: string
+  type: 'Sale' | 'ContainerOnly' | 'Promotion'
+  quantity: number
+  productDetail: string
+  amount: number
+}
+
+/** Un cliente dentro de la liquidacion detallada de una salida. */
+export interface CustomerSettlement {
+  customerId: string
+  customerName: string
+  customerAddress: string
+  customerPhone: string
+  lines: CustomerSettlementLine[]
+  /** Vacios que devolvio, en positivo. */
+  returnedContainers: { productDetail: string; quantity: number }[]
+  cash: number
+  transfer: number
+  card: number
+  /** Saldo de su cuenta al cierre de la salida, con deuda anterior incluida. */
+  balance: number
+}
+
 export const sessionService = {
   keepAlive: (sessionId: string) => api.post<{ status: SessionStatus; token: string | null }>(`/api/sessions/${sessionId}/keep-alive`),
   getStatus: (sessionId: string) => api.get<DepartureStatus>(`/api/sessions/${sessionId}/status`),
@@ -122,6 +146,16 @@ export const sessionService = {
     api.get<PagedResult<Session>>(`/api/sessions?page=${page}&pageSize=${pageSize}`),
 
   /**
+   * Las salidas RECIBIDAS ese dia (YYYY-MM-DD, dia del negocio), filtradas por
+   * cuando se cerro y no por cuando salio el camion. Con includeOpen se suman,
+   * primero, las que siguen en la calle del dia que sean.
+   */
+  listReceivedOn: (date: string, includeOpen: boolean, page = 1, pageSize = 20) =>
+    api.get<PagedResult<Session>>(
+      `/api/sessions?closedDate=${date}&includeOpen=${includeOpen}&page=${page}&pageSize=${pageSize}`,
+    ),
+
+  /**
    * Las salidas de un vehiculo en un dia. La fecha va como YYYY-MM-DD y el backend
    * la entiende como dia local del negocio, no como dia UTC.
    *
@@ -137,6 +171,9 @@ export const sessionService = {
 
   getDeliveries: (sessionId: string) =>
     api.get<SessionDelivery[]>(`/api/sessions/${sessionId}/deliveries`),
+
+  getDetailedSettlement: (sessionId: string) =>
+    api.get<CustomerSettlement[]>(`/api/sessions/${sessionId}/detailed-settlement`),
 
   getSettlement: (sessionId: string) =>
     api.get<SessionSettlement>(`/api/sessions/${sessionId}/settlement`),

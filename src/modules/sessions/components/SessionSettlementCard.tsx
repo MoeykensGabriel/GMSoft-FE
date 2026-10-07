@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { formatDateTime } from '../../core'
 import { sessionService } from '../services/sessionService'
+import { DetailedSettlementPanel } from './DetailedSettlementPanel'
 import { SettlementPanel } from './SettlementPanel'
 import { StockOnBoardPanel } from './StockOnBoardPanel'
 
@@ -59,6 +60,8 @@ export function SessionSettlementCard({ sessionId }: { sessionId: string }) {
       <StockOnBoardPanel stock={s.stock} cerrada={cerrada} />
 
       <SettlementPanel sessionId={s.id} cerrada={cerrada} />
+
+      <DetailedSettlementPanel sessionId={s.id} />
 
       <Link
         to={`/panel/salidas/${s.id}`}

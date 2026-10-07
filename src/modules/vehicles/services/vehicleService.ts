@@ -27,6 +27,12 @@ export interface VehicleLoadLine {
   routeDays: number[] | null
 }
 
+/** La carga pendiente sumada por producto, con los dias de la proxima salida. */
+export interface VehicleLoadSummary {
+  routeDays: number[]
+  lines: { productId: string; productDetail: string; quantity: number }[]
+}
+
 /**
  * Como esta un camion de cara a la carga del deposito. Son las dos unicas cosas que
  * deciden si se lo puede cargar.
@@ -67,9 +73,21 @@ export const vehicleService = {
   getPendingLoad: (vehicleId: string) =>
     api.get<VehicleLoadLine[]>(`/api/vehicles/${vehicleId}/load`),
 
-  /** Sube una tanda al camion. Falla con 409 si el camion ya esta en la calle. */
-  registerLoad: (vehicleId: string, items: { productId: string; quantity: number }[], routeDays: number[]) =>
-    api.post<void>(`/api/vehicles/${vehicleId}/load`, { vehicleId, items, routeDays }),
+  /** La misma carga sumada por producto: una linea aunque se haya subido en tandas. */
+  getPendingLoadSummary: (vehicleId: string) =>
+    api.get<VehicleLoadSummary>(`/api/vehicles/${vehicleId}/load/summary`),
+
+  /**
+   * Sube una tanda al camion. Falla con 409 si el camion ya esta en la calle.
+   * Repetir el mismo clientRequestId no vuelve a cargar: devuelve la hora original.
+   */
+  registerLoad: (
+    vehicleId: string,
+    items: { productId: string; quantity: number }[],
+    routeDays: number[],
+    clientRequestId: string,
+  ) =>
+    api.post<{ loadedAt: string }>(`/api/vehicles/${vehicleId}/load`, { vehicleId, items, routeDays, clientRequestId }),
 
   updateRouteDays: (vehicleId: string, routeDays: number[]) =>
     api.put<void>(`/api/vehicles/${vehicleId}/load/route-days`, { vehicleId, routeDays }),

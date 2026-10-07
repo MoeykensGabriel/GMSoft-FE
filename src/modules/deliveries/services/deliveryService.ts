@@ -19,8 +19,11 @@ export interface RegisterDeliveryRequest {
   items: { productId: string; quantity: number }[]
   containersOut: { productId: string; quantity: number }[]
   containersIn: { productId: string; quantity: number }[]
-  payment: { amount: number; method: PaymentMethod } | null
+  /** Sin amount se cobra el total de la venta, que calcula el servidor. */
+  payment: { method: PaymentMethod; amount?: number } | null
   notes: string | null
+  /** Identifica la visita para que un reintento no la duplique. */
+  clientRequestId: string
 }
 
 export interface RegisterDeliveryResult {

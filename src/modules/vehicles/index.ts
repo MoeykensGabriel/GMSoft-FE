@@ -4,6 +4,7 @@ export type {
   VehicleType,
   VehicleInput,
   VehicleLoadLine,
+  VehicleLoadSummary,
   VehicleLoadStatus,
 } from './services/vehicleService'
 export { VehicleListView } from './views/VehicleListView'

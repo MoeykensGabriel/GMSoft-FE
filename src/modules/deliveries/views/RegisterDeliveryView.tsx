@@ -4,13 +4,14 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useQueries } from '@tanstack/react-query'
 import { productService } from '../../products'
 import { customerService, CustomerAccountSummary } from '../../customers'
-import { ApiError, Button, Field, formatMoney, currentBusinessWeekday } from '../../core'
+import { ApiError, Button, Field, formatMoney, currentBusinessWeekday, newRequestId } from '../../core'
 import { useCurrentSession } from '../../sessions'
 import { CustomerPicker } from '../components/CustomerPicker'
 import { DeliveryLinesEditor } from '../components/DeliveryLinesEditor'
 import type { DeliveryLine } from '../components/DeliveryLinesEditor'
 import { NewCustomerFields } from '../components/NewCustomerFields'
-import { PaymentFields } from '../components/PaymentFields'
+import { SaleConfirmModal } from '../components/SaleConfirmModal'
+import type { Cobro } from '../components/SaleConfirmModal'
 import { useRegisterDelivery } from '../hooks/useRegisterDelivery'
 import type { NewCustomerLine, PaymentMethod, RegisterDeliveryResult } from '../services/deliveryService'
 
@@ -59,7 +60,12 @@ export function RegisterDeliveryView() {
   })
   const [nuevo, setNuevo] = useState<NewCustomerLine>(() => ({ ...CLIENTE_VACIO, visitDays: [currentBusinessWeekday()] }))
   const [lineas, setLineas] = useState<DeliveryLine[]>([])
-  const [monto, setMonto] = useState('')
+  // Null hasta que el chofer responde en el resumen si cobro o queda a deuda.
+  const [cobro, setCobro] = useState<Cobro | null>(null)
+  const [confirmando, setConfirmando] = useState(false)
+  // Identifica esta visita: si el envio se repite, el backend devuelve la ya
+  // registrada en vez de duplicar venta, envases y cobro.
+  const [requestId] = useState(newRequestId)
   const [metodo, setMetodo] = useState<PaymentMethod>('Cash')
   const [notas, setNotas] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -101,8 +107,17 @@ export function RegisterDeliveryView() {
   }
 
   const vendeAlgo = lineas.some((l) => l.vende > 0)
+  // En el orden del camion y en centavos, igual que el editor: es lo que se muestra
+  // para confirmar. El importe definitivo lo calcula el servidor.
+  const vendidas = sesion.stock.flatMap((producto) => {
+    const linea = lineas.find((l) => l.productId === producto.productId)
+    if (!linea || linea.vende === 0) return []
+    const centavos = Math.round((prices[producto.productId] ?? 0) * 100) * linea.vende
+    return [{ productId: producto.productId, productDetail: producto.productDetail, quantity: linea.vende, centavos }]
+  })
+  const totalVenta = vendidas.reduce((sum, linea) => sum + linea.centavos, 0) / 100
 
-  async function onSubmit(e: FormEvent) {
+  function onSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
     if (registrar.isPending || (vendeAlgo && !pricesReady)) return
@@ -111,6 +126,19 @@ export function RegisterDeliveryView() {
       setError('Seleccioná al menos un día de visita.')
       return
     }
+    // Una venta pasa primero por el resumen, que pregunta si se cobro. Una visita
+    // de solo envases no tiene nada que cobrar y se registra directo.
+    if (vendeAlgo) {
+      setCobro(null)
+      setConfirmando(true)
+      return
+    }
+    void registrarVisita()
+  }
+
+  async function registrarVisita() {
+    if (registrar.isPending) return
+    setError(null)
     try {
       const resultado = await registrar.mutateAsync({
         customerId: esNuevo ? null : customerId,
@@ -123,8 +151,10 @@ export function RegisterDeliveryView() {
         containersIn: lineas
           .filter((l) => l.retiraEnvases > 0)
           .map((l) => ({ productId: l.productId, quantity: l.retiraEnvases })),
-        payment: Number(monto) > 0 ? { amount: Number(monto), method: metodo } : null,
+        // Sin importe: "cobre" significa el total de esta venta, y lo pone el servidor.
+        payment: vendeAlgo && cobro === 'cobrada' ? { method: metodo } : null,
         notes: notas.trim() === '' ? null : notas.trim(),
+        clientRequestId: requestId,
       })
 
       setHecho(resultado)
@@ -174,8 +204,6 @@ export function RegisterDeliveryView() {
       </div>}
       <DeliveryLinesEditor stock={sesion.stock} prices={pricesReady ? prices : {}} lineas={lineas} onChange={setLineas} />
 
-      <PaymentFields monto={monto} metodo={metodo} onMonto={setMonto} onMetodo={setMetodo} />
-
       <Field
         label="Observaciones (opcional)"
         name="notas"
@@ -189,7 +217,7 @@ export function RegisterDeliveryView() {
         </p>
       )}
 
-      {error && (
+      {error && !confirmando && (
         <p role="alert" className="text-sm text-red-600">
           {error}
         </p>
@@ -197,12 +225,27 @@ export function RegisterDeliveryView() {
 
       <div className="flex gap-2">
         <Button type="submit" disabled={registrar.isPending || (vendeAlgo && !pricesReady) || (!esNuevo && !customerId) || (directo && (!cliente.data || !cuenta.data || cliente.isError || cuenta.isError || cliente.data.zoneId !== sesion.zoneId || !cliente.data.isActive))}>
-          {registrar.isPending ? 'Registrando...' : 'Registrar visita'}
+          {registrar.isPending ? 'Registrando...' : vendeAlgo ? 'Confirmar venta' : 'Registrar visita'}
         </Button>
         <Button type="button" variant="secondary" onClick={() => navigate(directo && customerId ? `/reparto/clientes/${encodeURIComponent(customerId)}` : '/reparto')}>
           Cancelar
         </Button>
       </div>
+
+      {confirmando && (
+        <SaleConfirmModal
+          lines={vendidas.map((linea) => ({ ...linea, subtotal: linea.centavos / 100 }))}
+          total={totalVenta}
+          cobro={cobro}
+          metodo={metodo}
+          onCobro={setCobro}
+          onMetodo={setMetodo}
+          sending={registrar.isPending}
+          error={error}
+          onBack={() => { setConfirmando(false); setError(null) }}
+          onConfirm={() => { if (cobro !== null) void registrarVisita() }}
+        />
+      )}
     </form>
   )
 }

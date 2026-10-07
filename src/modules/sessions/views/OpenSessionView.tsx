@@ -21,8 +21,8 @@ export function OpenSessionView() {
 
   const vehicleId = perfil.data?.vehicleId ?? ''
   const carga = useQuery({
-    queryKey: ['vehicles', 'load', vehicleId],
-    queryFn: () => vehicleService.getPendingLoad(vehicleId),
+    queryKey: ['vehicles', 'load-summary', vehicleId],
+    queryFn: () => vehicleService.getPendingLoadSummary(vehicleId),
     enabled: Boolean(vehicleId),
   })
 
@@ -69,8 +69,10 @@ export function OpenSessionView() {
     }
   }
 
-  const lineas = carga.data ?? []
-  const routeDays = [...new Set(lineas.flatMap((line) => line.routeDays ?? []))]
+  // Sumada por producto: al chofer le importa cuanto lleva, no en cuantas tandas
+  // lo cargo la oficina.
+  const lineas = carga.data?.lines ?? []
+  const routeDays = carga.data?.routeDays ?? []
 
   return (
     <form onSubmit={onSubmit} className="mx-auto flex max-w-md flex-col gap-5 p-6">
@@ -95,11 +97,11 @@ export function OpenSessionView() {
           <ul className="flex flex-col gap-1">
             {lineas.map((l) => (
               <li
-                key={l.id}
+                key={l.productId}
                 className="flex justify-between rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm"
               >
                 <span className="text-neutral-700">{l.productDetail}</span>
-                <span className="text-neutral-900">{l.quantity}</span>
+                <span className="text-neutral-900">{l.quantity} unidades</span>
               </li>
             ))}
           </ul>

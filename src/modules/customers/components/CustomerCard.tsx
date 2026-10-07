@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { customerService } from '../services/customerService'
 import type { Customer } from '../services/customerService'
+import { purchaseActivityLabel } from '../utils/activity'
 import { CustomerContainersSummary } from './CustomerContainersSummary'
 import { formatMoney } from '../../core'
 
@@ -28,7 +29,7 @@ export function CustomerCard({ customer, onSelect, deferred = false }: {
         </span>
       </div>
       <div className="mt-2 flex flex-wrap items-start justify-between gap-x-3 gap-y-1 text-xs">
-        <span>{customer.daysWithoutPurchase === null ? 'Sin compras registradas' : `${customer.daysWithoutPurchase} días sin comprar`}</span>
+        <span>{purchaseActivityLabel(customer.weeksWithoutPurchase, customer.lastPurchaseAt === null)}</span>
         <span className="min-w-0 break-words">{account.data ? <CustomerContainersSummary account={account.data} /> : account.isError ? 'No se pudieron leer los envases' : 'Cargando envases…'}</span>
       </div>
       {customer.visitDays == null && <span className="mt-1 block text-xs">Días pendientes de configurar</span>}

@@ -7,6 +7,7 @@ export { CustomerProfileCard } from './components/CustomerProfileCard'
 export { CustomerBalanceCard } from './components/CustomerBalanceCard'
 export { CustomerAccountMovements } from './components/CustomerAccountMovements'
 export { CustomerContainersSummary } from './components/CustomerContainersSummary'
+export { purchaseActivityLabel } from './utils/activity'
 export type {
   Customer,
   CustomerAccount,

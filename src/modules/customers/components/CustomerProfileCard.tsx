@@ -1,5 +1,6 @@
 import { weekdayLabels, formatDateTime } from '../../core'
 import type { Customer } from '../services/customerService'
+import { purchaseActivityLabel } from '../utils/activity'
 
 export function CustomerProfileCard({ customer }: { customer: Customer }) {
   const phone = customer.phone.replace(/[^+\d]/g, '')
@@ -13,6 +14,6 @@ export function CustomerProfileCard({ customer }: { customer: Customer }) {
     <p><strong>Camión:</strong> {customer.vehicleId ? `${customer.vehicleName} · ${customer.vehicleLicensePlate}` : 'Sin camión asignado'}</p>
     <p><strong>Última visita:</strong> {customer.lastVisitAt ? formatDateTime(customer.lastVisitAt, 'America/Argentina/Buenos_Aires') : 'Sin visitas registradas'}</p>
     {customer.notes && <p className="whitespace-pre-wrap break-words"><strong>Indicaciones:</strong> {customer.notes}</p>}
-    <p>{customer.daysWithoutPurchase === null ? 'Sin compras registradas' : `${customer.daysWithoutPurchase} días sin comprar`}</p>
+    <p>{purchaseActivityLabel(customer.weeksWithoutPurchase, customer.lastPurchaseAt === null)}</p>
   </section>
 }

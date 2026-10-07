@@ -17,6 +17,8 @@ export interface Customer {
   routeOrder: number
   visitDays: number[] | null
   activityStatus: 'White' | 'Red' | 'Black'
+  /** Semanas en que paso el camion y no compro. No son semanas de calendario. */
+  weeksWithoutPurchase: number
   notes: string | null
   isActive: boolean
   displayName: string
@@ -55,6 +57,7 @@ export interface CustomerAccount {
   balance: number
   lastPurchaseAt: string | null
   daysWithoutPurchase: number | null
+  weeksWithoutPurchase: number
   containers: CustomerContainerLine[]
   units: CustomerUnitLine[]
   movements: AccountMovement[]
@@ -74,7 +77,11 @@ export interface CustomerInput {
 }
 
 export const customerService = {
-  list: (page = 1, search = '') => api.get<PagedResult<Customer>>(`/api/customers?page=${page}&pageSize=20&search=${encodeURIComponent(search)}`),
+  /** Vista de la oficina: los clientes que un camión visita un día de la semana (ISO 1–7). */
+  listByVehicleAndDay: (vehicleId: string, visitDay: number, page = 1, search = '') =>
+    api.get<PagedResult<Customer>>(
+      `/api/customers?vehicleId=${vehicleId}&visitDays=${visitDay}&page=${page}&pageSize=20&search=${encodeURIComponent(search)}`,
+    ),
   create: (input: CustomerInput) => api.post<string>('/api/customers', input),
   update: (id: string, input: CustomerInput) => api.put<void>(`/api/customers/${id}`, { ...input, id, routeOrder: null }),
   getPrices: (customerId: string) =>
