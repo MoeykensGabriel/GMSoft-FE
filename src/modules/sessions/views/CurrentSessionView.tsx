@@ -11,7 +11,7 @@ export function CurrentSessionView({ sesion }: { sesion: Session }) {
   const { user } = useAuth()
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-3 p-3">
-      <RouteHeader zoneName={sesion.zoneName ?? 'Zona'} date={new Date().toISOString()} userName={user?.userName ?? sesion.driverName} routeDays={sesion.routeDays} />
+      <RouteHeader zoneName={sesion.zoneName ?? 'Zona'} date={sesion.openedAt} userName={user?.userName ?? sesion.driverName} routeDays={sesion.routeDays} />
       <Link to="/reparto/visita?new=1" className="flex min-h-14 items-center justify-center rounded-md bg-green-700 px-4 py-3 text-center font-medium text-white hover:bg-green-800">+ Agregar cliente</Link>
       <CustomerRouteList vehicleId={sesion.vehicleId} zoneId={sesion.zoneId} routeDays={sesion.routeDays} deferredCustomerIds={sesion.deferredCustomerIds} onSelect={(id) => navigate(`/reparto/clientes/${encodeURIComponent(id)}`)} />
       <details className="rounded-md border border-neutral-300 p-3">
@@ -50,7 +50,7 @@ export function CurrentSessionView({ sesion }: { sesion: Session }) {
       </details>
 
       <p className="text-xs text-neutral-500">
-        Cuando volvés, la oficina cuenta lo que traés y cierra la salida.
+        Tu salida sigue abierta hasta que ADMIN reciba este camión. Después de la recepción, volverás automáticamente al login.
       </p>
     </div>
   )

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { setOnUnauthorized, tokenStorage } from '../../core'
+import { queryClient, setOnUnauthorized, tokenStorage } from '../../core'
 import { authService } from '../services/authService'
 import type { CurrentUser, Role } from '../services/authService'
 import { AuthContext } from './authContext'
@@ -30,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     tokenStorage.clear()
     localStorage.removeItem(USER_KEY)
     setUser(null)
+    queryClient.clear()
   }, [])
 
   // Si el token vence en medio de una consulta, la sesion se cierra sola en vez de
@@ -38,9 +39,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setOnUnauthorized(logout)
   }, [logout])
 
+  useEffect(() => {
+    const synchronize = (event: StorageEvent) => {
+      if (event.key !== USER_KEY && event.key !== 'gmsoft.token' && event.key !== null) return
+      // Renovar la firma de la misma cuenta no descarta formularios ni consultas.
+      if (event.key === 'gmsoft.token' && event.newValue !== null) return
+      queryClient.clear()
+      setUser(leerUsuarioGuardado())
+    }
+    window.addEventListener('storage', synchronize)
+    return () => window.removeEventListener('storage', synchronize)
+  }, [])
+
   const login = useCallback(async (userName: string, password: string) => {
     const { token, ...datos } = await authService.login(userName, password)
 
+    queryClient.clear()
     tokenStorage.set(token)
     localStorage.setItem(USER_KEY, JSON.stringify(datos))
     setUser(datos)

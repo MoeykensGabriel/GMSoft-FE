@@ -76,6 +76,17 @@ Las altas y las asignaciones pertenecen a `vehicles` y `drivers`. La preparació
 de la carga se compone en `vehicleLoads`, para evitar dependencias circulares
 entre los módulos de choferes y vehículos.
 
+El chofer retoma la misma salida al recargar o volver a abrir el panel. No puede
+cerrarla ni iniciar otra mientras esté abierta. En todas sus pantallas se comprueba
+cada 10 segundos el estado de esa salida, también al recuperar el foco o la conexión.
+Cuando ADMIN confirma la recepción, vuelve al login y se limpian los datos de la cuenta.
+Un error de conexión no se interpreta como recepción.
+
+Mientras hay una salida abierta y el dispositivo se comunica con la API, se renueva
+periódicamente el acceso del chofer. Si el acceso ya venció después de una desconexión
+prolongada, debe ingresar nuevamente; eso no cierra ni duplica el recorrido guardado
+en la base. Después de la recepción no se renueva el acceso de esa salida.
+
 ## Comandos
 
 - `npm run dev` — desarrollo

@@ -68,7 +68,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 
   // 401 es token vencido o invalido: se cierra sesion. 403 NO, porque ahi el usuario
   // esta bien identificado y solo le falta permiso; desloguearlo seria mentirle.
-  if (res.status === 401) {
+  if (res.status === 401 && token === tokenStorage.get()) {
     tokenStorage.clear()
     onUnauthorized?.()
   }

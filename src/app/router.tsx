@@ -4,6 +4,7 @@ import { RegisterDeliveryView, CustomerVisitView } from '../modules/deliveries'
 import { ProductFormView, ProductListView } from '../modules/products'
 import {
   DeliveryRouteView,
+  DriverSessionLayout,
   ReceiveSessionView,
   RouteSettlementView,
   SessionDetailView,
@@ -33,9 +34,11 @@ export function AppRouter() {
       </Route>
 
       <Route element={<ProtectedRoute roles={[ROLES.driver]} />}>
-        <Route path="/reparto" element={<DeliveryRouteView />} />
-        <Route path="/reparto/visita" element={<RegisterDeliveryView />} />
-        <Route path="/reparto/clientes/:id" element={<CustomerVisitView />} />
+        <Route element={<DriverSessionLayout />}>
+          <Route path="/reparto" element={<DeliveryRouteView />} />
+          <Route path="/reparto/visita" element={<RegisterDeliveryView />} />
+          <Route path="/reparto/clientes/:id" element={<CustomerVisitView />} />
+        </Route>
       </Route>
 
       <Route element={<ProtectedRoute roles={[ROLES.admin]} />}>

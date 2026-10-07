@@ -3,6 +3,7 @@ import type { PagedResult } from '../../core'
 
 export type SessionStatus = 'Open' | 'Closed'
 export type ContainerState = 'Full' | 'Empty'
+export interface DepartureStatus { id: string; vehicleId: string; status: SessionStatus; closedAt: string | null }
 
 /** Lo que hay a bordo de un producto. Llenos y vacios se cuentan aparte. */
 export interface SessionStockLine {
@@ -102,6 +103,8 @@ export interface SessionSettlement {
 }
 
 export const sessionService = {
+  keepAlive: (sessionId: string) => api.post<{ status: SessionStatus; token: string | null }>(`/api/sessions/${sessionId}/keep-alive`),
+  getStatus: (sessionId: string) => api.get<DepartureStatus>(`/api/sessions/${sessionId}/status`),
   getActiveDepartures: () => api.get<ActiveDeparture[]>('/api/sessions/active-departures'),
   postponeVisit: (customerId: string) => api.post<void>(`/api/sessions/current/customers/${customerId}/postpone`, {}),
   /**
