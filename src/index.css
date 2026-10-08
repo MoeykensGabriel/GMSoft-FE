@@ -59,7 +59,7 @@
   .ui-link:hover { color: var(--color-brand-dark); }
   .ui-choice { border: 1px solid var(--color-line); border-radius: 4px; background: var(--color-surface); }
   .ui-choice:has(input:checked) { border-color: var(--color-accent); background: var(--color-accent-soft); color: var(--color-brand-dark); }
-  .ui-dialog { margin: auto; width: calc(100% - 2rem); max-width: 28rem; max-height: calc(100dvh - 2rem); overflow-y: auto; border: 1px solid var(--color-line); border-radius: 4px; background: var(--color-surface); color: var(--color-ink); padding: 0; }
+  .ui-dialog { margin: auto; width: calc(100% - 2rem); max-width: 40rem; font-size: 1.125rem; line-height: 1.5; max-height: calc(100dvh - 2rem); overflow-y: auto; border: 1px solid var(--color-line); border-radius: 4px; background: var(--color-surface); color: var(--color-ink); padding: 0; }
   .ui-dialog::backdrop { background: rgb(6 35 53 / 55%); }
   @media (min-width: 768px) {
     .admin-shell { --control-height: 36px; }
@@ -67,3 +67,9 @@
     .admin-shell :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) { font-size: 14px; }
   }
 }
+
+/* Los modales son para revisar antes de confirmar: todo su contenido va un paso más
+   grande. Fuera de capas para que le gane a las utilidades de tamaño de texto. */
+.ui-dialog :where(.text-xs) { font-size: 0.9375rem; line-height: 1.4; }
+.ui-dialog :where(.text-sm, .ui-table th, .ui-table td) { font-size: 1.0625rem; line-height: 1.5; }
+.ui-dialog :where(button, a) { font-size: 1.0625rem; }

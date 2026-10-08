@@ -34,9 +34,9 @@ export function Modal({ title, onClose, busy = false, children, footer }: Props)
         const bounds = event.currentTarget.getBoundingClientRect()
         if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) onClose()
       }}>
-      <h2 id={titleId} className="border-b border-brand bg-brand px-4 py-3 text-base font-semibold text-white">{title}</h2>
-      <div className="flex flex-col gap-4 p-4">{children}</div>
-      <div className="flex flex-wrap justify-end gap-2 border-t border-line bg-canvas p-4">{footer}</div>
+      <h2 id={titleId} className="border-b border-brand bg-brand px-5 py-4 text-xl font-semibold text-white">{title}</h2>
+      <div className="flex flex-col gap-4 p-5">{children}</div>
+      <div className="flex flex-wrap justify-end gap-3 border-t border-line bg-canvas p-5">{footer}</div>
     </dialog>
   )
 }
