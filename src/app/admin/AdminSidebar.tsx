@@ -6,6 +6,7 @@ const sections = [
   { to: '/panel/vehiculos', label: 'Vehículos' },
   { to: '/panel/choferes', label: 'Choferes' },
   { to: '/panel/clientes', label: 'Clientes' },
+  { to: '/panel/promociones', label: 'Promociones' },
   { to: '/panel/carga', label: 'Carga inicial' },
   { to: '/panel/salidas', label: 'Salidas y recepción' },
   { to: '/panel/liquidacion', label: 'Liquidación' },

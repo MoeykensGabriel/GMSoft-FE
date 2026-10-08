@@ -18,6 +18,7 @@ import { HomeView } from './HomeView'
 import { AdminLayout } from './admin/AdminLayout'
 import { AdminHomeView } from './admin/AdminHomeView'
 import { CustomerFormView, CustomerListView } from '../modules/customers'
+import { PendingPromotions, PromotionDetailView, PromotionListView, RegisterPromotionView } from '../modules/promotions'
 
 /**
  * Router global. Ensambla las vistas que cada modulo expone por su index; las vistas
@@ -35,7 +36,8 @@ export function AppRouter() {
 
       <Route element={<ProtectedRoute roles={[ROLES.driver]} />}>
         <Route element={<DriverSessionLayout />}>
-          <Route path="/reparto" element={<DeliveryRouteView />} />
+          <Route path="/reparto" element={<DeliveryRouteView promotions={<PendingPromotions />} />} />
+          <Route path="/reparto/promocion" element={<RegisterPromotionView />} />
           <Route path="/reparto/visita" element={<RegisterDeliveryView />} />
           <Route path="/reparto/clientes/:id" element={<CustomerVisitView />} />
         </Route>
@@ -44,6 +46,8 @@ export function AppRouter() {
       <Route element={<ProtectedRoute roles={[ROLES.admin]} />}>
         <Route element={<AdminLayout />}>
           <Route path="/panel" element={<AdminHomeView />} />
+          <Route path="/panel/promociones" element={<PromotionListView />} />
+          <Route path="/panel/promociones/:id" element={<PromotionDetailView />} />
           <Route path="/panel/vehiculos" element={<VehicleListView />} />
           <Route path="/panel/vehiculos/nuevo" element={<VehicleFormView />} />
           <Route path="/panel/vehiculos/:id" element={<VehicleFormView />} />
