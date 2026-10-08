@@ -8,6 +8,7 @@ const sections = [
   { to: '/panel/clientes', label: 'Clientes' },
   { to: '/panel/promociones', label: 'Promociones' },
   { to: '/panel/carga', label: 'Carga inicial' },
+  { to: '/panel/recargas', label: 'Recargas' },
   { to: '/panel/salidas', label: 'Salidas y recepción' },
   { to: '/panel/liquidacion', label: 'Liquidación' },
   { to: '/panel/catalogo', label: 'Productos' },
