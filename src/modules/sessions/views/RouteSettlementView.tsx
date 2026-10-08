@@ -39,8 +39,10 @@ export function RouteSettlementView() {
   const [fecha, setFecha] = useState(hoy)
 
   const vehiculos = useQuery({
+    // Misma clave y misma forma (lista completa) que el resto de las pantallas: la
+    // caché es compartida y una forma distinta bajo esta clave rompe a las demás.
     queryKey: ['vehicles', 'all'],
-    queryFn: () => vehicleService.list(),
+    queryFn: vehicleService.listAll,
   })
 
   const salidas = useQuery({
@@ -65,7 +67,7 @@ export function RouteSettlementView() {
           onChange={(e) => setVehicleId(e.target.value)}
         >
           <option value="">Elegí un vehículo</option>
-          {vehiculos.data?.items.map((v) => (
+          {vehiculos.data?.map((v) => (
             <option key={v.id} value={v.id}>
               {v.name} ({v.licensePlate})
             </option>
