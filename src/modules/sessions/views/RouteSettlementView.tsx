@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQueries, useQuery } from '@tanstack/react-query'
 import { Field, Select, Page, PageHeader } from '../../core'
 import { vehicleService } from '../../vehicles'
+import { detailedSettlementQuery } from '../hooks/detailedSettlementQuery'
 import { SessionSettlementCard } from '../components/SessionSettlementCard'
+import { SettlementTotals } from '../components/SettlementTotals'
 import { sessionService } from '../services/sessionService'
 
 /**
@@ -49,9 +51,15 @@ export function RouteSettlementView() {
     queryKey: ['sessions', 'byVehicle', vehicleId, fecha],
     queryFn: () => sessionService.listByVehicleAndDate(vehicleId, fecha),
     enabled: Boolean(vehicleId && fecha),
+    // Una salida que se abre mientras la pantalla está a la vista aparece sola.
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
   })
 
   const items = salidas.data?.items ?? []
+  // Los totales suman todas las salidas del día; comparten la caché del detalle.
+  const detalles = useQueries({ queries: items.map((s) => detailedSettlementQuery(s.id)) })
+  const totales = detalles.every((d) => d.isSuccess) ? detalles.flatMap((d) => d.data ?? []) : null
 
   return (
     <Page className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
@@ -101,13 +109,15 @@ export function RouteSettlementView() {
               dos veces en el dia: se muestran todas y cada una rinde por separado. */}
           {items.length > 1 && (
             <p className="text-sm text-muted">
-              {items.length} salidas ese día. Cada una se rinde por separado.
+              {items.length} salidas ese día. Los totales del final las suman a todas.
             </p>
           )}
 
           {items.map((s) => (
-            <SessionSettlementCard key={s.id} sessionId={s.id} />
+            <SessionSettlementCard key={s.id} session={s} />
           ))}
+
+          {totales && <SettlementTotals settlements={totales} />}
         </div>
       )}
     </Page>

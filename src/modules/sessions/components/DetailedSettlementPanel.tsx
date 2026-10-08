@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { formatDate, formatMoney, DataTable } from '../../core'
-import { sessionService } from '../services/sessionService'
+import { detailedSettlementQuery } from '../hooks/detailedSettlementQuery'
 
 /**
  * La liquidacion detallada de una salida: un bloque por cliente visitado, en el
@@ -8,10 +8,7 @@ import { sessionService } from '../services/sessionService'
  * como quedo su cuenta.
  */
 export function DetailedSettlementPanel({ sessionId }: { sessionId: string }) {
-  const detalle = useQuery({
-    queryKey: ['sessions', 'detailed-settlement', sessionId],
-    queryFn: () => sessionService.getDetailedSettlement(sessionId),
-  })
+  const detalle = useQuery(detailedSettlementQuery(sessionId))
 
   if (detalle.isLoading) return <p className="text-sm text-muted">Cargando el detalle...</p>
   if (detalle.isError) return <p className="text-sm text-danger">No se pudo leer el detalle por cliente.</p>
