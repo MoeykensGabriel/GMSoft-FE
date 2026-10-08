@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { CustomerRouteList } from '../../customers'
 import { useAuth } from '../../auth'
 import { RouteHeader } from '../components/RouteHeader'
 import { Button, formatDateTime, LinkButton, Page } from '../../core'
+import { sessionService } from '../services/sessionService'
 import type { Session } from '../services/sessionService'
 import { RestocksPanel } from '../components/RestocksPanel'
 import { RestockNotice } from '../components/RestockNotice'
@@ -39,6 +41,13 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
   const { user } = useAuth()
   const [modo, setModo] = useState<Modo | null>(leerModo)
   const elegir = (nuevo: Modo | null) => { guardarModo(nuevo); setModo(nuevo) }
+  // Las visitas ya hechas en esta salida: la lista de pendientes se acorta con cada una.
+  const visitas = useQuery({
+    queryKey: ['sessions', 'deliveries', sesion.id],
+    queryFn: () => sessionService.getDeliveries(sesion.id),
+    staleTime: 0, refetchOnMount: 'always', refetchOnWindowFocus: true, refetchOnReconnect: true,
+  })
+  const visitados = [...new Set((visitas.data ?? []).map((visita) => visita.customerId))]
   return (
     <Page className="mx-auto flex max-w-3xl flex-col gap-3 p-3">
       {user && <RestockNotice userId={user.userId} session={sesion} />}
@@ -52,7 +61,7 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
       {modo !== null && <Button variant="secondary" onClick={() => elegir(null)}>← Menú principal</Button>}
       {modo === 'ventas' && <>
         <LinkButton to="/reparto/visita?new=1" variant="primary" className="min-h-14">+ Agregar cliente</LinkButton>
-        <CustomerRouteList vehicleId={sesion.vehicleId} zoneId={sesion.zoneId} routeDays={sesion.routeDays} deferredCustomerIds={sesion.deferredCustomerIds} onSelect={(id) => navigate(`/reparto/clientes/${encodeURIComponent(id)}`)} />
+        <CustomerRouteList vehicleId={sesion.vehicleId} zoneId={sesion.zoneId} routeDays={sesion.routeDays} deferredCustomerIds={sesion.deferredCustomerIds} visitedCustomerIds={visitados} onSelect={(id) => navigate(`/reparto/clientes/${encodeURIComponent(id)}`)} />
       </>}
       {modo === 'promociones' && <>
         <LinkButton to="/reparto/promocion" variant="primary" className="min-h-14">+ Registrar promoción</LinkButton>
