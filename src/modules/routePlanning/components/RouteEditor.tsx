@@ -5,6 +5,16 @@ import type { RouteCustomer, RouteFilters, RouteSnapshot } from '../types'
 import { routePlanningService } from '../services/routePlanningService'
 import { buildRouteSave, dropRow, hasChanges, moveRow, rowModified, toggleVisitDay } from '../utils/routeDraft'
 
+/** Flecha fina para subir o bajar una fila; el nombre accesible lo pone el botón. */
+function Arrow({ up = false }: { up?: boolean }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor"
+      strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={up ? undefined : 'rotate-180'}>
+      <path d="M10 16V4" /><path d="M5 9l5-5 5 5" />
+    </svg>
+  )
+}
+
 export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSaved, reload }: {
   initial: RouteSnapshot; filters: RouteFilters; vehicles: Vehicle[]
   onDirty: (value: boolean) => void; onBusy: (value: boolean) => void
@@ -116,7 +126,7 @@ export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSav
     <p role="status" aria-live="polite" className="text-sm">{notice}</p>
     {rows.length === 0 ? <p>No hay clientes de este camión en esa zona para ese día</p>
       : <>
-        <p className="text-sm text-muted">Arrastrá desde el agarre o usá Subir y Bajar. El orden es compartido con los otros días de visita.</p>
+        <p className="text-sm text-muted">Arrastrá desde el agarre o usá las flechas para subir y bajar. El orden es compartido con los otros días de visita.</p>
         <DataTable label="Clientes del recorrido" className="min-w-[80rem]">
           <thead><tr>
             <th scope="col">Ordenar</th><th scope="col">Pos</th><th scope="col">Cliente</th>
@@ -154,11 +164,11 @@ export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSav
                     event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', row.id)
                     setDragId(row.id)
                   }} onDragEnd={() => { setDragId(null); setDropAt(null) }}>⠿</Button>
-                <div className="flex flex-col gap-1">
-                  <Button variant="secondary" className="px-2" disabled={pending || index === 0}
-                    aria-label={`Subir a ${row.displayName}`} onClick={() => move(index, index - 1)}>Subir</Button>
-                  <Button variant="secondary" className="px-2" disabled={pending || index === rows.length - 1}
-                    aria-label={`Bajar a ${row.displayName}`} onClick={() => move(index, index + 1)}>Bajar</Button>
+                <div className="flex gap-1">
+                  <Button variant="secondary" className="px-2" disabled={pending || index === 0} title="Subir"
+                    aria-label={`Subir a ${row.displayName}`} onClick={() => move(index, index - 1)}><Arrow up /></Button>
+                  <Button variant="secondary" className="px-2" disabled={pending || index === rows.length - 1} title="Bajar"
+                    aria-label={`Bajar a ${row.displayName}`} onClick={() => move(index, index + 1)}><Arrow /></Button>
                 </div>
               </div></td>
               <td>{index + 1}</td>
