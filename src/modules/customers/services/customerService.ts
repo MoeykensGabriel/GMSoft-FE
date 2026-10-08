@@ -78,9 +78,10 @@ export interface CustomerInput {
 
 export const customerService = {
   /** Vista de la oficina: los clientes que un camión visita un día de la semana (ISO 1–7). */
-  listByVehicleAndDay: (vehicleId: string, visitDay: number, page = 1, search = '') =>
+  /** Clientes de un camión; el día de visita es opcional. */
+  listByVehicle: (vehicleId: string, visitDay: number | null, page = 1, search = '') =>
     api.get<PagedResult<Customer>>(
-      `/api/customers?vehicleId=${vehicleId}&visitDays=${visitDay}&page=${page}&pageSize=20&search=${encodeURIComponent(search)}`,
+      `/api/customers?vehicleId=${vehicleId}${visitDay === null ? '' : `&visitDays=${visitDay}`}&page=${page}&pageSize=20&search=${encodeURIComponent(search)}`,
     ),
   create: (input: CustomerInput) => api.post<string>('/api/customers', input),
   update: (id: string, input: CustomerInput) => api.put<void>(`/api/customers/${id}`, { ...input, id, routeOrder: null }),
