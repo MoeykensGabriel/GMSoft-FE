@@ -12,6 +12,7 @@ const sections = [
   { to: '/panel/recargas', label: 'Recargas' },
   { to: '/panel/salidas', label: 'Salidas y recepción' },
   { to: '/panel/liquidacion', label: 'Liquidación' },
+  { to: '/panel/resumen-diario', label: 'Resumen diario' },
   { to: '/panel/catalogo', label: 'Productos' },
   { to: '/panel/zonas', label: 'Zonas de reparto' },
 ]

@@ -7,6 +7,7 @@ import {
   DriverSessionLayout,
   ReceiveSessionView,
   RouteSettlementView,
+  DailySummaryView,
   SessionDetailView,
   SessionListView,
 } from '../modules/sessions'
@@ -62,6 +63,7 @@ export function AppRouter() {
           <Route path="/panel/carga" element={<VehicleLoadView />} />
 
           <Route path="/panel/liquidacion" element={<RouteSettlementView />} />
+          <Route path="/panel/resumen-diario" element={<DailySummaryView />} />
 
           <Route path="/panel/salidas" element={<SessionListView />} />
           <Route path="/panel/salidas/:id" element={<SessionDetailView />} />
