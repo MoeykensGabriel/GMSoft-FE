@@ -4,6 +4,7 @@ import { formatDateTime, formatMoney, LinkButton, Page, PageHeader } from '../..
 import { SettlementPanel } from '../components/SettlementPanel'
 import { StockOnBoardPanel } from '../components/StockOnBoardPanel'
 import { sessionService } from '../services/sessionService'
+import { RestocksPanel } from '../components/RestocksPanel'
 
 /**
  * El dia de un chofer: con que salio, a quien visito y en que orden, que quedo a
@@ -47,9 +48,12 @@ export function SessionDetailView() {
       </div>
 
       {!cerrada && (
+        <div className="flex flex-wrap gap-3">
+        <LinkButton to={`/panel/salidas/${id}/recarga`} variant="primary">Recargar</LinkButton>
         <LinkButton to={`/panel/salidas/${id}/recepcion`} variant="primary">
           Recibir el camión
         </LinkButton>
+        </div>
       )}
 
       <section className="flex flex-col gap-2">
@@ -103,6 +107,7 @@ export function SessionDetailView() {
       </section>
 
       <StockOnBoardPanel stock={s.stock} cerrada={cerrada} />
+      <RestocksPanel restocks={s.restocks} />
 
       <SettlementPanel sessionId={id} cerrada={cerrada} />
     </Page>

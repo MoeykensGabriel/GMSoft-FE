@@ -6,6 +6,8 @@ import { useAuth } from '../../auth'
 import { RouteHeader } from '../components/RouteHeader'
 import { Button, formatDateTime, LinkButton, Page } from '../../core'
 import type { Session } from '../services/sessionService'
+import { RestocksPanel } from '../components/RestocksPanel'
+import { RestockNotice } from '../components/RestockNotice'
 
 type Modo = 'ventas' | 'promociones'
 
@@ -39,6 +41,7 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
   const elegir = (nuevo: Modo | null) => { guardarModo(nuevo); setModo(nuevo) }
   return (
     <Page className="mx-auto flex max-w-3xl flex-col gap-3 p-3">
+      {user && <RestockNotice userId={user.userId} session={sesion} />}
       <RouteHeader zoneName={sesion.zoneName ?? 'Zona'} date={sesion.openedAt} userName={user?.userName ?? sesion.driverName} routeDays={sesion.routeDays} />
       {modo === null && (
         <div className="grid grid-cols-2 gap-2">
@@ -88,6 +91,7 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
           </ul>
         )}
       </div>
+      <RestocksPanel restocks={sesion.restocks} />
       </details>
 
       <p className="text-xs text-muted">

@@ -16,6 +16,7 @@ export function useCurrentSession() {
     staleTime: 0,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
+    refetchInterval: 30_000,
   })
 }
 

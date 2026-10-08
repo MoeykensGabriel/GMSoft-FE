@@ -6,6 +6,7 @@ import { Button, ErrorMessage, tokenStorage } from '../../core'
 import { useCurrentSession } from '../hooks/useCurrentSession'
 import { sessionService } from '../services/sessionService'
 import { activeDepartureStorage } from '../states/activeDepartureStorage'
+import { restockSeenStorage } from '../states/restockSeenStorage'
 
 /** Acompaña al chofer tanto en el listado como en la ficha y el formulario de venta. */
 export function DriverSessionLayout() {
@@ -27,12 +28,17 @@ export function DriverSessionLayout() {
   })
 
   const completeReception = useCallback(() => {
+    restockSeenStorage.clear(userId)
     // Aviso efímero: la protección de rutas también puede redirigir al cerrar la cuenta.
     window.sessionStorage.setItem('gmsoft.reception-completed', '1')
     navigate('/login', { replace: true, state: { receptionCompleted: true } })
     activeDepartureStorage.clear(userId)
     logout()
   }, [userId, logout, navigate])
+
+  useEffect(() => {
+    if (userId && current.data?.status === 'Open') restockSeenStorage.activate(userId, current.data.id)
+  }, [userId, current.data?.id, current.data?.status])
 
   useEffect(() => {
     if (userId && current.data?.status === 'Open' && !sessionId)

@@ -10,7 +10,7 @@ import {
   SessionDetailView,
   SessionListView,
 } from '../modules/sessions'
-import { VehicleLoadView } from '../modules/vehicleLoads'
+import { VehicleLoadView, RestockView } from '../modules/vehicleLoads'
 import { VehicleListView, VehicleFormView } from '../modules/vehicles'
 import { DriverListView, DriverFormView } from '../modules/drivers'
 import { ZoneFormView, ZoneListView } from '../modules/zones'
@@ -64,6 +64,7 @@ export function AppRouter() {
           <Route path="/panel/salidas" element={<SessionListView />} />
           <Route path="/panel/salidas/:id" element={<SessionDetailView />} />
           <Route path="/panel/salidas/:id/recepcion" element={<ReceiveSessionView />} />
+          <Route path="/panel/salidas/:id/recarga" element={<RestockView />} />
 
           {/* El segmento fijo le gana al dinamico en el router, asi que "nuevo" nunca
               se toma por un id. */}

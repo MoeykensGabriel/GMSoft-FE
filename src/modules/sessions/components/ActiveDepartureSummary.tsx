@@ -21,6 +21,9 @@ export function ActiveDepartureSummary({ departure }: { departure: ActiveDepartu
           </tr>)}</tbody>
         </DataTable>}
     </div>
-    <LinkButton to={`/panel/salidas/${departure.sessionId}`} className="mt-auto self-start" aria-label={`Ver salida de ${departure.vehicleName} ${departure.vehicleLicensePlate}`}>Ver salida</LinkButton>
+    <div className="mt-auto flex flex-wrap gap-2">
+      <LinkButton to={`/panel/salidas/${departure.sessionId}`} aria-label={`Ver salida de ${departure.vehicleName} ${departure.vehicleLicensePlate}`}>Ver salida</LinkButton>
+      <LinkButton to={`/panel/salidas/${departure.sessionId}/recarga`} variant="primary" aria-label={`Recargar ${departure.vehicleName} ${departure.vehicleLicensePlate}`}>Recargar</LinkButton>
+    </div>
   </article>
 }

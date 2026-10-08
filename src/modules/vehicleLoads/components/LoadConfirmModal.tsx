@@ -21,6 +21,10 @@ interface Props {
   error: unknown
   onBack: () => void
   onConfirm: () => void
+  restock?: boolean
+  notes?: string | null
+  backDisabled?: boolean
+  notice?: string
 }
 
 /**
@@ -29,22 +33,23 @@ interface Props {
  */
 export function LoadConfirmModal({
   vehicleName, licensePlate, driverNames, routeDays, lines, openedAt, sending, error, onBack, onConfirm,
+  restock = false, notes, backDisabled = false, notice,
 }: Props) {
   const yaTeniaCarga = lines.some((line) => line.totalOnBoard !== line.quantity)
 
   return (
     <Modal
-      title="Confirmar carga del camión"
-      onClose={onBack}
+      title={restock ? 'Confirmar recarga en ruta' : 'Confirmar carga del camión'}
+      onClose={() => { if (!backDisabled) onBack() }}
       busy={sending}
       footer={<>
-        <Button type="button" variant="danger" disabled={sending} onClick={onBack}>Volver a editar</Button>
+        <Button type="button" variant="danger" disabled={sending || backDisabled} onClick={onBack}>Volver a editar</Button>
         <Button type="button" disabled={sending} onClick={onConfirm}>
-          {sending ? 'Registrando...' : 'Confirmar carga'}
+          {sending ? 'Registrando...' : restock ? 'Confirmar recarga' : 'Confirmar carga'}
         </Button>
       </>}
     >
-      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
         <dt className="text-muted">Camión</dt>
         <dd className="font-medium text-ink">{vehicleName} · {licensePlate}</dd>
         <dt className="text-muted">Chofer</dt>
@@ -57,7 +62,7 @@ export function LoadConfirmModal({
         <dd className="font-medium text-ink">{formatDateTime(openedAt, BUSINESS_TIME_ZONE)}</dd>
       </dl>
 
-      <DataTable label="Productos de la carga a confirmar" className="w-full text-sm">
+      <DataTable label={restock ? 'Productos de la recarga a confirmar' : 'Productos de la carga a confirmar'} className="w-full">
         <thead>
           <tr className="border-b border-brand text-left">
             <th scope="col" className="py-1 font-semibold">Producto</th>
@@ -76,10 +81,13 @@ export function LoadConfirmModal({
         </tbody>
       </DataTable>
 
-      <p className="text-xs text-muted">
-        La hora definitiva la registra el sistema al confirmar. La salida la abre el chofer con
-        su zona y kilometraje.
+      {notes && <p className="whitespace-pre-wrap break-words">Notas: {notes}</p>}
+      <p className="text-muted">
+        La fecha y hora mostradas son de referencia. La hora definitiva la registra el sistema al confirmar.
+        {!restock && ' La salida la abre el chofer con su zona y kilometraje.'}
       </p>
+      {restock && <p>Una recarga confirmada no se puede anular. Un error se corrige en la recepción final.</p>}
+      {notice && <p role="status">{notice}</p>}
 
       <ErrorMessage error={error} />
     </Modal>

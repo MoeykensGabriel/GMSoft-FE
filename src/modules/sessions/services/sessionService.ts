@@ -3,6 +3,19 @@ import type { PagedResult } from '../../core'
 
 export type SessionStatus = 'Open' | 'Closed'
 export type ContainerState = 'Full' | 'Empty'
+export interface RegisterRestockRequest {
+  clientRequestId: string
+  items: { productId: string; quantity: number }[]
+  notes: string | null
+}
+
+export interface SessionRestock extends RegisterRestockRequest {
+  id: string
+  sessionId: string
+  occurredAt: string
+  registeredByUserId: string
+  items: { productId: string; productDetail: string; quantity: number }[]
+}
 export interface DepartureStatus { id: string; vehicleId: string; status: SessionStatus; closedAt: string | null }
 
 /** Lo que hay a bordo de un producto. Llenos y vacios se cuentan aparte. */
@@ -41,6 +54,7 @@ export interface Session {
   kilometersAtClose: number | null
   status: SessionStatus
   stock: SessionStockLine[]
+  restocks: SessionRestock[]
 }
 
 /** Sin carga: la subio la oficina al camion y la salida se lleva lo que haya arriba. */
@@ -127,6 +141,8 @@ export interface CustomerSettlement {
 }
 
 export const sessionService = {
+  registerRestock: (sessionId: string, body: RegisterRestockRequest) =>
+    api.post<SessionRestock>(`/api/sessions/${sessionId}/restocks`, body),
   keepAlive: (sessionId: string) => api.post<{ status: SessionStatus; token: string | null }>(`/api/sessions/${sessionId}/keep-alive`),
   getStatus: (sessionId: string) => api.get<DepartureStatus>(`/api/sessions/${sessionId}/status`),
   getActiveDepartures: () => api.get<ActiveDeparture[]>('/api/sessions/active-departures'),

@@ -9,6 +9,7 @@ import { LoadEditor } from '../components/LoadEditor'
 import type { LoadLine } from '../components/LoadEditor'
 import { LoadConfirmModal } from '../components/LoadConfirmModal'
 import { vehicleService } from '../../vehicles'
+import { ActiveDeparturesCard } from '../../sessions'
 
 /**
  * Cargar el camion, de manana, antes de que salga el chofer.
@@ -167,15 +168,7 @@ export function VehicleLoadView() {
         ? `Carga registrada el ${formatDateTime(loadedAt, BUSINESS_TIME_ZONE)}. El chofer ya puede abrir la salida.`
         : 'Días del recorrido guardados.'}</p>}
 
-      {/* Una ausencia sin explicar se lee como un error: si falta un camion de la
-          lista hay que decir por que, o el proximo paso es revisar si se borro. */}
-      {enLaCalle.length > 0 && (
-        <p className="text-xs text-muted">
-          No aparecen {enLaCalle.map((v) => v.licensePlate).join(', ')}: están en la calle con
-          una salida abierta. Si se quedaron sin stock, va como recarga en ruta sobre esa
-          salida.
-        </p>
-      )}
+      {enLaCalle.length > 0 && <ActiveDeparturesCard />}
 
       {!vehicleId ? (
         <p className="text-sm text-muted">Elegí un vehículo para cargarlo.</p>
