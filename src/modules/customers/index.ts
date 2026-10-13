@@ -1,3 +1,5 @@
+export { NO_PURCHASE_REASONS, noPurchaseLabel, validNoPurchase } from './utils/noPurchase'
+export type { NoPurchaseReason, LastNoPurchase } from './utils/noPurchase'
 export { customerService } from './services/customerService'
 export { CustomerFormView } from './views/CustomerFormView'
 export { CustomerListView } from './views/CustomerListView'

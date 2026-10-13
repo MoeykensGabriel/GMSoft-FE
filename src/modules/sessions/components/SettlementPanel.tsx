@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ApiError, Button, Field, formatMoney } from '../../core'
+import { ApiError, Button, Field, Panel, formatMoney } from '../../core'
 import { sessionService } from '../services/sessionService'
+import { StatTile } from './StatTile'
+
+export interface CollectedByMethod { cash: number; transfer: number; card: number }
 
 /**
  * La liquidacion de la salida. Muestra las tres cifras separadas, que no son la
@@ -10,7 +13,12 @@ import { sessionService } from '../services/sessionService'
  * entregado es plata que se cobro y no llego. Mezclarlas haria ver un problema de
  * caja donde solo hay una venta a cuenta.
  */
-export function SettlementPanel({ sessionId, cerrada }: { sessionId: string; cerrada: boolean }) {
+export function SettlementPanel({ sessionId, cerrada, byMethod }: {
+  sessionId: string
+  cerrada: boolean
+  /** Cobrado por forma de pago, si quien lo usa ya lo tiene calculado. */
+  byMethod?: CollectedByMethod
+}) {
   const queryClient = useQueryClient()
 
   const liquidacion = useQuery({
@@ -31,6 +39,7 @@ export function SettlementPanel({ sessionId, cerrada }: { sessionId: string; cer
   if (!liquidacion.data) return null
 
   const l = liquidacion.data
+  const diferencia = l.cashDifference ?? 0
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -43,47 +52,36 @@ export function SettlementPanel({ sessionId, cerrada }: { sessionId: string; cer
   }
 
   return (
-    <section className="flex flex-col gap-3">
-      <h3 className="text-sm font-medium text-muted">Liquidación</h3>
-
-      <div className="ui-card bg-surface p-3 text-sm">
-        <div className="flex justify-between">
-          <span className="text-muted">Vendió</span>
-          <span className="text-ink">{formatMoney(l.totalSold)}</span>
-        </div>
-        <div className="mt-1 flex justify-between">
-          <span className="text-muted">Cobró</span>
-          <span className="text-ink">{formatMoney(l.totalCollected)}</span>
-        </div>
-        <div className="mt-1 flex justify-between border-t border-line pt-1">
-          <span className="text-muted">Quedó a cuenta</span>
-          <span className="text-ink">{formatMoney(l.newDebt)}</span>
-        </div>
-
-        {l.amountReceived === null ? (
-          <p className="mt-2 text-xs text-muted">Todavía no se rindió.</p>
-        ) : (
-          <>
-            <div className="mt-2 flex justify-between border-t border-line pt-2">
-              <span className="text-muted">Entregó</span>
-              <span className="text-ink">{formatMoney(l.amountReceived)}</span>
-            </div>
-            <div className="mt-1 flex justify-between">
-              <span className="text-muted">Diferencia de caja</span>
-              <span
-                className={
-                  l.cashDifference === 0 ? 'font-medium text-success' : 'font-medium text-danger'
-                }
-              >
-                {formatMoney(l.cashDifference ?? 0)}
-              </span>
-            </div>
-          </>
-        )}
+    <Panel title="Liquidación">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <StatTile label="Vendió" value={formatMoney(l.totalSold)} />
+        <StatTile label="Cobró" value={formatMoney(l.totalCollected)} />
+        <StatTile label="Quedó a cuenta" value={formatMoney(l.newDebt)} tone={l.newDebt > 0 ? 'warning' : 'neutral'}
+          detail={l.newDebt > 0 ? 'Ventas sin cobrar en esta salida' : 'Nada quedó debiendo'} />
       </div>
 
+      {byMethod && (
+        <div className="grid gap-3 sm:grid-cols-3">
+          <StatTile label="Efectivo" value={formatMoney(byMethod.cash)} detail="Lo que tiene que entregar el chofer" />
+          <StatTile label="Transferencia" value={formatMoney(byMethod.transfer)} tone={byMethod.transfer > 0 ? 'info' : 'neutral'}
+            detail="No pasa por el chofer" />
+          <StatTile label="Tarjeta" value={formatMoney(byMethod.card)} tone={byMethod.card > 0 ? 'info' : 'neutral'}
+            detail="No pasa por el chofer" />
+        </div>
+      )}
+
+      {l.amountReceived !== null && (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <StatTile label="Entregó" value={formatMoney(l.amountReceived)} />
+          <StatTile label="Diferencia de caja" value={formatMoney(Math.abs(diferencia))}
+            tone={diferencia === 0 ? 'success' : 'danger'}
+            detail={diferencia === 0 ? 'La caja cuadra' : diferencia > 0 ? 'Falta plata: cobró más de lo que entregó' : 'Sobra plata: entregó más de lo que cobró'} />
+        </div>
+      )}
+
       {l.amountReceived === null && cerrada && (
-        <form onSubmit={onSubmit} className="flex flex-col gap-3">
+        <form onSubmit={onSubmit} className="flex flex-col gap-3 rounded border border-warning/40 bg-warning-soft p-4">
+          <p className="text-base font-semibold text-ink">Falta rendir el efectivo de esta salida.</p>
           <Field
             label="Cuánta plata llegó"
             name="amountReceived"
@@ -100,17 +98,17 @@ export function SettlementPanel({ sessionId, cerrada }: { sessionId: string; cer
               {error}
             </p>
           )}
-          <Button type="submit" disabled={rendir.isPending}>
+          <Button type="submit" className="self-start" disabled={rendir.isPending}>
             {rendir.isPending ? 'Registrando...' : 'Registrar rendición'}
           </Button>
         </form>
       )}
 
       {l.amountReceived === null && !cerrada && (
-        <p className="text-xs text-muted">
-          Se rinde cuando el chofer volvió y cerró la salida.
+        <p className="text-sm text-muted">
+          Todavía no se rindió. Se rinde cuando el chofer volvió y se recibió el camión.
         </p>
       )}
-    </section>
+    </Panel>
   )
 }

@@ -1,3 +1,4 @@
+import type { LastNoPurchase } from '../utils/noPurchase'
 import { api } from '../../core'
 import type { PagedResult } from '../../core'
 
@@ -22,6 +23,7 @@ export interface Customer {
   notes: string | null
   isActive: boolean
   displayName: string
+  lastNoPurchase: LastNoPurchase | null
   lastPurchaseAt: string | null
   daysWithoutPurchase: number | null
   sinComprasRegistradas: boolean
@@ -55,6 +57,7 @@ export interface CustomerAccount {
   phone: string
   zoneName: string | null
   balance: number
+  lastNoPurchase: LastNoPurchase | null
   lastPurchaseAt: string | null
   daysWithoutPurchase: number | null
   weeksWithoutPurchase: number

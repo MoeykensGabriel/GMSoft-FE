@@ -1,3 +1,4 @@
+import { Panel } from '../../core'
 import type { SessionStockLine } from '../services/sessionService'
 
 interface Props {
@@ -15,41 +16,38 @@ interface Props {
  */
 export function StockOnBoardPanel({ stock, cerrada }: Props) {
   const pendiente = stock.filter((l) => l.fullOnBoard !== 0 || l.emptyOnBoard !== 0)
+  const llenos = pendiente.reduce((sum, l) => sum + l.fullOnBoard, 0)
+  const vacios = pendiente.reduce((sum, l) => sum + l.emptyOnBoard, 0)
 
   return (
-    <section className="flex flex-col gap-2">
-      <h3 className="text-sm font-medium text-muted">
-        {cerrada ? 'Faltante al cerrar' : 'A bordo ahora'}
-      </h3>
-
+    <Panel title={cerrada ? 'Faltante al cerrar' : 'A bordo ahora'}>
       {pendiente.length === 0 ? (
-        <p
-          className={`rounded border p-3 text-sm ${
-            cerrada
-              ? 'border-success/30 bg-success-soft text-success-dark'
-              : 'border-line bg-surface text-muted'
-          }`}
-        >
-          {cerrada ? 'Cuadró todo.' : 'Sin stock a bordo.'}
+        <p className={`rounded border px-4 py-3 text-lg font-semibold ${
+          cerrada ? 'border-success/40 bg-success-soft text-success-dark' : 'border-line bg-canvas text-muted'
+        }`}>
+          {cerrada ? 'Cuadró todo: no falta nada.' : 'Sin stock a bordo.'}
         </p>
       ) : (
-        <ul
-          className={`flex flex-col gap-1 rounded border p-3 text-sm ${
-            cerrada ? 'border-danger/30 bg-danger-soft' : 'border-line bg-surface'
-          }`}
-        >
-          {pendiente.map((l) => (
-            <li key={l.productId} className="flex justify-between">
-              <span className={cerrada ? 'text-danger' : 'text-muted'}>{l.productDetail}</span>
-              <span className={cerrada ? 'text-danger-dark' : 'text-ink'}>
-                {l.fullOnBoard !== 0 && `${l.fullOnBoard} llenos`}
-                {l.fullOnBoard !== 0 && l.emptyOnBoard !== 0 && ' · '}
-                {l.emptyOnBoard !== 0 && `${l.emptyOnBoard} vacíos`}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <>
+          <p className={`text-lg font-semibold ${cerrada ? 'text-danger-dark' : 'text-ink'}`}>
+            {cerrada ? 'Faltan ' : 'Lleva '}{llenos} llenos y {vacios} vacíos
+          </p>
+          <ul className={`flex flex-col divide-y rounded border ${
+            cerrada ? 'divide-danger/20 border-danger/40 bg-danger-soft' : 'divide-line border-line bg-surface'
+          }`}>
+            {pendiente.map((l) => (
+              <li key={l.productId} className="flex flex-wrap items-baseline justify-between gap-x-4 px-4 py-3">
+                <span className="text-base font-medium text-ink">{l.productDetail}</span>
+                <span className={`text-lg font-semibold ${cerrada ? 'text-danger-dark' : 'text-ink'}`}>
+                  {l.fullOnBoard !== 0 && `${l.fullOnBoard} llenos`}
+                  {l.fullOnBoard !== 0 && l.emptyOnBoard !== 0 && ' · '}
+                  {l.emptyOnBoard !== 0 && `${l.emptyOnBoard} vacíos`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
-    </section>
+    </Panel>
   )
 }

@@ -61,7 +61,7 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
       {modo !== null && <Button variant="secondary" onClick={() => elegir(null)}>← Menú principal</Button>}
       {modo === 'ventas' && <>
         <LinkButton to="/reparto/visita?new=1" variant="primary" className="min-h-14">+ Agregar cliente</LinkButton>
-        <CustomerRouteList vehicleId={sesion.vehicleId} zoneId={sesion.zoneId} routeDays={sesion.routeDays} deferredCustomerIds={sesion.deferredCustomerIds} visitedCustomerIds={visitados} onSelect={(id) => navigate(`/reparto/clientes/${encodeURIComponent(id)}`)} />
+        <CustomerRouteList vehicleId={sesion.vehicleId} zoneId={sesion.zoneId} routeDays={sesion.routeDays} noPurchaseReasons={Object.fromEntries((visitas.data ?? []).flatMap((v) => v.type === 'NoPurchase' && v.noPurchaseReason ? [[v.customerId, v.noPurchaseReason]] : []))} visitedCustomerIds={visitados} onSelect={(id) => navigate(`/reparto/clientes/${encodeURIComponent(id)}`)} />
       </>}
       {modo === 'promociones' && <>
         <LinkButton to="/reparto/promocion" variant="primary" className="min-h-14">+ Registrar promoción</LinkButton>

@@ -3,11 +3,13 @@ import { customerService } from '../services/customerService'
 import type { Customer } from '../services/customerService'
 import { purchaseActivityLabel } from '../utils/activity'
 import { CustomerContainersSummary } from './CustomerContainersSummary'
+import { noPurchaseLabel } from '../utils/noPurchase'
+import type { NoPurchaseReason } from '../utils/noPurchase'
 import { formatMoney } from '../../core'
 
-export function CustomerCard({ customer, onSelect, deferred = false }: {
+export function CustomerCard({ customer, onSelect, noPurchaseReason }: {
   customer: Customer
-  deferred?: boolean
+  noPurchaseReason?: NoPurchaseReason
   onSelect: (id: string) => void
 }) {
   const account = useQuery({
@@ -33,7 +35,7 @@ export function CustomerCard({ customer, onSelect, deferred = false }: {
         <span className="min-w-0 break-words">{account.data ? <CustomerContainersSummary account={account.data} /> : account.isError ? 'No se pudieron leer los envases' : 'Cargando envases…'}</span>
       </div>
       {customer.visitDays == null && <span className="mt-1 block text-xs">Días pendientes de configurar</span>}
-      {deferred && <span className="mt-1 inline-block rounded border border-current px-2 py-1 text-xs font-semibold">Visita pendiente</span>}
+      {noPurchaseReason && <span className="mt-1 block text-sm font-semibold">No compró: {noPurchaseLabel(noPurchaseReason)}</span>}
     </button>
   )
 }

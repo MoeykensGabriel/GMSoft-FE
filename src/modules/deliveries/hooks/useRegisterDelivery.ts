@@ -13,6 +13,7 @@ export function useRegisterDelivery() {
       // quedo viejo en el mismo instante en que el backend respondio.
       queryClient.invalidateQueries({ queryKey: SESION_ACTUAL })
       queryClient.invalidateQueries({ queryKey: ['customers'] })
+      queryClient.invalidateQueries({ queryKey: ['sessions'] })
     },
   })
 }

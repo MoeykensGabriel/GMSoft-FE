@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
 import { Button, ErrorMessage, Field, Page, PageHeader } from '../../core'
+import { UnvisitedCustomersPanel } from '../components/UnvisitedCustomersPanel'
 import { ReturnsEditor } from '../components/ReturnsEditor'
 import type { ReturnLine } from '../components/ReturnsEditor'
 import { sessionService } from '../services/sessionService'
@@ -140,6 +141,7 @@ export function ReceiveSessionView() {
 
       <ReturnsEditor stock={s.stock} lineas={devoluciones} onChange={setDevoluciones} />
 
+      <UnvisitedCustomersPanel sessionId={id} notice />
       <ErrorMessage error={recibir.error} />
 
       <Button type="submit" disabled={recibir.isPending}>

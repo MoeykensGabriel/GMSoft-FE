@@ -1,6 +1,7 @@
+import type { NoPurchaseReason } from '../../customers'
 import { api } from '../../core'
 
-export type DeliveryType = 'Sale' | 'ContainerOnly'
+export type DeliveryType = 'Sale' | 'ContainerOnly' | 'NoPurchase'
 export type PaymentMethod = 'Cash' | 'Transfer' | 'Card'
 
 export interface NewCustomerLine {
@@ -16,6 +17,7 @@ export interface RegisterDeliveryRequest {
   customerId: string | null
   newCustomer: NewCustomerLine | null
   type: DeliveryType
+  noPurchaseReason?: NoPurchaseReason
   items: { productId: string; quantity: number }[]
   containersOut: { productId: string; quantity: number }[]
   containersIn: { productId: string; quantity: number }[]

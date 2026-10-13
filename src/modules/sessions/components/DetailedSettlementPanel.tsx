@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { formatDate, formatMoney, DataTable } from '../../core'
+import { noPurchaseLabel } from '../../customers'
 import { detailedSettlementQuery } from '../hooks/detailedSettlementQuery'
 
 /**
@@ -42,6 +43,9 @@ export function DetailedSettlementPanel({ sessionId }: { sessionId: string }) {
               </tr>
             </thead>
             <tbody>
+              {(c.noPurchases ?? []).map((visit) => <tr key={visit.date} className="border-b border-line">
+                <td>{formatDate(visit.date)}</td><td /><td>No compró — {noPurchaseLabel(visit.reason)}{visit.notes && <span className="block text-muted">{visit.notes}</span>}</td><td />
+              </tr>)}
               {c.lines.map((linea, i) => (
                 <tr key={i} className="border-b border-line">
                   <td className="px-3 py-2">{formatDate(linea.date)}</td>

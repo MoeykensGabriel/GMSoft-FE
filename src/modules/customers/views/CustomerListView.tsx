@@ -6,6 +6,8 @@ import { vehicleService } from '../../vehicles'
 import { customerService } from '../services/customerService'
 import type { Customer } from '../services/customerService'
 import { purchaseActivityLabel } from '../utils/activity'
+import { noPurchaseLabel } from '../utils/noPurchase'
+import { BUSINESS_TIME_ZONE } from '../../core'
 import { visitDaysLabel } from '../utils/visitDays'
 
 // El color acompaña al texto: rojo y negro son los mismos umbrales que ve el chofer.
@@ -59,6 +61,7 @@ export function CustomerListView() {
               <td>{customer.vehicleId ? <>{customer.vehicleName}<span className={detail}>{customer.vehicleLicensePlate}</span></> : 'Sin camión asignado'}</td>
               <td>{visitDaysLabel(customer.visitDays)}</td>
               <td><span className="font-semibold">{purchaseActivityLabel(customer.weeksWithoutPurchase, customer.lastPurchaseAt === null)}</span>
+                {customer.lastNoPurchase && <span className={detail}>Última visita sin compra: {new Intl.DateTimeFormat('es-AR', { day: '2-digit', month: '2-digit', timeZone: BUSINESS_TIME_ZONE }).format(new Date(customer.lastNoPurchase.date))} · {noPurchaseLabel(customer.lastNoPurchase.reason)}</span>}
                 {customer.lastPurchaseAt && <span className={detail}>Última compra: {formatDate(customer.lastPurchaseAt)}</span>}</td>
               <td><Link to={`/panel/clientes/${customer.id}`} className={`inline-flex min-h-11 items-center ${dark ? 'underline' : 'ui-link'}`} aria-label={`Editar cliente ${customer.displayName}`}>Editar</Link></td>
             </tr>

@@ -1,3 +1,4 @@
+import type { Customer, LastNoPurchase, NoPurchaseReason } from '../../customers'
 import { api } from '../../core'
 import type { PagedResult } from '../../core'
 
@@ -94,7 +95,8 @@ export interface SessionDelivery {
   customerId: string
   customerName: string
   customerAddress: string
-  type: 'Sale' | 'ContainerOnly'
+  type: 'Sale' | 'ContainerOnly' | 'Promotion' | 'NoPurchase'
+  noPurchaseReason: NoPurchaseReason | null
   deliveredAt: string
   total: number
   notes: string | null
@@ -130,6 +132,7 @@ export interface CustomerSettlement {
   customerName: string
   customerAddress: string
   customerPhone: string
+  noPurchases: LastNoPurchase[]
   lines: CustomerSettlementLine[]
   /** Vacios que devolvio, en positivo. */
   returnedContainers: { productDetail: string; quantity: number }[]
@@ -141,6 +144,8 @@ export interface CustomerSettlement {
 }
 
 export const sessionService = {
+  getUnvisitedCustomers: (sessionId: string) =>
+    api.get<{ items: Customer[]; total: number }>(`/api/sessions/${sessionId}/unvisited-customers`),
   registerRestock: (sessionId: string, body: RegisterRestockRequest) =>
     api.post<SessionRestock>(`/api/sessions/${sessionId}/restocks`, body),
   keepAlive: (sessionId: string) => api.post<{ status: SessionStatus; token: string | null }>(`/api/sessions/${sessionId}/keep-alive`),

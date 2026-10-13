@@ -2,13 +2,14 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Button, Field } from '../../core'
 import { customerService } from '../services/customerService'
+import type { NoPurchaseReason } from '../utils/noPurchase'
 import { CustomerCard } from './CustomerCard'
 
-export function CustomerRouteList({ vehicleId, zoneId, routeDays, onSelect, deferredCustomerIds = [], visitedCustomerIds = [] }: {
+export function CustomerRouteList({ vehicleId, zoneId, routeDays, onSelect, noPurchaseReasons = {}, visitedCustomerIds = [] }: {
   vehicleId: string
   zoneId: string
   routeDays: number[]
-  deferredCustomerIds?: string[]
+  noPurchaseReasons?: Record<string, NoPurchaseReason>
   /** Ya visitados en esta salida: salen de la lista de pendientes y quedan aparte. */
   visitedCustomerIds?: string[]
   onSelect: (id: string) => void
@@ -42,7 +43,7 @@ export function CustomerRouteList({ vehicleId, zoneId, routeDays, onSelect, defe
       {customers.isSuccess && list.length === 0 && <p className="text-sm text-muted">{visited.length > 0 && !customers.hasNextPage ? (debouncedSearch ? 'Los clientes de esa búsqueda ya fueron visitados.' : 'Ya visitaste a todos los clientes de esta salida.') : debouncedSearch ? 'No se encontraron clientes con esa búsqueda.' : 'No hay clientes programados para los días de esta salida en la zona.'}</p>}
       {list.length > 0 && <div aria-hidden="true" className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)_minmax(0,1fr)] gap-2 rounded-t bg-accent px-2 py-3 text-xs font-semibold text-white"><span>Cliente</span><span>Dirección</span><span className="text-right">Deuda</span></div>}
       <ul className="ui-card flex flex-col overflow-hidden">
-        {list.map((customer) => <li key={customer.id}><CustomerCard customer={customer} onSelect={onSelect} deferred={deferredCustomerIds.includes(customer.id)} /></li>)}
+        {list.map((customer) => <li key={customer.id}><CustomerCard customer={customer} onSelect={onSelect} /></li>)}
       </ul>
       {customers.isFetchNextPageError && <p role="alert">No se pudo cargar la siguiente página. Podés reintentar.</p>}
       {customers.hasNextPage && <Button variant="secondary" disabled={customers.isFetchingNextPage}
@@ -52,7 +53,7 @@ export function CustomerRouteList({ vehicleId, zoneId, routeDays, onSelect, defe
       {visited.length > 0 && <details className="ui-card p-3">
         <summary className="cursor-pointer py-1 text-sm font-medium">Ya visitados ({visited.length})</summary>
         <ul className="mt-2 flex flex-col overflow-hidden">
-          {visited.map((customer) => <li key={customer.id}><CustomerCard customer={customer} onSelect={onSelect} /></li>)}
+          {visited.map((customer) => <li key={customer.id}><CustomerCard customer={customer} onSelect={onSelect} noPurchaseReason={noPurchaseReasons[customer.id]} /></li>)}
         </ul>
       </details>}
     </section>
