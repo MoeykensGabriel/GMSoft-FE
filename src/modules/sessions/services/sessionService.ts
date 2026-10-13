@@ -49,7 +49,6 @@ export interface Session {
   zoneName: string
   openedAt: string
   routeDays: number[]
-  deferredCustomerIds: string[]
   closedAt: string | null
   kilometersAtOpen: number
   kilometersAtClose: number | null
@@ -151,7 +150,6 @@ export const sessionService = {
   keepAlive: (sessionId: string) => api.post<{ status: SessionStatus; token: string | null }>(`/api/sessions/${sessionId}/keep-alive`),
   getStatus: (sessionId: string) => api.get<DepartureStatus>(`/api/sessions/${sessionId}/status`),
   getActiveDepartures: () => api.get<ActiveDeparture[]>('/api/sessions/active-departures'),
-  postponeVisit: (customerId: string) => api.post<void>(`/api/sessions/current/customers/${customerId}/postpone`, {}),
   /**
    * La sesion abierta del chofer, o null si no tiene ninguna. El backend devuelve
    * 204 sin cuerpo cuando no hay, y el cliente lo traduce a undefined.
