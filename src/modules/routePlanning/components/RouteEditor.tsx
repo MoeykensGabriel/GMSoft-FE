@@ -127,11 +127,11 @@ export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSav
     {rows.length === 0 ? <p>No hay clientes de este camión en esa zona para ese día</p>
       : <>
         <p className="text-sm text-muted">Arrastrá desde el agarre o usá las flechas para subir y bajar. El orden es compartido con los otros días de visita.</p>
-        <DataTable label="Clientes del recorrido" className="min-w-[80rem]">
+        <DataTable label="Clientes del recorrido" className="min-w-[62rem]">
           <thead><tr>
-            <th scope="col">Ordenar</th><th scope="col">Pos</th><th scope="col">Cliente</th>
-            <th scope="col">Dirección</th><th scope="col">Zona</th>
-            {WEEKDAYS.map((day) => <th key={day.value} scope="col" className="text-center"><abbr className="no-underline" title={day.label}>{day.label.slice(0, 3)}</abbr></th>)}
+            <th scope="col">Ordenar</th><th scope="col" className="whitespace-nowrap">Pos</th><th scope="col">Cliente</th>
+            <th scope="col">Dirección</th>
+            {WEEKDAYS.map((day) => <th key={day.value} scope="col" className="whitespace-nowrap text-center"><abbr className="no-underline" title={day.label}>{day.label.slice(0, 3)}</abbr></th>)}
             <th scope="col">Camión</th>
           </tr></thead>
           <tbody onDragLeave={(event) => {
@@ -176,13 +176,13 @@ export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSav
                 {modified && <Badge tone="warning">Modificado</Badge>}
                 {leaves && <span className="text-warning">Sale de esta lista al guardar</span>}
               </div></td>
-              <td>{row.address}<span className="block text-muted">{row.phone}</span></td><td>{row.zoneName}</td>
+              <td>{row.address}<span className="block text-muted">{row.phone}</span></td>
               {WEEKDAYS.map((day) => <td key={day.value} className="text-center">
                 <input type="checkbox" checked={row.visitDays.includes(day.value)} disabled={pending}
                   aria-label={`${day.label} para ${row.displayName}`} onChange={() => changeDay(row, day.value)} />
               </td>)}
-              <td><Select label={`Camión de ${row.displayName}`} value={row.vehicleId} disabled={pending || vehicles.length === 0}
-                className="min-w-44" onChange={(event) => update(row.id, { vehicleId: event.target.value })}>
+              <td><Select hideLabel label={`Camión de ${row.displayName}`} value={row.vehicleId} disabled={pending || vehicles.length === 0}
+                className="min-w-40" onChange={(event) => update(row.id, { vehicleId: event.target.value })}>
                 {!vehicles.some((vehicle) => vehicle.id === row.vehicleId) && <option value={row.vehicleId}>{row.vehicleName} · {row.vehicleLicensePlate}</option>}
                 {vehicles.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.name} · {vehicle.licensePlate}</option>)}
               </Select></td>

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { Badge, Button, DataTable, ErrorMessage, Field, ManagementHeader, Pagination, Select, Page } from '../../core'
+import { Badge, Button, DataTable, ErrorMessage, Field, ManagementHeader, Pagination, Select, Page, WhatsAppButton } from '../../core'
 import { driverService } from '../services/driverService'
 
 export function DriverListView() {
@@ -22,8 +22,8 @@ export function DriverListView() {
       {!drivers.data.items.length ? <p>{search || active ? 'No se encontraron choferes para estos filtros.' : 'Todavía no hay choferes. Creá uno con su usuario de acceso y un vehículo asignado.'}</p> : <DataTable label="Choferes registrados" className="min-w-[48rem]">
         <thead><tr><th scope="col">Chofer</th><th scope="col">Usuario</th><th scope="col">Contacto</th><th scope="col">Vehículo</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
         <tbody>{drivers.data.items.map((driver) => <tr key={driver.id}>
-          <td className="font-semibold">{driver.firstName} {driver.lastName}<span className="block text-xs font-normal text-muted">DNI {driver.documentNumber}</span></td>
-          <td>{driver.userName ?? 'Sin usuario vinculado'}</td><td>{driver.phone}</td>
+          <td className="font-semibold">{driver.firstName} {driver.lastName}</td>
+          <td>{driver.userName ?? 'Sin usuario vinculado'}</td><td><div className="flex flex-wrap items-center gap-2"><span>{driver.phone}</span><WhatsAppButton phone={driver.phone} name={`${driver.firstName} ${driver.lastName}`} /></div></td>
           <td>{driver.vehicleId ? <>{driver.vehicleName ?? 'Vehículo'}<span className="block text-xs text-muted">{driver.vehicleLicensePlate}</span></> : 'Sin asignar: no puede iniciar un reparto'}</td>
           <td><Badge tone={driver.isActive ? 'success' : 'neutral'}>{driver.isActive ? 'Activo' : 'Inactivo'}</Badge></td>
           <td><Link to={`/panel/choferes/${driver.id}`} className="ui-link inline-flex min-h-11 items-center" aria-label={`Editar chofer ${driver.firstName} ${driver.lastName}`}>Editar / contraseña</Link></td>

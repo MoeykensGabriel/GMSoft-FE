@@ -22,7 +22,7 @@ export function RoutePlanningView() {
     setFilters(next)
   }
 
-  return <Page className="flex min-w-0 flex-col gap-5 p-6">
+  return <Page className="mx-auto flex min-w-0 max-w-6xl flex-col gap-5 p-4 md:p-6">
     <PageHeader title="Recorridos" description="Organizá el orden, los días de visita y el camión de los clientes. Los cambios se aplican todos juntos al guardar." />
     {vehicles.isError && <div><ErrorMessage error={vehicles.error} /><Button variant="secondary" onClick={() => vehicles.refetch()}>Reintentar camiones</Button></div>}
     {zones.isError && <div><ErrorMessage error={zones.error} /><Button variant="secondary" onClick={() => zones.refetch()}>Reintentar zonas</Button></div>}
