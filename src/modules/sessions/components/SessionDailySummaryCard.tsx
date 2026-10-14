@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Badge, BUSINESS_TIME_ZONE, formatDateTime } from '../../core'
+import { OutsideWorkingHoursBadge, OutsideWorkingHoursEvents } from '../../workingHours'
 import type { SessionDailySummary } from '../services/dailySummaryService'
 import { DailySummaryMoneyTable, DailySummaryStockTable } from './DailySummaryTables'
 
@@ -14,13 +15,14 @@ export function SessionDailySummaryCard({ session }: { session: SessionDailySumm
       <div className="flex flex-wrap items-start justify-between gap-3 text-sm">
         <div className="min-w-0 space-y-1">
           <p className="font-semibold">{session.vehicleName} · {session.vehicleLicensePlate}</p>
-          <p>Apertura: {time(session.openedAt)} · {session.kilometersAtOpen} km</p>
-          {session.closedAt && <p>Cierre: {time(session.closedAt)} · {session.kilometersAtClose} km</p>}
-          {session.receivedAt && <p>Rendición de efectivo: {time(session.receivedAt)}</p>}
+          <p>Apertura: {time(session.openedAt)} · {session.kilometersAtOpen} km <OutsideWorkingHoursBadge marked={session.openedOutsideWorkingHours} /></p>
+          {session.closedAt && <p>Cierre: {time(session.closedAt)} · {session.kilometersAtClose} km <OutsideWorkingHoursBadge marked={session.closedOutsideWorkingHours} /></p>}
+          {session.receivedAt && <p>Rendición de efectivo: {time(session.receivedAt)} <OutsideWorkingHoursBadge marked={session.settlementOutsideWorkingHours} /></p>}
           {session.notes && <p className="whitespace-pre-wrap break-words">Observaciones: {session.notes}</p>}
         </div>
         <Link to={`/panel/salidas/${session.sessionId}`} className="text-muted underline underline-offset-2">Ver detalle de la salida →</Link>
       </div>
+      <OutsideWorkingHoursEvents events={session.outsideWorkingHoursEvents} />
       <DailySummaryMoneyTable money={session.money} isClosed={session.isClosed} label="Dinero de la salida" />
       {!session.isClosed && <p className="text-sm text-muted">A bordo es lo que sigue en el camión. El cuadre se confirma al recibirlo.</p>}
       <DailySummaryStockTable products={session.products} totals={session.totals} isClosed={session.isClosed} label="Productos de la salida" />

@@ -24,6 +24,7 @@ export class ApiError extends Error {
   // que prohibe las propiedades de constructor de TypeScript.
   readonly status: number
   readonly title: string
+  readonly type?: string
   readonly detail?: string
   /** Errores por campo, cuando la validacion rechaza el request. */
   readonly errors?: Record<string, string[]>
@@ -33,12 +34,14 @@ export class ApiError extends Error {
     title: string,
     detail?: string,
     errors?: Record<string, string[]>,
+    type?: string,
   ) {
     super(detail || title)
     this.status = status
     this.title = title
     this.detail = detail
     this.errors = errors
+    this.type = type
   }
 
   /** Todos los mensajes de validacion en una sola linea, para mostrar rapido. */
@@ -79,7 +82,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   const data = texto ? JSON.parse(texto) : null
 
   if (!res.ok) {
-    throw new ApiError(res.status, data?.title ?? 'Error', data?.detail, data?.errors)
+    throw new ApiError(res.status, data?.title ?? 'Error', data?.detail, data?.errors, data?.type)
   }
 
   return data as T

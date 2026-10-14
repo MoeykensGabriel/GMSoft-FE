@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ApiError, Button, Field, Panel, formatMoney } from '../../core'
+import { OutsideWorkingHoursBadge } from '../../workingHours'
 import { sessionService } from '../services/sessionService'
 import { StatTile } from './StatTile'
 
@@ -29,7 +30,7 @@ export function SettlementPanel({ sessionId, cerrada, byMethod }: {
   const rendir = useMutation({
     mutationFn: (monto: number) => sessionService.registerSettlement(sessionId, monto, null),
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ['sessions', 'settlement', sessionId] }),
+      queryClient.invalidateQueries({ queryKey: ['sessions'] }),
   })
 
   const [monto, setMonto] = useState('')
@@ -53,6 +54,7 @@ export function SettlementPanel({ sessionId, cerrada, byMethod }: {
 
   return (
     <Panel title="Liquidación">
+      {l.receivedAt && <OutsideWorkingHoursBadge marked={l.isOutsideWorkingHours} />}
       <div className="grid gap-3 sm:grid-cols-3">
         <StatTile label="Vendió" value={formatMoney(l.totalSold)} />
         <StatTile label="Cobró" value={formatMoney(l.totalCollected)} />

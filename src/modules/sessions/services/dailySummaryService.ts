@@ -1,4 +1,5 @@
 import { api } from '../../core'
+import type { SessionWorkingHours } from '../../workingHours'
 import type { SessionStatus } from './sessionService'
 
 export interface SummaryStock {
@@ -25,7 +26,7 @@ export interface SummaryMoney {
   cashDifference: number | null
 }
 
-export interface SessionDailySummary {
+export interface SessionDailySummary extends SessionWorkingHours {
   sessionId: string
   vehicleId: string
   vehicleName: string

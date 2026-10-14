@@ -19,6 +19,7 @@ export type VehicleInput = Omit<Vehicle, 'id'>
  * varias tandas y se equivoca en una sola.
  */
 export interface VehicleLoadLine {
+  isOutsideWorkingHours: boolean
   id: string
   productId: string
   productDetail: string
@@ -86,8 +87,9 @@ export const vehicleService = {
     items: { productId: string; quantity: number }[],
     routeDays: number[],
     clientRequestId: string,
+    confirmOutsideWorkingHours = false,
   ) =>
-    api.post<{ loadedAt: string }>(`/api/vehicles/${vehicleId}/load`, { vehicleId, items, routeDays, clientRequestId }),
+    api.post<{ loadedAt: string }>(`/api/vehicles/${vehicleId}/load`, { vehicleId, items, routeDays, clientRequestId, confirmOutsideWorkingHours }),
 
   updateRouteDays: (vehicleId: string, routeDays: number[]) =>
     api.put<void>(`/api/vehicles/${vehicleId}/load/route-days`, { vehicleId, routeDays }),

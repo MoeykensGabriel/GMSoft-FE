@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { BUSINESS_TIME_ZONE, Button, ErrorMessage, Select, WeekdaysField, formatDateTime, currentBusinessWeekday, newRequestId, Page, PageHeader } from '../../core'
+import { ApiError, BUSINESS_TIME_ZONE, Button, ErrorMessage, Select, WeekdaysField, formatDateTime, currentBusinessWeekday, newRequestId, Page, PageHeader } from '../../core'
+import { OutsideWorkingHoursBadge } from '../../workingHours'
 import { productService } from '../../products'
 import { driverService } from '../../drivers'
 import { VehicleAssignmentSummary } from '../components/VehicleAssignmentSummary'
@@ -20,6 +21,8 @@ import { vehicleService } from '../../vehicles'
  */
 export function VehicleLoadView() {
   const queryClient = useQueryClient()
+  const attempt = useRef<{ vehicleId: string; items: LoadLine[]; routeDays: number[]; requestId: string; confirmOutsideWorkingHours: boolean } | null>(null)
+  const sending = useRef(false)
   const [vehicleId, setVehicleId] = useState('')
   const [tanda, setTanda] = useState<LoadLine[]>([])
   const [success, setSuccess] = useState(false)
@@ -61,15 +64,23 @@ export function VehicleLoadView() {
   const daysChanged = routeDays.join(',') !== pendingDays.join(',')
 
   const cargar = useMutation({
-    mutationFn: async () => {
+    retry: false,
+    mutationFn: async (confirmOutside: boolean) => {
       if (!tanda.length) {
         await vehicleService.updateRouteDays(vehicleId, routeDays)
         return null
       }
-      return (await vehicleService.registerLoad(vehicleId, tanda, routeDays, requestId)).loadedAt
+      if (!attempt.current) attempt.current = structuredClone({ vehicleId, items: tanda, routeDays, requestId, confirmOutsideWorkingHours: false })
+      // El consentimiento se captura en el clic, antes de que la mutación limpie el error.
+      if (confirmOutside) {
+        attempt.current.confirmOutsideWorkingHours = true
+      }
+      const body = attempt.current
+      return (await vehicleService.registerLoad(body.vehicleId, body.items, body.routeDays, body.requestId, body.confirmOutsideWorkingHours)).loadedAt
     },
     onSuccess: async (registrada) => {
       await refrescar()
+      attempt.current = null
       setTanda([])
       setEditedDays(null)
       setConfirmandoDesde(null)
@@ -78,6 +89,15 @@ export function VehicleLoadView() {
       setSuccess(true)
     },
   })
+
+  const canCorrect = cargar.isIdle || (cargar.error instanceof ApiError && [400, 403, 404, 409].includes(cargar.error.status))
+  async function sendLoad() {
+    if (sending.current) return
+    sending.current = true
+    const outside = cargar.error instanceof ApiError && cargar.error.status === 409 && cargar.error.type === 'outside-working-hours'
+    try { await cargar.mutateAsync(outside) } catch { /* El modal conserva el pedido y muestra el error. */ }
+    finally { sending.current = false }
+  }
 
   const bajar = useMutation({
     mutationFn: (loadId: string) => vehicleService.removeLoad(vehicleId, loadId),
@@ -95,7 +115,7 @@ export function VehicleLoadView() {
       setConfirmandoDesde(new Date())
       return
     }
-    cargar.mutate()
+    cargar.mutate(false)
   }
 
   const lineas = carga.data ?? []
@@ -204,7 +224,8 @@ export function VehicleLoadView() {
                       <p className="text-sm text-ink">
                         {l.quantity} × {l.productDetail}
                       </p>
-                      <p className="text-xs text-muted">{formatDateTime(l.loadedAt)}</p>
+                      <p className="text-xs text-muted">{formatDateTime(l.loadedAt, BUSINESS_TIME_ZONE)}</p>
+                      <OutsideWorkingHoursBadge marked={l.isOutsideWorkingHours} />
                     </div>
                     <Button variant="danger"
                       type="button"
@@ -265,8 +286,10 @@ export function VehicleLoadView() {
           openedAt={confirmandoDesde}
           sending={cargar.isPending}
           error={cargar.error}
-          onBack={() => { setConfirmandoDesde(null); cargar.reset() }}
-          onConfirm={() => { if (!cargar.isPending) cargar.mutate() }}
+          backDisabled={!canCorrect}
+          notice={cargar.isError && !canCorrect ? 'No pudimos confirmar el resultado. Reintentá sin cambiar el pedido para evitar duplicarlo.' : undefined}
+          onBack={() => { attempt.current = null; setConfirmandoDesde(null); cargar.reset() }}
+          onConfirm={() => { void sendLoad() }}
         />
       )}
     </Page>

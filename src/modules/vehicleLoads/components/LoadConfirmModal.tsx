@@ -1,4 +1,4 @@
-import { BUSINESS_TIME_ZONE, Button, ErrorMessage, Modal, formatDateTime, weekdayLabels, DataTable } from '../../core'
+import { ApiError, BUSINESS_TIME_ZONE, Button, ErrorMessage, Modal, formatDateTime, weekdayLabels, DataTable } from '../../core'
 
 export interface LoadConfirmLine {
   productId: string
@@ -35,17 +35,18 @@ export function LoadConfirmModal({
   vehicleName, licensePlate, driverNames, routeDays, lines, openedAt, sending, error, onBack, onConfirm,
   restock = false, notes, backDisabled = false, notice,
 }: Props) {
+  const outside = error instanceof ApiError && error.status === 409 && error.type === 'outside-working-hours'
   const yaTeniaCarga = lines.some((line) => line.totalOnBoard !== line.quantity)
 
   return (
     <Modal
-      title={restock ? 'Confirmar recarga en ruta' : 'Confirmar carga del camión'}
+      title={outside ? 'Fuera del horario laboral' : restock ? 'Confirmar recarga en ruta' : 'Confirmar carga del camión'}
       onClose={() => { if (!backDisabled) onBack() }}
       busy={sending}
       footer={<>
-        <Button type="button" variant="danger" disabled={sending || backDisabled} onClick={onBack}>Volver a editar</Button>
+        <Button type="button" variant="danger" disabled={sending || backDisabled} onClick={onBack}>{outside ? 'Cancelar' : 'Volver a editar'}</Button>
         <Button type="button" disabled={sending} onClick={onConfirm}>
-          {sending ? 'Registrando...' : restock ? 'Confirmar recarga' : 'Confirmar carga'}
+          {sending ? 'Registrando...' : outside ? 'Registrar igual' : restock ? 'Confirmar recarga' : 'Confirmar carga'}
         </Button>
       </>}
     >
@@ -89,7 +90,7 @@ export function LoadConfirmModal({
       {restock && <p>Una recarga confirmada no se puede anular. Un error se corrige en la recepción final.</p>}
       {notice && <p role="status">{notice}</p>}
 
-      <ErrorMessage error={error} />
+      {outside ? <p role="alert" className="rounded border border-warning/40 bg-warning-soft p-3 text-warning">{error.detail}</p> : <ErrorMessage error={error} />}
     </Modal>
   )
 }

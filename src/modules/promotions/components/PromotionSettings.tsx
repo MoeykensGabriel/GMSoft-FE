@@ -33,7 +33,7 @@ function SettingsForm({ initialDays }: { initialDays: number }) {
 }
 export function PromotionSettings() {
   const settings = useQuery({ queryKey: ['promotions', 'settings'], queryFn: promotionService.settings })
-  return <Panel title="Plazo de retiro">
+  return <Panel title="Promociones">
     <p className="text-sm text-muted">Se aplica a las nuevas promociones. No modifica las fechas de retiro de las promociones ya registradas.</p>
     {settings.isPending ? <p role="status">Cargando plazo...</p> : settings.isError ? <>
       <ErrorMessage error={settings.error} /><Button variant="secondary" onClick={() => settings.refetch()}>Reintentar</Button>

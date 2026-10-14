@@ -2,12 +2,12 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { BUSINESS_TIME_ZONE, Button, DataTable, ErrorMessage, Field, Page, PageHeader, Pagination, Select, formatDateTime } from '../../core'
+import { OutsideWorkingHoursBadge } from '../../workingHours'
 import { vehicleService } from '../../vehicles'
 import type { PromotionFilters } from '../services/promotionService'
 import { promotionService } from '../services/promotionService'
 import { pickupLabel } from '../utils/promotion'
 import { PromotionBadge } from '../components/PromotionSummary'
-import { PromotionSettings } from '../components/PromotionSettings'
 
 export function PromotionListView() {
   const [filters, setFilters] = useState<PromotionFilters>({ status: '', vehicleId: '', from: '', to: '' })
@@ -23,7 +23,7 @@ export function PromotionListView() {
   }
   return <Page className="mx-auto flex max-w-7xl flex-col gap-4 p-6">
     <PageHeader title="Promociones" description="Pruebas de productos, prospectos y envases prestados." />
-    <PromotionSettings />
+    <Link to="/panel/configuracion" className="ui-link self-start">Configurar plazo de retiro de promociones</Link>
     <div className="ui-toolbar flex flex-wrap items-end gap-3">
       <Select label="Vehículo" value={filters.vehicleId} onChange={(event) => filter('vehicleId', event.target.value)}>
         <option value="">Elegí un vehículo</option>{vehicles.data?.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.name} · {vehicle.licensePlate}</option>)}
@@ -46,7 +46,8 @@ export function PromotionListView() {
         {!promotions.data.items.length ? <p>No se encontraron promociones con estos filtros.</p> : <DataTable label="Promociones" className="min-w-[65rem]">
           <thead><tr><th scope="col">Fecha</th><th scope="col">Vehículo</th><th scope="col">Chofer</th><th scope="col">Prospecto</th><th scope="col">Productos / envases</th><th scope="col">Retiro</th><th scope="col">Estado</th><th scope="col">Detalle</th></tr></thead>
           <tbody>{promotions.data.items.map((promotion) => <tr key={promotion.id}>
-            <td>{formatDateTime(promotion.registeredAt, BUSINESS_TIME_ZONE)}</td>
+            <td>{formatDateTime(promotion.registeredAt, BUSINESS_TIME_ZONE)} <OutsideWorkingHoursBadge marked={promotion.isOutsideWorkingHours} />
+              {promotion.closedAt && promotion.closedOutsideWorkingHours && <span className="block">Cierre: <OutsideWorkingHoursBadge marked /></span>}</td>
             <td>{promotion.vehicleName}<span className="block text-xs text-muted">{promotion.vehicleLicensePlate}</span></td>
             <td>{promotion.driverName}</td>
             <td>{promotion.prospect.contactName}<span className="block text-xs text-muted">{promotion.prospect.businessName}</span></td>

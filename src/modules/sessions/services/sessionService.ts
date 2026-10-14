@@ -1,16 +1,19 @@
 import type { Customer, LastNoPurchase, NoPurchaseReason } from '../../customers'
 import { api } from '../../core'
 import type { PagedResult } from '../../core'
+import type { SessionWorkingHours } from '../../workingHours'
 
 export type SessionStatus = 'Open' | 'Closed'
 export type ContainerState = 'Full' | 'Empty'
 export interface RegisterRestockRequest {
+  confirmOutsideWorkingHours?: boolean
   clientRequestId: string
   items: { productId: string; quantity: number }[]
   notes: string | null
 }
 
-export interface SessionRestock extends RegisterRestockRequest {
+export interface SessionRestock extends Omit<RegisterRestockRequest, 'confirmOutsideWorkingHours'> {
+  isOutsideWorkingHours: boolean
   id: string
   sessionId: string
   occurredAt: string
@@ -38,7 +41,7 @@ export interface ActiveDeparture {
   initialLoad: { productId: string; productDetail: string; quantity: number }[]
 }
 
-export interface Session {
+export interface Session extends SessionWorkingHours {
   id: string
   driverId: string
   driverName: string
@@ -90,6 +93,7 @@ export interface SessionDeliveryContainer {
 }
 
 export interface SessionDelivery {
+  isOutsideWorkingHours: boolean
   deliveryId: string
   customerId: string
   customerName: string
@@ -104,6 +108,7 @@ export interface SessionDelivery {
 }
 
 export interface SessionSettlement {
+  isOutsideWorkingHours: boolean
   sessionId: string
   totalSold: number
   totalCollected: number

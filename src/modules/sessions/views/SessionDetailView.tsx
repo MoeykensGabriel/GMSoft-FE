@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { Badge, formatDateTime, formatMoney, LinkButton, Page, PageHeader, Panel } from '../../core'
+import { BUSINESS_TIME_ZONE, Badge, formatDateTime, formatMoney, LinkButton, Page, PageHeader, Panel } from '../../core'
+import { OutsideWorkingHoursBadge, OutsideWorkingHoursEvents } from '../../workingHours'
 import { noPurchaseLabel } from '../../customers'
 import { RestocksPanel } from '../components/RestocksPanel'
 import { SettlementPanel } from '../components/SettlementPanel'
@@ -99,10 +100,12 @@ export function SessionDetailView() {
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-base text-ink">
           <Badge tone={cerrada ? 'neutral' : 'warning'}>{cerrada ? 'Camión recibido' : 'En la calle'}</Badge>
           <span className="font-medium">{s.vehicleName} · {s.vehicleLicensePlate}</span>
-          <span className="text-muted">Salió {formatDateTime(s.openedAt)} con {s.kilometersAtOpen} km</span>
-          {s.closedAt && <span className="text-muted">Volvió {formatDateTime(s.closedAt)} con {s.kilometersAtClose} km</span>}
+          <span className="text-muted">Salió {formatDateTime(s.openedAt, BUSINESS_TIME_ZONE)} con {s.kilometersAtOpen} km <OutsideWorkingHoursBadge marked={s.openedOutsideWorkingHours} /></span>
+          {s.closedAt && <span className="text-muted">Volvió {formatDateTime(s.closedAt, BUSINESS_TIME_ZONE)} con {s.kilometersAtClose} km <OutsideWorkingHoursBadge marked={s.closedOutsideWorkingHours} /></span>}
         </div>
       </div>
+
+      <OutsideWorkingHoursEvents events={s.outsideWorkingHoursEvents} />
 
       {!cerrada && (
         <div className="flex flex-wrap gap-3">
@@ -150,7 +153,8 @@ export function SessionDetailView() {
                         <p className="text-base font-semibold text-ink">
                           <span className="mr-2 text-muted">{visitas.indexOf(v) + 1}.</span>{v.customerName}
                         </p>
-                        <p className="text-sm text-muted">{v.customerAddress} · {formatDateTime(v.deliveredAt)}</p>
+                        <p className="text-sm text-muted">{v.customerAddress} · {formatDateTime(v.deliveredAt, BUSINESS_TIME_ZONE)}</p>
+                        <OutsideWorkingHoursBadge marked={v.isOutsideWorkingHours} />
                       </div>
                       {!noCompro && v.items.length > 0 && <p className="text-xl font-semibold text-ink">{formatMoney(v.total)}</p>}
                     </div>

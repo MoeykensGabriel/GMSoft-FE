@@ -15,6 +15,7 @@ import { VehicleLoadView, RestockView, RestockListView } from '../modules/vehicl
 import { VehicleListView, VehicleFormView } from '../modules/vehicles'
 import { DriverListView, DriverFormView } from '../modules/drivers'
 import { ZoneFormView, ZoneListView } from '../modules/zones'
+import { ConfigurationView } from './admin/ConfigurationView'
 import { HomeView } from './HomeView'
 import { AdminLayout } from './admin/AdminLayout'
 import { AdminHomeView } from './admin/AdminHomeView'
@@ -48,6 +49,7 @@ export function AppRouter() {
       <Route element={<ProtectedRoute roles={[ROLES.admin]} />}>
         <Route element={<AdminLayout />}>
           <Route path="/panel" element={<AdminHomeView />} />
+          <Route path="/panel/configuracion" element={<ConfigurationView />} />
           <Route path="/panel/promociones" element={<PromotionListView />} />
           <Route path="/panel/promociones/:id" element={<PromotionDetailView />} />
           <Route path="/panel/vehiculos" element={<VehicleListView />} />

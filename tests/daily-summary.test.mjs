@@ -179,6 +179,7 @@ test('encabezado usa Argentina en todas las horas y enlaza a la salida', () => {
     '../../core': { Badge: 'badge', BUSINESS_TIME_ZONE: 'America/Argentina/Buenos_Aires',
       formatDateTime: (date, zone) => { calls.push([date, zone]); return date } },
     './DailySummaryTables': tables,
+    '../../workingHours': { OutsideWorkingHoursBadge: 'outside-badge', OutsideWorkingHoursEvents: 'outside-events' },
   })
   const session = { sessionId: 'one', driverName: 'Juan', zoneName: 'Centro', vehicleName: 'Camión',
     vehicleLicensePlate: 'AA123BB', openedAt: '2026-10-08T11:00:00Z', closedAt: '2026-10-08T20:00:00Z',

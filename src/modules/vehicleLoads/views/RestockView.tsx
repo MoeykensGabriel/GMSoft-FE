@@ -76,6 +76,6 @@ function RestockForm({ sessionId }: { sessionId: string }) {
       backDisabled={write.locked && !write.canCorrect}
       notice={write.isError && !write.canCorrect ? 'No pudimos confirmar el resultado. Conservamos los datos: presioná Confirmar recarga para reintentar sin duplicarla.' : undefined}
       onBack={() => { if (write.locked) write.correct(); setReview(null) }}
-      onConfirm={() => { void write.send({ items, notes: notes.trim() || null }) }} />}
+      onConfirm={() => { void write.send({ items, notes: notes.trim() || null }, write.outsideRejected) }} />}
   </Page>
 }

@@ -22,10 +22,13 @@ export function useRestockWrite(sessionId: string) {
       void cache.invalidateQueries({ queryKey: ['vehicles'] })
     },
   })
-  async function send(body: Omit<RegisterRestockRequest, 'clientRequestId'>) {
+  async function send(body: Omit<RegisterRestockRequest, 'clientRequestId' | 'confirmOutsideWorkingHours'>, confirmOutside = false) {
     if (sending.current || completed.current) return
     sending.current = true
     if (!attempt.current) attempt.current = structuredClone({ ...body, clientRequestId: newRequestId() })
+    if (confirmOutside && mutation.error instanceof ApiError && mutation.error.status === 409 && mutation.error.type === 'outside-working-hours') {
+      attempt.current = { ...attempt.current, confirmOutsideWorkingHours: true }
+    }
     setLocked(true)
     try { await mutation.mutateAsync(attempt.current) }
     catch { /* ErrorMessage muestra el error. El intento sigue intacto para reintentar. */ }
@@ -45,5 +48,6 @@ export function useRestockWrite(sessionId: string) {
     setLocked(false)
     mutation.reset()
   }
-  return { ...mutation, send, locked, canCorrect, correct, startAnother }
+  const outsideRejected = mutation.error instanceof ApiError && mutation.error.status === 409 && mutation.error.type === 'outside-working-hours'
+  return { ...mutation, send, locked, canCorrect, correct, startAnother, outsideRejected }
 }

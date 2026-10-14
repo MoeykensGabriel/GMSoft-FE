@@ -176,7 +176,7 @@ test('almacenamiento bloqueado o corrupto conserva Entendido en memoria', () => 
 
 test('el aviso usa hora argentina y una línea con todos los productos', () => {
   const { restockTime, restockProducts } = load('sessions/utils/restocks.ts', {
-    '../../core': { BUSINESS_TIME_ZONE: 'America/Argentina/Buenos_Aires' },
+    '../../core': { ApiError, BUSINESS_TIME_ZONE: 'America/Argentina/Buenos_Aires' },
   })
   assert.equal(restockTime('2026-10-08T15:30:00Z'), '12:30')
   assert.equal(restockTime('2026-10-09T02:10:00Z'), '23:10')
@@ -211,7 +211,7 @@ function nodes(tree) {
 test('el modal compartido revisa sin enviar; bloquea edición incierta y usa fecha de referencia', () => {
   const { LoadConfirmModal } = load('vehicleLoads/components/LoadConfirmModal.tsx', {
     'react/jsx-runtime': jsxRuntime,
-    '../../core': { BUSINESS_TIME_ZONE: 'America/Argentina/Buenos_Aires', Button: 'button', Modal: 'modal',
+    '../../core': { ApiError, BUSINESS_TIME_ZONE: 'America/Argentina/Buenos_Aires', Button: 'button', Modal: 'modal',
       ErrorMessage: 'error', DataTable: 'table', weekdayLabels: () => 'Jueves', formatDateTime: () => '8/10/26, 12:30' },
   })
   let sent = 0
@@ -261,4 +261,68 @@ test('aviso accesible: descartar una recarga mantiene las demás y las nuevas', 
   tree = RestockNotice({ userId: 'u', session })
   assert.equal(nodes(tree).filter((node) => node.type === 'li').length, 1)
   assert.equal(nodes(RestockNotice({ userId: 'otro', session })).filter((node) => node.type === 'li').length, 3)
+})
+
+
+test('fuera de horario exige confirmación explícita y conserva clave, productos y notas', async () => {
+  const calls = []
+  const outside = Object.assign(new ApiError(409), { type: 'outside-working-hours' })
+  const harness = hookHarness(async (_, body) => {
+    calls.push(structuredClone(body))
+    if (!body.confirmOutsideWorkingHours) throw outside
+    if (calls.length === 3) throw new TypeError('Respuesta perdida')
+    return { id: 'r' }
+  })
+  let hook = harness.render()
+  const original = { items: [{ productId: 'p', quantity: 3 }], notes: 'Original' }
+  await hook.send(original, true) // Incluso un caller incorrecto no puede confirmar de entrada.
+  assert.equal(calls[0].confirmOutsideWorkingHours, undefined)
+  hook = harness.render()
+  assert.equal(hook.outsideRejected, true)
+  await hook.send(original) // Reintento sin consentimiento: sigue sin override.
+  assert.equal(calls[1].confirmOutsideWorkingHours, undefined)
+  hook = harness.render()
+  await hook.send({ items: [], notes: 'Cambio' }, true)
+  assert.deepEqual(calls[2], { ...calls[0], confirmOutsideWorkingHours: true })
+  hook = harness.render()
+  await hook.send({ items: [], notes: 'Otro cambio' })
+  assert.deepEqual(calls[3], calls[2])
+  assert.equal(harness.render().isSuccess, true)
+})
+
+test('cancelar permite editar; otros conflictos nunca habilitan override', async () => {
+  const calls = []
+  let rejection = Object.assign(new ApiError(409), { type: 'outside-working-hours' })
+  const harness = hookHarness(async (_, body) => { calls.push(structuredClone(body)); throw rejection })
+  const body = { items: [{ productId: 'p', quantity: 1 }], notes: null }
+  await harness.render().send(body)
+  harness.render().correct()
+  rejection = new ApiError(409)
+  await harness.render().send(body, true)
+  assert.notEqual(calls[1].clientRequestId, calls[0].clientRequestId)
+  assert.equal(calls[1].confirmOutsideWorkingHours, undefined)
+  assert.equal(harness.render().outsideRejected, false)
+  await harness.render().send(body, true)
+  assert.equal(calls[2].confirmOutsideWorkingHours, undefined)
+})
+
+test('modal de excepción muestra detalle ámbar y solo confirma mediante Registrar igual', () => {
+  const { LoadConfirmModal } = load('vehicleLoads/components/LoadConfirmModal.tsx', {
+    'react/jsx-runtime': jsxRuntime,
+    '../../core': { ApiError, BUSINESS_TIME_ZONE: 'America/Argentina/Buenos_Aires', Button: 'button', Modal: 'modal',
+      ErrorMessage: 'error', DataTable: 'table', weekdayLabels: () => 'Lunes', formatDateTime: () => '12:00' },
+  })
+  let sent = 0
+  const props = { vehicleName: 'Camión', licensePlate: 'AA', driverNames: [], routeDays: [1], lines: [], openedAt: new Date(),
+    sending: false, error: Object.assign(new ApiError(409), { type: 'outside-working-hours', detail: 'Horario: 08:00 a 18:00' }),
+    onBack() {}, onConfirm() { sent++ } }
+  const tree = LoadConfirmModal(props)
+  assert.equal(sent, 0)
+  assert.equal(tree.props.title, 'Fuera del horario laboral')
+  assert.ok(nodes(tree).some((n) => n.props?.role === 'alert' && n.props.children === props.error.detail && n.props.className.includes('warning')))
+  nodes(tree).find((n) => n.type === 'button' && n.props.children === 'Registrar igual').props.onClick()
+  assert.equal(sent, 1)
+  const other = LoadConfirmModal({ ...props, error: new ApiError(409) })
+  assert.equal(other.props.title, 'Confirmar carga del camión')
+  assert.ok(!nodes(other).some((n) => n.props?.children === 'Registrar igual'))
 })

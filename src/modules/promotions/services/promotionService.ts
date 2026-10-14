@@ -19,6 +19,8 @@ export interface PromotionLine {
   containersLost: number
 }
 export interface Promotion {
+  isOutsideWorkingHours: boolean
+  closedOutsideWorkingHours: boolean
   id: string
   vehicleId: string
   vehicleName: string
@@ -42,6 +44,8 @@ export interface Promotion {
   closeClientRequestId: string | null
 }
 export interface PromotionResult {
+  isOutsideWorkingHours: boolean
+  closedOutsideWorkingHours: boolean
   promotionId: string
   customerId: string | null
   status: Exclude<PromotionStatus, 'Overdue'>

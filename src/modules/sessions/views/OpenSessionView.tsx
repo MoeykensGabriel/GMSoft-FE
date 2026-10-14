@@ -62,7 +62,9 @@ export function OpenSessionView() {
       await abrir.mutateAsync({ zoneId, kilometersAtOpen: Number(kilometros) })
     } catch (err) {
       if (err instanceof ApiError) {
-        setError(err.fieldMessages[0] ?? err.detail ?? err.title)
+        setError(err.status === 409 && err.type === 'outside-working-hours'
+          ? `Fuera del horario laboral. Consultá con la administración. ${err.detail ?? ''}`
+          : err.fieldMessages[0] ?? err.detail ?? err.title)
       } else {
         setError('No se pudo conectar con el servidor.')
       }
@@ -137,7 +139,7 @@ export function OpenSessionView() {
       />
 
       {error && (
-        <p role="alert" className="text-sm text-danger">
+        <p role="alert" className={`text-sm ${abrir.error instanceof ApiError && abrir.error.type === 'outside-working-hours' ? 'rounded border border-warning/40 bg-warning-soft p-3 text-warning' : 'text-danger'}`}>
           {error}
         </p>
       )}

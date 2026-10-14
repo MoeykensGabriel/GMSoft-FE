@@ -1,4 +1,5 @@
 import { Badge, weekdayLabels } from '../../core'
+import { OutsideWorkingHoursBadge } from '../../workingHours'
 import type { Promotion, Prospect } from '../services/promotionService'
 import { pickupLabel } from '../utils/promotion'
 
@@ -21,6 +22,8 @@ export function PromotionBadge({ promotion }: { promotion: Promotion }) {
 export function PromotionSummary({ promotion }: { promotion: Promotion }) {
   return <div className="flex flex-col gap-3">
     <ProspectSummary prospect={promotion.prospect} />
+    {promotion.isOutsideWorkingHours && <p>Registro: <OutsideWorkingHoursBadge marked /></p>}
+    {promotion.closedAt && promotion.closedOutsideWorkingHours && <p>Cierre: <OutsideWorkingHoursBadge marked /></p>}
     <div><PromotionBadge promotion={promotion} /> <span className="text-sm">Retiro: {pickupLabel(promotion.pickupDate)}</span></div>
     <ul className="flex flex-col gap-2 text-sm">{promotion.lines.map((line) => <li key={line.productId}>
       {line.quantity} × {line.productDetail} · {line.containersLoaned} envases prestados
