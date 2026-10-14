@@ -33,7 +33,7 @@ export function SessionListView() {
 
   return (
     <Page className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
-      <PageHeader title={<>Salidas de reparto</>} />
+      <PageHeader title={<>Salidas de reparto</>} actions={<LinkButton to="/panel/salidas/abrir">Abrir salida</LinkButton>} />
 
       <div className="ui-toolbar flex flex-wrap items-end gap-3">
         <Field

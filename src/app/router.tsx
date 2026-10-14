@@ -10,6 +10,7 @@ import {
   DailySummaryView,
   SessionDetailView,
   SessionListView,
+  AdminOpenSessionView,
 } from '../modules/sessions'
 import { VehicleLoadView, RestockView, RestockListView } from '../modules/vehicleLoads'
 import { VehicleListView, VehicleFormView } from '../modules/vehicles'
@@ -68,6 +69,7 @@ export function AppRouter() {
           <Route path="/panel/resumen-diario" element={<DailySummaryView />} />
 
           <Route path="/panel/salidas" element={<SessionListView />} />
+          <Route path="/panel/salidas/abrir" element={<AdminOpenSessionView />} />
           <Route path="/panel/salidas/:id" element={<SessionDetailView />} />
           <Route path="/panel/salidas/:id/recepcion" element={<ReceiveSessionView />} />
           <Route path="/panel/salidas/:id/recarga" element={<RestockView />} />

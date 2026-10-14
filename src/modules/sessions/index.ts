@@ -1,6 +1,7 @@
 export { DeliveryRouteView } from './views/DeliveryRouteView'
 export { DriverSessionLayout } from './views/DriverSessionLayout'
 export { ReceiveSessionView } from './views/ReceiveSessionView'
+export { AdminOpenSessionView } from './views/AdminOpenSessionView'
 export { SessionListView } from './views/SessionListView'
 export { SessionDetailView } from './views/SessionDetailView'
 export { RouteSettlementView } from './views/RouteSettlementView'

@@ -64,6 +64,10 @@ export interface Session extends SessionWorkingHours {
 export interface OpenSessionRequest {
   zoneId: string
   kilometersAtOpen: number
+  /** Solo ADMIN: abre la salida de ese chofer. */
+  driverId?: string
+  /** Solo ADMIN, y solo después de ver el rechazo por horario. */
+  confirmOutsideWorkingHours?: boolean
 }
 
 export interface CloseSessionRequest {
