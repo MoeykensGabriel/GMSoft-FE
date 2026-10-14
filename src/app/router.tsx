@@ -12,7 +12,7 @@ import {
   SessionListView,
   AdminOpenSessionView,
 } from '../modules/sessions'
-import { VehicleLoadView, RestockView, RestockListView } from '../modules/vehicleLoads'
+import { VehicleLoadView, RemovedLoadsView, RestockView, RestockListView } from '../modules/vehicleLoads'
 import { VehicleListView, VehicleFormView } from '../modules/vehicles'
 import { DriverListView, DriverFormView } from '../modules/drivers'
 import { ZoneFormView, ZoneListView } from '../modules/zones'
@@ -64,6 +64,7 @@ export function AppRouter() {
           <Route path="/panel/clientes/nuevo" element={<CustomerFormView />} />
           <Route path="/panel/clientes/:id" element={<CustomerFormView />} />
           <Route path="/panel/carga" element={<VehicleLoadView />} />
+          <Route path="/panel/carga/bajadas" element={<RemovedLoadsView />} />
 
           <Route path="/panel/liquidacion" element={<RouteSettlementView />} />
           <Route path="/panel/resumen-diario" element={<DailySummaryView />} />

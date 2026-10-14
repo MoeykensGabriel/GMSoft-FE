@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { ApiError, BUSINESS_TIME_ZONE, Button, ErrorMessage, Modal, Select, WeekdaysField, formatDateTime, currentBusinessWeekday, newRequestId, Page, PageHeader } from '../../core'
+import { ApiError, BUSINESS_TIME_ZONE, Button, ErrorMessage, LinkButton, Modal, Select, WeekdaysField, formatDateTime, currentBusinessWeekday, newRequestId, Page, PageHeader } from '../../core'
 import { OutsideWorkingHoursBadge } from '../../workingHours'
 import { productService } from '../../products'
 import { driverService } from '../../drivers'
@@ -141,7 +141,8 @@ export function VehicleLoadView() {
   return (
     <Page className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
       <div>
-        <PageHeader title={<>Carga inicial de vehículos</>} />
+        <PageHeader title={<>Carga inicial de vehículos</>}
+          actions={<LinkButton to={vehicleId ? `/panel/carga/bajadas?vehiculo=${vehicleId}` : '/panel/carga/bajadas'}>Cargas bajadas</LinkButton>} />
         <p className="text-sm text-muted">
           Prepará los productos llenos que llevará el vehículo antes de iniciar el reparto.
         </p>

@@ -48,6 +48,16 @@ export interface VehicleLoadStatus {
   pendingUnits: number
 }
 
+export interface RemovedVehicleLoad {
+  id: string
+  productDetail: string
+  quantity: number
+  loadedAt: string
+  removedAt: string
+  /** Null en lo bajado antes de que se registrara quién. */
+  removedByUserName: string | null
+}
+
 export const vehicleService = {
   listPage: (page: number, search: string) => api.get<PagedResult<Vehicle>>(
     `/api/vehicles?page=${page}&pageSize=20&search=${encodeURIComponent(search)}`),
@@ -96,6 +106,9 @@ export const vehicleService = {
 
   removeLoad: (vehicleId: string, loadId: string) =>
     api.del<void>(`/api/vehicles/${vehicleId}/load/${loadId}`),
+
+  /** Lo último que se bajó del camión antes de salir, lo más reciente primero. */
+  listRemovedLoads: (vehicleId: string) => api.get<RemovedVehicleLoad[]>(`/api/vehicles/${vehicleId}/load/removed`),
 
   /** Vacía el camión: baja toda la carga que todavía no salió. Devuelve cuántos renglones bajó. */
   clearLoad: (vehicleId: string) => api.del<number>(`/api/vehicles/${vehicleId}/load`),
