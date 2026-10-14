@@ -174,13 +174,12 @@ test('almacenamiento bloqueado o corrupto conserva Entendido en memoria', () => 
   }
 })
 
-test('el aviso usa hora argentina y una línea con todos los productos', () => {
-  const { restockTime, restockProducts } = load('sessions/utils/restocks.ts', {
+test('el aviso usa hora argentina', () => {
+  const { restockTime } = load('sessions/utils/restocks.ts', {
     '../../core': { ApiError, BUSINESS_TIME_ZONE: 'America/Argentina/Buenos_Aires' },
   })
   assert.equal(restockTime('2026-10-08T15:30:00Z'), '12:30')
   assert.equal(restockTime('2026-10-09T02:10:00Z'), '23:10')
-  assert.equal(restockProducts({ items: [{ quantity: 3, productDetail: 'Bidon 20 lts' }, { quantity: 2, productDetail: 'Soda 1.5 lts' }] }), '3 × Bidon 20 lts y 2 × Soda 1.5 lts')
 })
 
 test('current se refresca en foco, reconexión y cada 30 segundos para el chofer', () => {
@@ -244,23 +243,23 @@ test('aviso accesible: descartar una recarga mantiene las demás y las nuevas', 
   const { RestockNotice } = load('sessions/components/RestockNotice.tsx', {
     'react/jsx-runtime': jsxRuntime,
     react: { useSyncExternalStore: (_, snapshot) => snapshot() },
-    '../../core': { Badge: 'badge', Button: 'button' },
+    '../../core': { Button: 'button' },
     '../states/restockSeenStorage': { restockSeenStorage: seen },
-    '../utils/restocks': { restockProducts: (restock) => restock.id, restockTime: () => '12:30' },
+    '../utils/restocks': { restockTime: () => '12:30' },
   })
   const session = { id: 's', restocks: [{ id: 'r1' }, { id: 'r2' }] }
   let tree = RestockNotice({ userId: 'u', session })
   assert.equal(tree.props.role, 'status')
-  assert.equal(nodes(tree).filter((node) => node.type === 'li').length, 2)
+  assert.equal(nodes(tree).filter((node) => node.type === 'article').length, 2)
   nodes(tree).find((node) => node.type === 'button').props.onClick()
   tree = RestockNotice({ userId: 'u', session })
-  assert.equal(nodes(tree).filter((node) => node.type === 'li').length, 1)
+  assert.equal(nodes(tree).filter((node) => node.type === 'article').length, 1)
   nodes(tree).find((node) => node.type === 'button').props.onClick()
   assert.equal(RestockNotice({ userId: 'u', session }), null)
   session.restocks.push({ id: 'r3' })
   tree = RestockNotice({ userId: 'u', session })
-  assert.equal(nodes(tree).filter((node) => node.type === 'li').length, 1)
-  assert.equal(nodes(RestockNotice({ userId: 'otro', session })).filter((node) => node.type === 'li').length, 3)
+  assert.equal(nodes(tree).filter((node) => node.type === 'article').length, 1)
+  assert.equal(nodes(RestockNotice({ userId: 'otro', session })).filter((node) => node.type === 'article').length, 3)
 })
 
 
