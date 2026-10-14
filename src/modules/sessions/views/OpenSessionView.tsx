@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ApiError, Button, Field, Select, weekdayLabels, PageHeader } from '../../core'
+import { ApiError, Button, Field, InstallAppButton, Select, weekdayLabels, PageHeader } from '../../core'
 import { driverService } from '../../drivers'
 import { vehicleService } from '../../vehicles'
 import { zoneService } from '../../zones'
@@ -147,6 +147,7 @@ export function OpenSessionView() {
       <Button type="submit" disabled={abrir.isPending}>
         {abrir.isPending ? 'Abriendo...' : 'Abrir salida'}
       </Button>
+      <InstallAppButton />
     </form>
   )
 }

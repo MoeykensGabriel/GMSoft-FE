@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { LoginForm } from '../components/LoginForm'
 import { useAuth } from '../hooks/useAuth'
-import { PageHeader } from '../../core'
+import { PageHeader, InstallAppButton } from '../../core'
 
 interface EstadoDeRuta {
   from?: { pathname: string }
@@ -32,6 +32,7 @@ export function LoginView() {
           <PageHeader title="Inicio de sesión" description="Ingresá con tu usuario y contraseña." />
           {receptionCompleted && <p role="status" className="ui-card bg-accent-soft p-3 text-sm">ADMIN recibió el camión. Tu salida terminó y se cerró tu sesión.</p>}
           <LoginForm onDone={() => navigate(destino, { replace: true })} />
+          <InstallAppButton className="w-full" />
         </section>
       </div>
     </main>

@@ -8,6 +8,16 @@ server {
         add_header Cache-Control "no-store" always;
     }
 
+    # El service worker y el manifiesto se revisan siempre: si no, una versión nueva tarda en llegar.
+    location = /sw.js {
+        add_header Cache-Control "no-cache" always;
+    }
+
+    location = /manifest.webmanifest {
+        add_header Cache-Control "no-cache" always;
+        default_type application/manifest+json;
+    }
+
     location /assets/ {
         try_files $uri =404;
         add_header Cache-Control "public, max-age=31536000, immutable";

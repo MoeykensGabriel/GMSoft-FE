@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { CustomerRouteList } from '../../customers'
 import { useAuth } from '../../auth'
 import { RouteHeader } from '../components/RouteHeader'
-import { Button, formatDateTime, LinkButton, Page } from '../../core'
+import { Button, formatDateTime, InstallAppButton, LinkButton, Page } from '../../core'
 import { sessionService } from '../services/sessionService'
 import type { Session } from '../services/sessionService'
 import { RestocksPanel } from '../components/RestocksPanel'
@@ -102,6 +102,8 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
       </div>
       <RestocksPanel restocks={sesion.restocks} />
       </details>
+
+      <InstallAppButton />
 
       <p className="text-xs text-muted">
         Tu salida sigue abierta hasta que ADMIN reciba este camión. Después de la recepción, volverás automáticamente al login.
