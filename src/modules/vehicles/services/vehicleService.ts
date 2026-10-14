@@ -96,4 +96,7 @@ export const vehicleService = {
 
   removeLoad: (vehicleId: string, loadId: string) =>
     api.del<void>(`/api/vehicles/${vehicleId}/load/${loadId}`),
+
+  /** Vacía el camión: baja toda la carga que todavía no salió. Devuelve cuántos renglones bajó. */
+  clearLoad: (vehicleId: string) => api.del<number>(`/api/vehicles/${vehicleId}/load`),
 }

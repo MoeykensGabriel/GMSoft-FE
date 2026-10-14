@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { ApiError, BUSINESS_TIME_ZONE, Button, ErrorMessage, Select, WeekdaysField, formatDateTime, currentBusinessWeekday, newRequestId, Page, PageHeader } from '../../core'
+import { ApiError, BUSINESS_TIME_ZONE, Button, ErrorMessage, Modal, Select, WeekdaysField, formatDateTime, currentBusinessWeekday, newRequestId, Page, PageHeader } from '../../core'
 import { OutsideWorkingHoursBadge } from '../../workingHours'
 import { productService } from '../../products'
 import { driverService } from '../../drivers'
@@ -99,9 +99,15 @@ export function VehicleLoadView() {
     finally { sending.current = false }
   }
 
+  // Qué se está por bajar: un renglón, o 'todo' para vaciar el camión. Siempre se confirma.
+  const [porBajar, setPorBajar] = useState<string | null>(null)
   const bajar = useMutation({
-    mutationFn: (loadId: string) => vehicleService.removeLoad(vehicleId, loadId),
+    mutationFn: async (target: string) => {
+      if (target === 'todo') await vehicleService.clearLoad(vehicleId)
+      else await vehicleService.removeLoad(vehicleId, target)
+    },
     onSuccess: refrescar,
+    onSettled: () => setPorBajar(null),
   })
 
   function onSubmit(e: FormEvent) {
@@ -203,7 +209,15 @@ export function VehicleLoadView() {
       ) : (
         <>
           <section className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium text-muted">Arriba del camión ahora</h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-sm font-medium text-muted">Arriba del camión ahora</h2>
+              {lineas.length > 0 && (
+                <Button variant="danger" type="button" onClick={() => { bajar.reset(); setPorBajar('todo') }}
+                  disabled={bajar.isPending || cargar.isPending}>
+                  Vaciar carga
+                </Button>
+              )}
+            </div>
 
             <ErrorMessage error={bajar.error} />
 
@@ -229,7 +243,7 @@ export function VehicleLoadView() {
                     </div>
                     <Button variant="danger"
                       type="button"
-                      onClick={() => bajar.mutate(l.id)}
+                      onClick={() => { bajar.reset(); setPorBajar(l.id) }}
                       disabled={bajar.isPending || cargar.isPending}
 
                     >
@@ -291,6 +305,25 @@ export function VehicleLoadView() {
           onBack={() => { attempt.current = null; setConfirmandoDesde(null); cargar.reset() }}
           onConfirm={() => { void sendLoad() }}
         />
+      )}
+
+      {porBajar && (
+        <Modal title={porBajar === 'todo' ? 'Vaciar la carga' : 'Bajar del camión'} busy={bajar.isPending}
+          onClose={() => setPorBajar(null)}
+          footer={<>
+            <Button type="button" variant="danger" disabled={bajar.isPending} onClick={() => setPorBajar(null)}>Cancelar</Button>
+            <Button type="button" disabled={bajar.isPending} onClick={() => bajar.mutate(porBajar)}>
+              {bajar.isPending ? 'Bajando...' : porBajar === 'todo' ? 'Vaciar carga' : 'Bajar'}
+            </Button>
+          </>}>
+          <p>{porBajar === 'todo' ? 'Se baja todo lo que está arriba del camión:' : 'Se baja del camión:'}</p>
+          <ul className="flex flex-col gap-1 font-semibold">
+            {lineas.filter((l) => porBajar === 'todo' || l.id === porBajar).map((l) => (
+              <li key={l.id}>{l.quantity} × {l.productDetail}</li>
+            ))}
+          </ul>
+          {porBajar === 'todo' && <p className="text-muted">El chofer no va a poder salir hasta que registres una carga nueva.</p>}
+        </Modal>
       )}
     </Page>
   )
