@@ -79,7 +79,18 @@ export interface CustomerInput {
   isActive: boolean
 }
 
+/** Umbrales de actividad; isDefault mientras ADMIN no guardó los suyos. */
+export interface ActivitySettings {
+  redAfterMissedWeeks: number
+  blackAfterMissedWeeks: number
+  isDefault: boolean
+}
+
 export const customerService = {
+  activitySettings: () => api.get<ActivitySettings>('/api/customer-activity/settings'),
+  saveActivitySettings: (redAfterMissedWeeks: number, blackAfterMissedWeeks: number) =>
+    api.put<ActivitySettings>('/api/customer-activity/settings', { redAfterMissedWeeks, blackAfterMissedWeeks }),
+
   /** Vista de la oficina: los clientes que un camión visita un día de la semana (ISO 1–7). */
   /** Clientes de un camión; el día de visita es opcional. */
   listByVehicle: (vehicleId: string, visitDay: number | null, page = 1, search = '') =>

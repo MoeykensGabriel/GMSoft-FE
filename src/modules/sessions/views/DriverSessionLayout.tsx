@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useSyncExternalStore } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth'
-import { Button, ErrorMessage, tokenStorage } from '../../core'
+import { Button, ErrorMessage, ScreenErrorBoundary, tokenStorage } from '../../core'
 import { useCurrentSession } from '../hooks/useCurrentSession'
 import { sessionService } from '../services/sessionService'
 import { activeDepartureStorage } from '../states/activeDepartureStorage'
@@ -10,6 +10,7 @@ import { restockSeenStorage } from '../states/restockSeenStorage'
 
 /** Acompaña al chofer tanto en el listado como en la ficha y el formulario de venta. */
 export function DriverSessionLayout() {
+  const { pathname } = useLocation()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const current = useCurrentSession()
@@ -91,6 +92,6 @@ export function DriverSessionLayout() {
 
   return <>
     {sessionId && status.isError && <p role="status" className="mx-auto max-w-3xl border-b border-line p-3 text-sm">Se perdió la conexión. Tu salida permanece abierta; se comprobará al reconectar.</p>}
-    <Outlet />
+    <ScreenErrorBoundary resetKey={pathname}><Outlet /></ScreenErrorBoundary>
   </>
 }
