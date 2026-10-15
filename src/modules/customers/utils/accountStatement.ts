@@ -1,0 +1,28 @@
+﻿import type { CustomerStatementEntry } from '../services/customerService'
+import { noPurchaseLabel } from './noPurchase'
+
+export function statementDetail(entry: CustomerStatementEntry) {
+  const products = entry.lines.map((line) => `${line.quantity} × ${line.productDetail}`).join(' + ')
+  const titles = {
+    Sale: products || 'Venta',
+    Promotion: products ? `Promoción · ${products}` : 'Promoción',
+    ContainerOnly: 'Movimiento de envases',
+    NoPurchase: `No compró · ${noPurchaseLabel(entry.noPurchaseReason)}`,
+    Payment: 'Cobro de deuda',
+    ContainerAdjustment: 'Ajuste de envases',
+    ContainerLoss: 'Pérdida de envases',
+  }
+  const containers = new Map<string, { name: string; delivered: number; returned: number }>()
+  for (const line of [...entry.containersDelivered, ...entry.containersReturned]) {
+    containers.set(line.productId, { name: line.productDetail, delivered: 0, returned: 0 })
+  }
+  for (const line of entry.containersDelivered) containers.get(line.productId)!.delivered += line.quantity
+  for (const line of entry.containersReturned) containers.get(line.productId)!.returned += line.quantity
+  const details = [...containers.values()].map((line) =>
+    `${containers.size > 1 ? `${line.name}: ` : ''}dejó ${line.delivered} · devolvió ${line.returned}`,
+  )
+  for (const change of entry.containerChanges) {
+    details.push(`${change.productDetail}: ${change.quantity > 0 ? '+' : ''}${change.quantity}${change.reason ? ` · ${change.reason}` : ''}`)
+  }
+  return { title: titles[entry.kind], details }
+}

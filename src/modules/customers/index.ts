@@ -2,6 +2,7 @@ export { NO_PURCHASE_REASONS, noPurchaseLabel, validNoPurchase } from './utils/n
 export type { NoPurchaseReason, LastNoPurchase } from './utils/noPurchase'
 export { customerService } from './services/customerService'
 export { CustomerFormView } from './views/CustomerFormView'
+export { CustomerDetailView } from './views/CustomerDetailView'
 export { CustomerListView } from './views/CustomerListView'
 export { CustomerRouteList } from './components/CustomerRouteList'
 export { CustomerAccountSummary } from './components/CustomerAccountSummary'
@@ -15,5 +16,5 @@ export type {
   Customer,
   CustomerAccount,
   CustomerContainerLine,
-  AccountMovement,
+  CustomerStatementEntry,
 } from './services/customerService'

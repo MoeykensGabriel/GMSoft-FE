@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Badge, Button, DataTable, Field, ErrorMessage, ManagementHeader, Pagination, Select, WEEKDAYS, formatDate, Page } from '../../core'
 import { vehicleService } from '../../vehicles'
 import { customerService } from '../services/customerService'
@@ -18,6 +18,7 @@ const ACTIVITY_ROW: Record<Customer['activityStatus'], string> = {
 }
 
 export function CustomerListView() {
+  const navigate = useNavigate()
   const [vehicleId, setVehicleId] = useState('')
   const [visitDay, setVisitDay] = useState<number | null>(null)
   const [page, setPage] = useState(1)
@@ -55,15 +56,19 @@ export function CustomerListView() {
           <tbody>{customers.data.items.map((customer) => {
             const dark = customer.activityStatus === 'Black'
             const detail = `block text-xs ${dark ? '' : 'text-muted'}`
-            return <tr key={customer.id} className={ACTIVITY_ROW[customer.activityStatus]}>
-              <td><span className="font-semibold">{customer.displayName}</span><span className={detail}>Orden {customer.routeOrder}</span>{!customer.isActive && <Badge>Inactivo</Badge>}</td>
+            const customerPath = `/panel/clientes/${encodeURIComponent(customer.id)}`
+            return <tr key={customer.id} className={`cursor-pointer ${ACTIVITY_ROW[customer.activityStatus]}`} onClick={(event) => {
+              if (event.target instanceof Element && event.target.closest('a, button, input, select, textarea')) return
+              navigate(customerPath)
+            }}>
+              <td><Link to={customerPath} className="inline-flex min-h-11 items-center font-semibold underline" aria-label={`Ver cliente ${customer.displayName}`}>{customer.displayName}</Link><span className={detail}>Orden {customer.routeOrder}</span>{!customer.isActive && <Badge>Inactivo</Badge>}</td>
               <td>{customer.address}<span className={detail}>{customer.phone}</span></td><td>{customer.zoneName}</td>
               <td>{customer.vehicleId ? <>{customer.vehicleName}<span className={detail}>{customer.vehicleLicensePlate}</span></> : 'Sin camión asignado'}</td>
               <td>{visitDaysLabel(customer.visitDays)}</td>
               <td><span className="font-semibold">{purchaseActivityLabel(customer.weeksWithoutPurchase, customer.lastPurchaseAt === null)}</span>
                 {customer.lastNoPurchase && <span className={detail}>Última visita sin compra: {new Intl.DateTimeFormat('es-AR', { day: '2-digit', month: '2-digit', timeZone: BUSINESS_TIME_ZONE }).format(new Date(customer.lastNoPurchase.date))} · {noPurchaseLabel(customer.lastNoPurchase.reason)}</span>}
                 {customer.lastPurchaseAt && <span className={detail}>Última compra: {formatDate(customer.lastPurchaseAt)}</span>}</td>
-              <td><Link to={`/panel/clientes/${customer.id}`} className={`inline-flex min-h-11 items-center ${dark ? 'underline' : 'ui-link'}`} aria-label={`Editar cliente ${customer.displayName}`}>Editar</Link></td>
+              <td><Link to={`${customerPath}/editar`} className={`inline-flex min-h-11 items-center ${dark ? 'underline' : 'ui-link'}`} aria-label={`Editar cliente ${customer.displayName}`}>Editar</Link></td>
             </tr>
           })}</tbody>
         </DataTable>}

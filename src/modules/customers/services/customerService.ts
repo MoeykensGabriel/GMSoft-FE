@@ -1,4 +1,4 @@
-import type { LastNoPurchase } from '../utils/noPurchase'
+import type { LastNoPurchase, NoPurchaseReason } from '../utils/noPurchase'
 import { api } from '../../core'
 import type { PagedResult } from '../../core'
 
@@ -42,12 +42,20 @@ export interface CustomerUnitLine {
   serialNumber: string
 }
 
-export interface AccountMovement {
+export interface CustomerStatementEntry {
   date: string
-  type: 'Delivery' | 'Payment'
-  amount: number
+  kind: 'Sale' | 'ContainerOnly' | 'Promotion' | 'NoPurchase' | 'Payment' | 'ContainerAdjustment' | 'ContainerLoss'
   referenceId: string
+  lines: (CustomerContainerLine & { unitPrice: number; amount: number })[]
+  containersDelivered: CustomerContainerLine[]
+  containersReturned: CustomerContainerLine[]
+  containerChanges: (CustomerContainerLine & { reason: string | null })[]
+  charge: number
+  payments: { amount: number; method: 'Cash' | 'Transfer' | 'Card' }[]
+  paid: number
+  noPurchaseReason: NoPurchaseReason | null
   notes: string | null
+  balanceAfter: number
 }
 
 export interface CustomerAccount {
@@ -63,7 +71,8 @@ export interface CustomerAccount {
   weeksWithoutPurchase: number
   containers: CustomerContainerLine[]
   units: CustomerUnitLine[]
-  movements: AccountMovement[]
+  statement: CustomerStatementEntry[]
+  statementTotalCount: number
 }
 
 export interface CustomerInput {

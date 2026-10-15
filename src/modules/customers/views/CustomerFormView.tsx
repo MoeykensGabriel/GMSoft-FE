@@ -21,7 +21,7 @@ export function CustomerFormView() {
     },
     onSuccess: async () => {
       await cache.invalidateQueries({ queryKey: ['customers'] })
-      navigate('/panel/clientes')
+      navigate(id ? `/panel/clientes/${encodeURIComponent(id)}` : '/panel/clientes')
     },
   })
   return <Page className="mx-auto flex max-w-4xl flex-col gap-5 p-6">

@@ -20,7 +20,7 @@ import { ConfigurationView } from './admin/ConfigurationView'
 import { HomeView } from './HomeView'
 import { AdminLayout } from './admin/AdminLayout'
 import { AdminHomeView } from './admin/AdminHomeView'
-import { CustomerFormView, CustomerListView } from '../modules/customers'
+import { CustomerDetailView, CustomerFormView, CustomerListView } from '../modules/customers'
 import { RoutePlanningView } from '../modules/routePlanning'
 import { PendingPromotions, PromotionDetailView, PromotionListView, RegisterPromotionView } from '../modules/promotions'
 
@@ -62,7 +62,8 @@ export function AppRouter() {
           <Route path="/panel/clientes" element={<CustomerListView />} />
           <Route path="/panel/recorridos" element={<RoutePlanningView />} />
           <Route path="/panel/clientes/nuevo" element={<CustomerFormView />} />
-          <Route path="/panel/clientes/:id" element={<CustomerFormView />} />
+          <Route path="/panel/clientes/:id/editar" element={<CustomerFormView />} />
+          <Route path="/panel/clientes/:id" element={<CustomerDetailView />} />
           <Route path="/panel/carga" element={<VehicleLoadView />} />
           <Route path="/panel/carga/bajadas" element={<RemovedLoadsView />} />
 
