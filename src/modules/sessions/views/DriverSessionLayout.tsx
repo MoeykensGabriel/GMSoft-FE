@@ -23,7 +23,8 @@ export function DriverSessionLayout() {
     enabled: Boolean(userId && sessionId),
     staleTime: 0,
     refetchOnMount: 'always',
-    refetchInterval: 10_000,
+    // Solo detecta que ADMIN recibió el camión: medio minuto alcanza y ahorra datos.
+    refetchInterval: 30_000,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   })

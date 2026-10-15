@@ -24,7 +24,8 @@ export function CustomerRouteList({ vehicleId, zoneId, routeDays, onSelect, noPu
     queryKey: ['customers', 'route', vehicleId, zoneId, routeDays, debouncedSearch],
     initialPageParam: 1,
     refetchOnWindowFocus: true,
-    refetchInterval: 30_000,
+    // Sin consulta periódica propia: RouteUpdateNotice ya vigila el recorrido y la
+    // refresca cuando la oficina lo cambia; las ventas del chofer también la invalidan.
     queryFn: ({ pageParam }) => customerService.listByZone(zoneId, 20, pageParam, routeDays, debouncedSearch, vehicleId),
     getNextPageParam: (page) => page.hasNextPage ? page.page + 1 : undefined,
   })
