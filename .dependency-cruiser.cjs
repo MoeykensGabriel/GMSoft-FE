@@ -20,6 +20,15 @@ module.exports = {
       },
     },
     {
+      name: 'admin-solo-desde-el-panel',
+      comment:
+        'El admin.ts de cada modulo junta lo que solo usa el panel y se carga aparte. ' +
+        'Importarlo desde otro lado mete esas pantallas en la descarga del celular del chofer.',
+      severity: 'error',
+      from: { pathNot: '^src/app/admin/' },
+      to: { path: '^src/modules/[^/]+/admin\\.ts$' },
+    },
+    {
       name: 'core-no-conoce-el-negocio',
       comment:
         'core es puramente tecnico. Si necesita importar un modulo de dominio es que ' +

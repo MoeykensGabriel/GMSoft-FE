@@ -7,5 +7,3 @@ export type {
   VehicleLoadSummary,
   VehicleLoadStatus,
 } from './services/vehicleService'
-export { VehicleListView } from './views/VehicleListView'
-export { VehicleFormView } from './views/VehicleFormView'

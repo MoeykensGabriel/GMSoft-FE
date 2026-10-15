@@ -1,4 +1,4 @@
-import { RemovalRequestsNotice } from '../../modules/customers'
+import { RemovalRequestsNotice } from '../../modules/customers/admin'
 import { UncoveredCustomers } from '../../modules/routePlanning'
 import { ActiveDeparturesCard } from '../../modules/sessions'
 import { Page, PageHeader } from '../../modules/core'
