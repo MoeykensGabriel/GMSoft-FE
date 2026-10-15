@@ -6,7 +6,7 @@ import { OutsideWorkingHoursBadge, OutsideWorkingHoursEvents } from '../../worki
 import { noPurchaseLabel } from '../../customers'
 import { RestocksPanel } from '../components/RestocksPanel'
 import { SettlementPanel } from '../components/SettlementPanel'
-import { StatTile } from '../components/StatTile'
+import { StatTile } from '../../core'
 import { StockOnBoardPanel } from '../components/StockOnBoardPanel'
 import { UnvisitedCustomersPanel } from '../components/UnvisitedCustomersPanel'
 import { detailedSettlementQuery } from '../hooks/detailedSettlementQuery'

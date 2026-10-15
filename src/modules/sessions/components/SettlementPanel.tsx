@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ApiError, Button, Field, Panel, formatMoney } from '../../core'
 import { OutsideWorkingHoursBadge } from '../../workingHours'
 import { sessionService } from '../services/sessionService'
-import { StatTile } from './StatTile'
+import { StatTile } from '../../core'
 
 export interface CollectedByMethod { cash: number; transfer: number; card: number }
 

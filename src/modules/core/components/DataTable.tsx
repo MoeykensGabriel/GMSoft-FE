@@ -12,11 +12,12 @@ export function DataTable({ label, children, className = '', stack = true, ...pr
   TableHTMLAttributes<HTMLTableElement> & { label: string; stack?: boolean }) {
   const table = useRef<HTMLTableElement>(null)
 
-  // Cada celda recibe el título de su columna para mostrarlo en la tarjeta. Corre en
+  // Cada celda recibe el título de su columna para mostrarlo en la tarjeta (o el
+  // data-label del encabezado, si el título tiene más texto del que conviene repetir). Corre en
   // cada render porque las filas cambian con los datos; tocar atributos no re-renderiza.
   useLayoutEffect(() => {
     if (!stack || !table.current) return
-    const headers = [...table.current.querySelectorAll('thead tr:last-child th')].map((th) => th.textContent?.trim() ?? '')
+    const headers = [...table.current.querySelectorAll('thead tr:last-child th')].map((th) => th.getAttribute('data-label') ?? th.textContent?.trim() ?? '')
     for (const row of table.current.querySelectorAll('tbody tr, tfoot tr')) {
       let column = 0
       for (const cell of row.children) {

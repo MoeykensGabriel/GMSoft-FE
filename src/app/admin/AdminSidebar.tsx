@@ -20,6 +20,7 @@ const groups: Group[] = [
     { to: '/panel/salidas', label: 'Salidas y recepción' },
     { to: '/panel/liquidacion', label: 'Liquidación' },
     { to: '/panel/resumen-diario', label: 'Resumen diario' },
+    { to: '/panel/estadisticas', label: 'Estadísticas' },
   ] },
   { id: 'empresa', label: 'Empresa', items: [
     { to: '/panel/configuracion', label: 'Configuración' },

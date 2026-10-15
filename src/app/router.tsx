@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { LoginView, ProtectedRoute, ROLES } from '../modules/auth'
 import { RegisterDeliveryView, CustomerVisitView } from '../modules/deliveries'
@@ -23,6 +24,10 @@ import { AdminHomeView } from './admin/AdminHomeView'
 import { CustomerDetailView, CustomerFormView, CustomerListView } from '../modules/customers'
 import { RoutePlanningView } from '../modules/routePlanning'
 import { PendingPromotions, PromotionDetailView, PromotionListView, RegisterPromotionView } from '../modules/promotions'
+
+// Estadísticas carga la librería de gráficos: se baja recién al entrar, así la app
+// del chofer, que casi siempre es un celular, no la descarga nunca.
+const VehiclePerformanceView = lazy(() => import('../modules/reports').then((module) => ({ default: module.VehiclePerformanceView })))
 
 /**
  * Router global. Ensambla las vistas que cada modulo expone por su index; las vistas
@@ -69,6 +74,7 @@ export function AppRouter() {
 
           <Route path="/panel/liquidacion" element={<RouteSettlementView />} />
           <Route path="/panel/resumen-diario" element={<DailySummaryView />} />
+          <Route path="/panel/estadisticas" element={<Suspense fallback={<p className="p-6 text-muted">Cargando estadísticas...</p>}><VehiclePerformanceView /></Suspense>} />
 
           <Route path="/panel/salidas" element={<SessionListView />} />
           <Route path="/panel/salidas/abrir" element={<AdminOpenSessionView />} />
