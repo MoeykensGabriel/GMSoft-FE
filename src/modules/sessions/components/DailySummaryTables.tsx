@@ -7,7 +7,7 @@ export function DailySummaryMoneyTable({ money, isClosed, label }: {
   isClosed: boolean
   label: string
 }) {
-  return <DataTable label={label}>
+  return <DataTable stack={false} label={label}>
     <thead><tr><th scope="col">Dinero</th><th scope="col" className="text-right">Importe</th></tr></thead>
     <tbody>
       <tr><th scope="row" className="font-normal">Efectivo a rendir</th><td className="text-right tabular-nums">{formatMoney(money.cashExpected)}</td></tr>

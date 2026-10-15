@@ -73,3 +73,34 @@
 .ui-dialog :where(.text-xs) { font-size: 0.9375rem; line-height: 1.4; }
 .ui-dialog :where(.text-sm, .ui-table th, .ui-table td) { font-size: 1.0625rem; line-height: 1.5; }
 .ui-dialog :where(button, a) { font-size: 1.0625rem; }
+
+/* Tablas en el celular: cada fila es una tarjeta con el título de la columna junto a
+   cada dato (DataTable con stack). Fuera de capas para ganarle a los anchos mínimos
+   que cada pantalla le pone a su tabla para la PC. */
+@media (max-width: 767px) {
+  .ui-table-stack-wrap { border: 0; background: transparent; box-shadow: none; overflow: visible; }
+  .ui-table.ui-table-stack { min-width: 0 !important; width: 100%; table-layout: auto; }
+  .ui-table-stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .ui-table-stack, .ui-table-stack tbody, .ui-table-stack tfoot { display: block; }
+  .ui-table-stack tbody tr, .ui-table-stack tfoot tr {
+    display: block; margin-bottom: 0.75rem; padding: 0.25rem 0.875rem;
+    border: 1px solid var(--color-line); border-radius: 6px; box-shadow: 0 1px 2px rgb(6 35 53 / 6%);
+  }
+  .ui-table-stack tbody tr:not([class*="bg-"]) { background: var(--color-surface); }
+  /* El título va en una columna fija a la izquierda y el contenido de la celda fluye
+     a la derecha tal cual, aunque tenga varios renglones. */
+  .ui-table-stack tbody tr > *, .ui-table-stack tfoot tr > * {
+    display: block; position: relative; min-height: 2.25rem;
+    padding: 0.5rem 0 0.5rem calc(min(38%, 9rem) + 0.75rem); border-bottom: 1px solid var(--color-line); text-align: left;
+  }
+  .ui-table-stack tbody tr > :last-child, .ui-table-stack tfoot tr > :last-child { border-bottom: 0; }
+  .ui-table-stack tbody tr > *::before, .ui-table-stack tfoot tr > *::before {
+    content: attr(data-label); position: absolute; left: 0; top: 0.625rem; width: min(38%, 9rem);
+    font-size: 0.75rem; font-weight: 600; line-height: 1.3; color: var(--color-muted);
+  }
+  .ui-table-stack tbody tr > [data-label=""], .ui-table-stack tfoot tr > [data-label=""] { padding-left: 0; }
+  .ui-table-stack tbody tr > [data-label=""]::before, .ui-table-stack tfoot tr > [data-label=""]::before { content: none; }
+  .ui-table-stack td.text-right, .ui-table-stack th.text-right { text-align: left; }
+  /* Filas oscuras (clientes en negro): el título también tiene que leerse. */
+  .ui-table-stack tr[class*="text-white"] > *::before { color: rgb(255 255 255 / 75%); }
+}

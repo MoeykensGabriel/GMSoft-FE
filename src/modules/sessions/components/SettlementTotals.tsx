@@ -44,7 +44,7 @@ export function SettlementTotals({ settlements }: { settlements: CustomerSettlem
       </div>
 
       <div className="flex flex-col gap-4 px-4 pb-4">
-        <DataTable label="Total de envases devueltos" className="w-full">
+        <DataTable stack={false} label="Total de envases devueltos" className="w-full">
           <thead>
             <tr><th scope="col">Envases devueltos</th><th scope="col" className="text-right">Cantidad</th></tr>
           </thead>
@@ -60,7 +60,7 @@ export function SettlementTotals({ settlements }: { settlements: CustomerSettlem
           </tbody>
         </DataTable>
 
-        <DataTable label="Total de productos vendidos" className="w-full">
+        <DataTable stack={false} label="Total de productos vendidos" className="w-full">
           <thead>
             <tr>
               <th scope="col">Productos vendidos</th>

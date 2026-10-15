@@ -52,7 +52,7 @@ test('motivos, promociones, cobros y cambios administrativos conservan su signif
   }), { title, details: [expected] })
 })
 
-const core = { ...load('core/utils/format.ts'), ...load('core/components/Badge.tsx'), ...load('core/components/DataTable.tsx') }
+const core = { ...load('core/utils/format.ts'), ...load('core/components/Badge.tsx'), ...load('core/components/DataTable.tsx', { react: require('react') }) }
 const { CustomerAccountMovements } = load('customers/components/CustomerAccountMovements.tsx', {
   '../../core': core, '../utils/accountStatement': detail,
 })

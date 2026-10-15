@@ -30,7 +30,7 @@ export function CustomerAccountMovements({ account }: { account: CustomerAccount
     </div>
     {!statement.length ? <p className="text-sm text-muted">Todavía no hay movimientos.</p> : <>
       <div className="hidden md:block">
-        <DataTable label="Movimientos de la cuenta corriente" className="table-fixed">
+        <DataTable stack={false} label="Movimientos de la cuenta corriente" className="table-fixed">
           <thead><tr><th scope="col" className="w-[18%]">Fecha</th><th scope="col" className="w-[34%]">Detalle</th><th scope="col" className="w-[14%]">Debe</th><th scope="col" className="w-[20%]">Pagó</th><th scope="col" className="w-[14%]">Saldo</th></tr></thead>
           <tbody>{statement.map((entry) => <tr key={`${entry.kind}-${entry.referenceId}`}>
             <td><time dateTime={entry.date}>{formatDateTime(entry.date, BUSINESS_TIME_ZONE)}</time></td>

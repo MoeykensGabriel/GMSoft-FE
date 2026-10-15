@@ -63,7 +63,7 @@ export function LoadConfirmModal({
         <dd className="font-medium text-ink">{formatDateTime(openedAt, BUSINESS_TIME_ZONE)}</dd>
       </dl>
 
-      <DataTable label={restock ? 'Productos de la recarga a confirmar' : 'Productos de la carga a confirmar'} className="w-full">
+      <DataTable stack={false} label={restock ? 'Productos de la recarga a confirmar' : 'Productos de la carga a confirmar'} className="w-full">
         <thead>
           <tr className="border-b border-brand text-left">
             <th scope="col" className="py-1 font-semibold">Producto</th>

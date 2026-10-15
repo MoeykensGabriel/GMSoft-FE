@@ -34,7 +34,7 @@ export function StockOnBoardPanel({ stock, cerrada }: Props) {
         </p>
       )}
       {stock.length > 0 && !(cerrada && vacio) && (
-        <DataTable label={cerrada ? 'Faltante al cerrar por producto' : 'A bordo ahora por producto'}
+        <DataTable stack={false} label={cerrada ? 'Faltante al cerrar por producto' : 'A bordo ahora por producto'}
           className={cerrada && !vacio ? 'bg-danger-soft' : ''}>
           <thead><tr>
             <th scope="col">Producto</th>

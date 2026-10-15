@@ -13,7 +13,7 @@ export function ActiveDepartureSummary({ departure }: { departure: ActiveDepartu
     <div className="min-w-0">
       <h4 className="mb-2 text-sm font-medium">Carga inicial · {total} unidades</h4>
       {departure.initialLoad.length === 0 ? <p className="text-sm text-muted">Sin carga inicial registrada.</p>
-        : <DataTable label="Carga inicial del camión" className="w-full table-fixed text-sm">
+        : <DataTable stack={false} label="Carga inicial del camión" className="w-full table-fixed text-sm">
           <thead><tr className="border-b border-line text-left"><th scope="col" className="py-2 font-medium">Producto</th><th scope="col" className="w-20 py-2 text-right font-medium">Cantidad</th></tr></thead>
           <tbody>{departure.initialLoad.map((line) => <tr key={line.productId} className="border-b border-line">
             <th scope="row" className="break-words py-2 pr-2 text-left font-normal">{line.productDetail}</th>

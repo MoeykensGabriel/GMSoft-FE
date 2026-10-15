@@ -127,7 +127,7 @@ export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSav
     {rows.length === 0 ? <p>No hay clientes de este camión en esa zona para ese día</p>
       : <>
         <p className="text-sm text-muted">Arrastrá desde el agarre o usá las flechas para subir y bajar. El orden es compartido con los otros días de visita.</p>
-        <DataTable label="Clientes del recorrido" className="min-w-[62rem]">
+        <DataTable stack={false} label="Clientes del recorrido" className="min-w-[62rem]">
           <thead><tr>
             <th scope="col">Ordenar</th><th scope="col" className="whitespace-nowrap">Pos</th><th scope="col">Cliente</th>
             <th scope="col">Dirección</th>
