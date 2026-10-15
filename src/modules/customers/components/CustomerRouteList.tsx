@@ -24,7 +24,7 @@ export function CustomerRouteList({ vehicleId, zoneId, routeDays, onSelect, noPu
     queryKey: ['customers', 'route', vehicleId, zoneId, routeDays, debouncedSearch],
     initialPageParam: 1,
     refetchOnWindowFocus: true,
-    refetchInterval: 60_000,
+    refetchInterval: 30_000,
     queryFn: ({ pageParam }) => customerService.listByZone(zoneId, 20, pageParam, routeDays, debouncedSearch, vehicleId),
     getNextPageParam: (page) => page.hasNextPage ? page.page + 1 : undefined,
   })

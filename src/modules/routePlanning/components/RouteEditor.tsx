@@ -1,3 +1,5 @@
+import { CoverageWarning, scheduleService } from '../../schedule'
+import type { CoverageWarningItem } from '../../schedule'
 import { useEffect, useRef, useState } from 'react'
 import { ApiError, Badge, Button, DataTable, ErrorMessage, Select, WEEKDAYS } from '../../core'
 import type { Vehicle } from '../../vehicles'
@@ -22,6 +24,7 @@ export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSav
 }) {
   const [baseline, setBaseline] = useState(initial)
   const [rows, setRows] = useState(initial.items)
+  const [warnings, setWarnings] = useState<CoverageWarningItem[]>([])
   const [pending, setPending] = useState(false)
   const lock = useRef(false)
   const [error, setError] = useState<unknown>(null)
@@ -58,10 +61,19 @@ export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSav
     return () => document.removeEventListener('click', warnOnLink, true)
   }, [dirty, pending])
 
-  function update(id: string, patch: Partial<RouteCustomer>) {
+  async function update(id: string, patch: Partial<RouteCustomer>) {
     if (lock.current) return
+    const row = { ...rows.find((item) => item.id === id)!, ...patch }
     setNotice('')
-    setRows((current) => current.map((row) => row.id === id ? { ...row, ...patch } : row))
+    const next = rows.map((item) => item.id === id ? row : item)
+    setRows(next)
+    if (!buildRouteSave(filters, baseline, next).changes.some((change) => change.id === id)) return
+    lock.current = true; setPending(true)
+    try {
+      const coverage = await scheduleService.coverage({ vehicleId: row.vehicleId, zoneId: row.zoneId, visitDays: row.visitDays })
+      if (coverage.covered === false) setWarnings([{ id, name: row.displayName, coverage }])
+    } catch { setWarnings([{ id, name: row.displayName }]) }
+    finally { lock.current = false; setPending(false) }
   }
 
   function changeDay(row: RouteCustomer, day: number) {
@@ -83,13 +95,26 @@ export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSav
     setConflict(false)
   }
 
-  async function save() {
+  async function save(skipCoverage = false) {
     if (lock.current || !dirty || conflict) return
     lock.current = true
     setPending(true)
     setError(null)
     setNotice('')
     try {
+      if (!skipCoverage) {
+        const changes = buildRouteSave(filters, baseline, rows).changes
+        const results = await Promise.all(changes.map(async (change) => {
+          const row = rows.find((item) => item.id === change.id)!
+          try {
+            const coverage = await scheduleService.coverage({ vehicleId: row.vehicleId, zoneId: row.zoneId, visitDays: row.visitDays })
+            return coverage.covered === false ? { id: row.id, name: row.displayName, coverage } : null
+          } catch { return { id: row.id, name: row.displayName } }
+        }))
+        const notices = results.filter((item) => item !== null)
+        if (notices.length) { setWarnings(notices); return }
+      }
+      setWarnings([])
       const snapshot = await routePlanningService.save(buildRouteSave(filters, baseline, rows))
       accept(snapshot)
       onSaved(snapshot)
@@ -113,7 +138,7 @@ export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSav
 
   return <section className="flex min-w-0 flex-col gap-3" aria-label="Edición del recorrido" aria-busy={pending}>
     <div className="ui-toolbar flex flex-wrap items-center gap-3">
-      <Button disabled={!dirty || pending || conflict} onClick={save}>{pending ? 'Procesando…' : 'Guardar cambios'}</Button>
+      <Button disabled={!dirty || pending || conflict} onClick={() => void save()}>{pending ? 'Procesando…' : 'Guardar cambios'}</Button>
       <Button variant="danger" disabled={!dirty || pending} onClick={() => {
         setRows(baseline.items); setNotice('Se descartaron los cambios locales.')
         if (!conflict) setError(null)
@@ -121,6 +146,11 @@ export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSav
       <Button variant="secondary" disabled={pending} onClick={reloadRoute}>Recargar recorrido</Button>
       <span className="text-sm text-muted">{rows.length} clientes · {dirty ? 'Cambios sin guardar' : 'Sin cambios pendientes'}</span>
     </div>
+    {warnings.length > 0 && <CoverageWarning items={warnings} busy={pending} onClose={() => setWarnings([])}
+      onContinue={() => void save(true)} onZone={(id, zoneId, zoneName) => {
+        update(id, { zoneId, zoneName }); setWarnings([])
+        setNotice('Zona actualizada. Revis? los cambios y guard? el recorrido; se volver? a consultar la cobertura.')
+      }} />}
     <ErrorMessage error={error} />
     {conflict && <p role="alert" className="text-sm text-warning">El recorrido cambió en el servidor. Tus cambios siguen visibles. Usá «Recargar recorrido» para ver la lista actual; al recargar se descartan los cambios locales.</p>}
     <p role="status" aria-live="polite" className="text-sm">{notice}</p>
@@ -138,7 +168,7 @@ export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSav
             if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDropAt(null)
           }}>{rows.map((row, index) => {
             const modified = rowModified(row, index, baseline.items)
-            const leaves = row.vehicleId !== filters.vehicleId || !row.visitDays.includes(filters.day)
+            const leaves = row.zoneId !== filters.zoneId || row.vehicleId !== filters.vehicleId || !row.visitDays.includes(filters.day)
             const dropClass = dropAt === index ? 'inset 0 3px 0 var(--color-accent)'
               : dropAt === rows.length && index === rows.length - 1 ? 'inset 0 -3px 0 var(--color-accent)' : undefined
             return <tr key={row.id} style={{ boxShadow: dropClass }} className={dragId === row.id ? 'opacity-50' : ''}
@@ -176,7 +206,7 @@ export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSav
                 {modified && <Badge tone="warning">Modificado</Badge>}
                 {leaves && <span className="text-warning">Sale de esta lista al guardar</span>}
               </div></td>
-              <td>{row.address}<span className="block text-muted">{row.phone}</span></td>
+              <td>{row.address}<span className="block text-muted">{row.zoneName}</span><span className="block text-muted">{row.phone}</span></td>
               {WEEKDAYS.map((day) => <td key={day.value} className="text-center">
                 <input type="checkbox" checked={row.visitDays.includes(day.value)} disabled={pending}
                   aria-label={`${day.label} para ${row.displayName}`} onChange={() => changeDay(row, day.value)} />

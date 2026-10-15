@@ -7,6 +7,7 @@ import type { Customer, CustomerInput } from '../services/customerService'
 import { VisitDaysField } from './VisitDaysField'
 
 interface Props {
+  zoneOverride?: { zoneId: string }
   initial?: Customer
   zones: Zone[]
   vehicles: Vehicle[]
@@ -15,7 +16,7 @@ interface Props {
   onSave: (input: CustomerInput) => void
 }
 
-export function CustomerForm({ initial, zones, vehicles, saving, error, onSave }: Props) {
+export function CustomerForm({ initial, zones, vehicles, saving, error, onSave, zoneOverride }: Props) {
   const [input, setInput] = useState<CustomerInput>(() => ({
     businessName: initial?.businessName ?? '', contactName: initial?.contactName ?? '',
     phone: initial?.phone ?? '', address: initial?.address ?? '', email: initial?.email ?? '',
@@ -23,6 +24,11 @@ export function CustomerForm({ initial, zones, vehicles, saving, error, onSave }
     vehicleId: initial?.vehicleId ?? '',
     visitDays: initial ? initial.visitDays ?? [] : [currentBusinessWeekday()], isActive: initial?.isActive ?? true,
   }))
+  const [appliedOverride, setAppliedOverride] = useState(zoneOverride)
+  if (zoneOverride !== appliedOverride) {
+    setAppliedOverride(zoneOverride)
+    if (zoneOverride) setInput({ ...input, zoneId: zoneOverride.zoneId })
+  }
   const [missingDays, setMissingDays] = useState(false)
   function submit(event: FormEvent) {
     event.preventDefault()

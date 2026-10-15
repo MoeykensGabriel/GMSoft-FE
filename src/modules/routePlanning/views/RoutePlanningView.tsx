@@ -4,6 +4,7 @@ import { Button, ErrorMessage, Page, PageHeader, Select, WEEKDAYS } from '../../
 import { vehicleService } from '../../vehicles'
 import type { Vehicle } from '../../vehicles'
 import { zoneService } from '../../zones'
+import { UncoveredCustomers } from '../components/UncoveredCustomers'
 import { RouteEditor } from '../components/RouteEditor'
 import { routePlanningKey, routePlanningService } from '../services/routePlanningService'
 import type { RouteFilters } from '../types'
@@ -50,6 +51,7 @@ export function RoutePlanningView() {
     {!ready ? <p>Elegí camión, zona y día para ver el recorrido</p>
       : <RouteWorkspace key={`${filters.vehicleId}/${filters.zoneId}/${filters.day}`} filters={filters}
         vehicles={vehicles.data ?? []} onDirty={setDirty} onBusy={setBusy} />}
+    <UncoveredCustomers />
   </Page>
 }
 
@@ -69,6 +71,7 @@ function RouteWorkspace({ filters, vehicles, onDirty, onBusy }: {
   }
   return <RouteEditor initial={query.data} filters={filters} vehicles={vehicles} onDirty={onDirty} onBusy={onBusy}
     onSaved={(snapshot) => {
+      void client.invalidateQueries({ queryKey: ['route-planning', 'uncovered'] })
       client.setQueryData(routePlanningKey(filters), snapshot)
       void client.invalidateQueries({ queryKey: ['customers'] })
       // Other day/truck lists can share customers, but must never replace this editor's draft.

@@ -20,7 +20,7 @@ export function sameDays(left: number[], right: number[]) {
 export function rowModified(row: RouteCustomer, index: number, baseline: RouteCustomer[]) {
   const originalIndex = baseline.findIndex((item) => item.id === row.id)
   const original = baseline[originalIndex]
-  return !original || originalIndex !== index || row.vehicleId !== original.vehicleId || !sameDays(row.visitDays, original.visitDays)
+  return !original || originalIndex !== index || row.zoneId !== original.zoneId || row.vehicleId !== original.vehicleId || !sameDays(row.visitDays, original.visitDays)
 }
 
 export function hasChanges(rows: RouteCustomer[], baseline: RouteCustomer[]) {
@@ -40,7 +40,8 @@ export function buildRouteSave(filters: RouteFilters, baseline: RouteSnapshot, r
     const change: RouteChange = { id: row.id }
     if (!sameDays(row.visitDays, original.visitDays)) change.visitDays = [...row.visitDays].sort((a, b) => a - b)
     if (row.vehicleId !== original.vehicleId) change.vehicleId = row.vehicleId
-    if (change.visitDays || change.vehicleId) changes.push(change)
+    if (row.zoneId !== original.zoneId) change.zoneId = row.zoneId
+    if (change.visitDays || change.vehicleId || change.zoneId) changes.push(change)
   }
   return { ...filters, version: baseline.version, customerIds: rows.map((row) => row.id), changes }
 }

@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { scheduleService } from '../../schedule'
+import { SuggestedZoneNotice } from '../components/SuggestedZoneNotice'
 import type { FormEvent } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ApiError, Button, Field, InstallAppButton, Select, weekdayLabels, PageHeader } from '../../core'
@@ -28,7 +30,13 @@ export function OpenSessionView() {
 
   const abrir = useOpenSession()
 
-  const [zoneId, setZoneId] = useState('')
+  const [chosenZone, setZoneId] = useState<string | null>(null)
+  const suggestion = useQuery({
+    queryKey: ['sessions', 'suggested-zone', { vehicleId }],
+    queryFn: () => scheduleService.suggested(),
+    enabled: Boolean(vehicleId),
+  })
+  const zoneId = chosenZone ?? suggestion.data?.zoneId ?? ''
   const [kilometros, setKilometros] = useState('')
   const [error, setError] = useState<string | null>(null)
 
@@ -125,6 +133,7 @@ export function OpenSessionView() {
           </option>
         ))}
       </Select>
+      <SuggestedZoneNotice suggestion={suggestion.data} zoneId={zoneId} />
       {routeDays.length > 0 && <p className="text-sm">Días del recorrido: <strong>{weekdayLabels(routeDays)}</strong></p>}
 
       <Field
@@ -145,7 +154,7 @@ export function OpenSessionView() {
       )}
 
       <Button type="submit" disabled={abrir.isPending}>
-        {abrir.isPending ? 'Abriendo...' : 'Abrir salida'}
+        {abrir.isPending ? 'Abriendo...' : suggestion.data?.zoneId && zoneId !== suggestion.data.zoneId ? 'Guardar igual y abrir salida' : 'Abrir salida'}
       </Button>
       <InstallAppButton />
     </form>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { CustomerRouteList } from '../../customers'
+import { CustomerRouteList, RouteUpdateNotice } from '../../customers'
 import { useAuth } from '../../auth'
 import { RouteHeader } from '../components/RouteHeader'
 import { Button, formatDateTime, InstallAppButton, LinkButton, Page } from '../../core'
@@ -45,12 +45,14 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
   const visitas = useQuery({
     queryKey: ['sessions', 'deliveries', sesion.id],
     queryFn: () => sessionService.getDeliveries(sesion.id),
+    refetchInterval: 30_000,
     staleTime: 0, refetchOnMount: 'always', refetchOnWindowFocus: true, refetchOnReconnect: true,
   })
   const visitados = [...new Set((visitas.data ?? []).map((visita) => visita.customerId))]
   return (
     <Page className="mx-auto flex max-w-3xl flex-col gap-3 p-3">
       {user && <RestockNotice userId={user.userId} session={sesion} />}
+      <RouteUpdateNotice key={sesion.id} vehicleId={sesion.vehicleId} zoneId={sesion.zoneId} routeDays={sesion.routeDays} />
       <RouteHeader zoneName={sesion.zoneName ?? 'Zona'} date={sesion.openedAt} userName={user?.userName ?? sesion.driverName} routeDays={sesion.routeDays} />
       {modo === null && (
         <div className="grid grid-cols-2 gap-2">

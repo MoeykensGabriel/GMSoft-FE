@@ -18,3 +18,5 @@ export type {
   CustomerContainerLine,
   CustomerStatementEntry,
 } from './services/customerService'
+
+export { RouteUpdateNotice } from './components/RouteUpdateNotice'

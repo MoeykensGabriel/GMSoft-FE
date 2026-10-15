@@ -24,6 +24,7 @@ export interface RouteSnapshot {
 }
 
 export interface RouteChange {
+  zoneId?: string
   id: string
   visitDays?: number[]
   vehicleId?: string
