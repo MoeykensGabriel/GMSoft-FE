@@ -5,6 +5,7 @@ import { Button, ErrorMessage, LinkButton, Page } from '../../core'
 import { customerService, CustomerProfileCard, CustomerBalanceCard, CustomerAccountMovements, CustomerContainersSummary } from '../../customers'
 import { useCurrentSession } from '../../sessions'
 import { NoPurchaseAction } from '../components/NoPurchaseAction'
+import { RemovalAction } from '../components/RemovalAction'
 
 export function CustomerVisitView() {
   const { id } = useParams()
@@ -34,7 +35,11 @@ export function CustomerVisitView() {
         </div>
         {panel === 'containers' && <section id="customer-containers" className="ui-card p-3 text-sm"><h2 className="mb-2 font-semibold">Envases en poder del cliente</h2><CustomerContainersSummary account={account.data!} /></section>}
         {panel === 'account' && <div id="customer-account"><CustomerAccountMovements account={account.data!} /></div>}
-        <NoPurchaseAction key={id} customerId={id!} customerName={customer.data!.displayName} />
+        {/* Los dos del mismo tamaño en la misma fila: no compró hoy (rojo) o no va a comprar más (negro). */}
+        <div className="grid grid-cols-2 gap-2">
+          <NoPurchaseAction key={id} customerId={id!} customerName={customer.data!.displayName} />
+          <RemovalAction key={`baja-${id}`} customerId={id!} customerName={customer.data!.displayName} account={account.data!} />
+        </div>
         <LinkButton to={`/reparto/visita?customerId=${encodeURIComponent(id!)}`} variant="primary" className="min-h-14">Realizar venta</LinkButton>
       </>}
   </Page>

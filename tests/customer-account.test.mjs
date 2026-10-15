@@ -21,6 +21,7 @@ function load(path, imports = {}) {
 }
 const detail = load('customers/utils/accountStatement.ts', {
   './noPurchase': load('customers/utils/noPurchase.ts'),
+  './removal': load('customers/utils/removal.ts'),
 })
 const base = { date: '2026-10-14T01:00:00Z', kind: 'Sale', referenceId: 'sale', lines: [],
   containersDelivered: [], containersReturned: [], containerChanges: [], charge: 0,
@@ -81,4 +82,16 @@ test('cuenta vacía y saldo a favor', () => {
   assert.ok(!empty.includes('Mostrando'))
   assert.ok(render({ balance: -500, statementTotalCount: 1, statement: [{ ...base, balanceAfter: -500 }] })
     .includes(`Saldo a favor ${core.formatMoney(500)}`))
+})
+
+test('baja del chofer: motivo, nota en Otro y envases', () => {
+  const { validRemoval, removalLabel } = load('customers/utils/removal.ts')
+  assert.equal(validRemoval(null, '', false, false), false)
+  assert.equal(validRemoval('Moved', '', false, false), true)
+  assert.equal(validRemoval('Other', '  ', false, false), false)
+  assert.equal(validRemoval('Other', 'Se fue a Salta', false, false), true)
+  assert.equal(validRemoval('Moved', '', true, false), false, 'con envases hay que marcar que no los devolvió')
+  assert.equal(validRemoval('Moved', '', true, true), true)
+  assert.equal(removalLabel('ClosedBusiness'), 'Cerró el negocio')
+  assert.equal(detail.statementDetail({ ...base, kind: 'RemovalRequested', removalReason: 'Moved' }).title, 'Baja pedida por el chofer · Se mudó')
 })

@@ -1,6 +1,7 @@
 import type { LastNoPurchase, NoPurchaseReason } from '../utils/noPurchase'
 import { api } from '../../core'
 import type { PagedResult } from '../../core'
+import type { RemovalReason, RemovalStatus } from '../utils/removal'
 
 export interface Customer {
   id: string
@@ -27,6 +28,8 @@ export interface Customer {
   lastPurchaseAt: string | null
   daysWithoutPurchase: number | null
   sinComprasRegistradas: boolean
+  /** El chofer pidió la baja y la oficina todavía no la resolvió. */
+  removalPending?: boolean
 }
 
 export interface CustomerContainerLine {
@@ -45,6 +48,7 @@ export interface CustomerUnitLine {
 export interface CustomerStatementEntry {
   date: string
   kind: 'Sale' | 'ContainerOnly' | 'Promotion' | 'NoPurchase' | 'Payment' | 'ContainerAdjustment' | 'ContainerLoss'
+    | 'RemovalRequested' | 'RemovalConfirmed' | 'RemovalRejected'
   referenceId: string
   lines: (CustomerContainerLine & { unitPrice: number; amount: number })[]
   containersDelivered: CustomerContainerLine[]
@@ -54,6 +58,7 @@ export interface CustomerStatementEntry {
   payments: { amount: number; method: 'Cash' | 'Transfer' | 'Card' }[]
   paid: number
   noPurchaseReason: NoPurchaseReason | null
+  removalReason?: RemovalReason | null
   notes: string | null
   balanceAfter: number
 }
@@ -95,7 +100,51 @@ export interface ActivitySettings {
   isDefault: boolean
 }
 
+/** Baja pedida por el chofer. Ver GM-SoftBE/docs/customer-removal.md. */
+export interface CustomerRemoval {
+  id: string
+  customerId: string
+  customerName: string
+  vehicleId: string
+  vehicleName: string
+  zoneId: string
+  zoneName: string
+  driverId: string
+  driverName: string
+  requestedAt: string
+  status: RemovalStatus
+  reason: RemovalReason
+  notes: string | null
+  containersNotReturned: boolean
+  containers: CustomerContainerLine[]
+  debt: number
+  resolvedAt: string | null
+  clientRequestId: string
+}
+
+export interface CustomerRemovalPage {
+  items: CustomerRemoval[]
+  totalCount: number
+  pendingCount: number
+  page: number
+  pageSize: number
+}
+
+export interface RemovalRequestInput {
+  clientRequestId: string
+  reason: RemovalReason
+  notes: string | null
+  containersNotReturned: boolean
+}
+
 export const customerService = {
+  requestRemoval: (customerId: string, body: RemovalRequestInput) =>
+    api.post<CustomerRemoval>(`/api/customers/${customerId}/removal-requests`, body),
+  removals: (status: RemovalStatus | null, page = 1) =>
+    api.get<CustomerRemovalPage>(`/api/customers/removal-requests?page=${page}&pageSize=20${status ? `&status=${status}` : ''}`),
+  confirmRemoval: (requestId: string) => api.post<CustomerRemoval>(`/api/customers/removal-requests/${requestId}/confirm`, {}),
+  rejectRemoval: (requestId: string) => api.post<CustomerRemoval>(`/api/customers/removal-requests/${requestId}/reject`, {}),
+
   activitySettings: () => api.get<ActivitySettings>('/api/customer-activity/settings'),
   saveActivitySettings: (redAfterMissedWeeks: number, blackAfterMissedWeeks: number) =>
     api.put<ActivitySettings>('/api/customer-activity/settings', { redAfterMissedWeeks, blackAfterMissedWeeks }),

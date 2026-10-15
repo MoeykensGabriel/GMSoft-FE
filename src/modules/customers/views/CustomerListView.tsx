@@ -61,7 +61,7 @@ export function CustomerListView() {
               if (event.target instanceof Element && event.target.closest('a, button, input, select, textarea')) return
               navigate(customerPath)
             }}>
-              <td><Link to={customerPath} className="inline-flex min-h-11 items-center font-semibold underline" aria-label={`Ver cliente ${customer.displayName}`}>{customer.displayName}</Link><span className={detail}>Orden {customer.routeOrder}</span>{!customer.isActive && <Badge>Inactivo</Badge>}</td>
+              <td><Link to={customerPath} className="inline-flex min-h-11 items-center font-semibold underline" aria-label={`Ver cliente ${customer.displayName}`}>{customer.displayName}</Link><span className={detail}>Orden {customer.routeOrder}</span>{!customer.isActive && <Badge>Inactivo</Badge>}{customer.removalPending && <Badge tone="warning">Baja pedida</Badge>}</td>
               <td>{customer.address}<span className={detail}>{customer.phone}</span></td><td>{customer.zoneName}</td>
               <td>{customer.vehicleId ? <>{customer.vehicleName}<span className={detail}>{customer.vehicleLicensePlate}</span></> : 'Sin camión asignado'}</td>
               <td>{visitDaysLabel(customer.visitDays)}</td>

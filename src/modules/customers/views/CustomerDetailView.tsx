@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { Badge, Button, ErrorMessage, LinkButton, Page, PageHeader, Panel } from '../../core'
 import { CustomerAccountMovements } from '../components/CustomerAccountMovements'
 import { CustomerBalanceCard } from '../components/CustomerBalanceCard'
@@ -22,6 +22,9 @@ export function CustomerDetailView() {
         <ErrorMessage error={customer.error ?? account.error} />
         <Button variant="secondary" onClick={() => { void customer.refetch(); void account.refetch() }}>Reintentar</Button>
       </div> : <>
+        {customer.data.removalPending && <p role="status" className="rounded border border-warning/40 bg-warning-soft p-3 text-warning">
+          El chofer pidió dar de baja a este cliente y ya no aparece en su hoja. <Link to="/panel/bajas" className="underline">Confirmá o rechazá la baja</Link>.
+        </p>}
         <div className="grid items-start gap-5 lg:grid-cols-2">
           <div className="flex min-w-0 flex-col gap-3">
             <CustomerProfileCard customer={customer.data} headingLevel={2} />

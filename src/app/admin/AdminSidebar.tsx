@@ -12,6 +12,7 @@ const groups: Group[] = [
   { id: 'clientes', label: 'Clientes', items: [
     { to: '/panel/clientes', label: 'Clientes' },
     { to: '/panel/recorridos', label: 'Recorridos' },
+    { to: '/panel/bajas', label: 'Bajas pedidas' },
     { to: '/panel/promociones', label: 'Promociones' },
   ] },
   { id: 'reparto', label: 'Reparto', items: [

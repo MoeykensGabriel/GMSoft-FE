@@ -1,5 +1,6 @@
-﻿import type { CustomerStatementEntry } from '../services/customerService'
+import type { CustomerStatementEntry } from '../services/customerService'
 import { noPurchaseLabel } from './noPurchase'
+import { removalLabel } from './removal'
 
 export function statementDetail(entry: CustomerStatementEntry) {
   const products = entry.lines.map((line) => `${line.quantity} × ${line.productDetail}`).join(' + ')
@@ -11,6 +12,9 @@ export function statementDetail(entry: CustomerStatementEntry) {
     Payment: 'Cobro de deuda',
     ContainerAdjustment: 'Ajuste de envases',
     ContainerLoss: 'Pérdida de envases',
+    RemovalRequested: `Baja pedida por el chofer · ${removalLabel(entry.removalReason)}`,
+    RemovalConfirmed: `Baja confirmada · ${removalLabel(entry.removalReason)}`,
+    RemovalRejected: `Baja rechazada: sigue en el recorrido`,
   }
   const containers = new Map<string, { name: string; delivered: number; returned: number }>()
   for (const line of [...entry.containersDelivered, ...entry.containersReturned]) {
