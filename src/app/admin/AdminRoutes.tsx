@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { ProductFormView, ProductListView } from '../../modules/products/admin'
 import {
   ReceiveSessionView,
+  CorrectReceptionView,
   RouteSettlementView,
   DailySummaryView,
   SessionDetailView,
@@ -58,6 +59,7 @@ export function AdminRoutes() {
         <Route path="salidas/abrir" element={<AdminOpenSessionView />} />
         <Route path="salidas/:id" element={<SessionDetailView />} />
         <Route path="salidas/:id/recepcion" element={<ReceiveSessionView />} />
+        <Route path="salidas/:id/correccion" element={<CorrectReceptionView />} />
         <Route path="salidas/:id/recarga" element={<RestockView />} />
         <Route path="recargas" element={<RestockListView />} />
 

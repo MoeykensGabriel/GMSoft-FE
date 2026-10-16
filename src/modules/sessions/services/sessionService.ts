@@ -126,6 +126,48 @@ export interface SessionSettlement {
   notes: string | null
 }
 
+/** Lo descargado de un producto al recibir el camión y lo que sigue faltando (negativo: sobra). */
+export interface ReceptionProduct {
+  productId: string
+  productDetail: string
+  fullReturned: number
+  emptyReturned: number
+  fullMissing: number
+  emptyMissing: number
+}
+
+export interface ReceptionCorrection {
+  id: string
+  correctedAt: string
+  /** Null si no se pudo saber quién fue. */
+  correctedByUserName: string | null
+  reason: string
+  previousKilometers: number | null
+  newKilometers: number | null
+  previousAmountReceived: number | null
+  newAmountReceived: number | null
+  lines: { productId: string; productDetail: string; state: ContainerState; previousQuantity: number; newQuantity: number }[]
+}
+
+/** La recepción como quedó, con su historial de correcciones. */
+export interface Reception {
+  sessionId: string
+  kilometersAtOpen: number
+  kilometersAtClose: number | null
+  /** Null si todavía no se rindió. */
+  amountReceived: number | null
+  products: ReceptionProduct[]
+  corrections: ReceptionCorrection[]
+}
+
+/** Solo va lo que se corrige. Lo descargado es el total que volvió, no la diferencia. */
+export interface CorrectReceptionRequest {
+  reason: string
+  kilometersAtClose: number | null
+  amountReceived: number | null
+  returns: { productId: string; state: ContainerState; quantity: number }[]
+}
+
 export interface CustomerSettlementLine {
   date: string
   type: 'Sale' | 'ContainerOnly' | 'Promotion'
@@ -208,4 +250,9 @@ export const sessionService = {
 
   registerSettlement: (sessionId: string, amountReceived: number, notes: string | null) =>
     api.post<SessionSettlement>(`/api/sessions/${sessionId}/settlement`, { amountReceived, notes }),
+
+  getReception: (sessionId: string) => api.get<Reception>(`/api/sessions/${sessionId}/reception`),
+
+  correctReception: (sessionId: string, body: CorrectReceptionRequest) =>
+    api.post<Reception>(`/api/sessions/${sessionId}/reception-corrections`, body),
 }

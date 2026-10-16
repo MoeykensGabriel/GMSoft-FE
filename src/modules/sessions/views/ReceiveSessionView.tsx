@@ -88,8 +88,11 @@ export function ReceiveSessionView() {
       <Page className="ui-card mx-auto flex max-w-3xl flex-col gap-3 p-6">
         <PageHeader title={<>Ya recibido</>} />
         <p className="text-sm text-muted">
-          Esta salida ya está cerrada. La recepción se hace una sola vez.
+          Esta salida ya está cerrada. La recepción se hace una sola vez; si se anotó algo mal, se corrige.
         </p>
+        <Link to={`/panel/salidas/${id}/correccion`} className="text-sm text-ink underline">
+          Corregir recepción
+        </Link>
         <Link to={`/panel/salidas/${id}`} className="text-sm text-ink underline">
           Ver la salida
         </Link>

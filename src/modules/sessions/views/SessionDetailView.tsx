@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom'
 import { BUSINESS_TIME_ZONE, Badge, formatDateTime, formatMoney, LinkButton, Page, PageHeader, Panel } from '../../core'
 import { OutsideWorkingHoursBadge, OutsideWorkingHoursEvents } from '../../workingHours'
 import { noPurchaseLabel } from '../../customers'
+import { ReceptionCorrectionsPanel } from '../components/ReceptionCorrectionsPanel'
 import { RestocksPanel } from '../components/RestocksPanel'
 import { SettlementPanel } from '../components/SettlementPanel'
 import { StatTile } from '../../core'
@@ -113,6 +114,11 @@ export function SessionDetailView() {
           <LinkButton to={`/panel/salidas/${id}/recarga`} variant="secondary">Recargar</LinkButton>
         </div>
       )}
+      {cerrada && (
+        <LinkButton to={`/panel/salidas/${id}/correccion`} variant="secondary" className="self-start">
+          Corregir recepción
+        </LinkButton>
+      )}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile label="Visitas" value={visitas.length} detail={`${ventas.length} con venta`} />
@@ -207,6 +213,7 @@ export function SessionDetailView() {
 
       <UnvisitedCustomersPanel sessionId={id} />
       <StockOnBoardPanel stock={s.stock} cerrada={cerrada} />
+      {cerrada && <ReceptionCorrectionsPanel sessionId={id} />}
       <RestocksPanel restocks={s.restocks} />
       <SettlementPanel sessionId={id} cerrada={cerrada} byMethod={cobros.data ? cobrado : undefined} />
     </Page>
