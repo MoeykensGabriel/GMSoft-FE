@@ -58,6 +58,8 @@ export interface Session extends SessionWorkingHours {
   status: SessionStatus
   stock: SessionStockLine[]
   restocks: SessionRestock[]
+  /** Si ya se cargó la plata que entregó el chofer. */
+  isSettled: boolean
 }
 
 /** Sin carga: la subio la oficina al camion y la salida se lleva lo que haya arriba. */
@@ -73,6 +75,8 @@ export interface OpenSessionRequest {
 export interface CloseSessionRequest {
   kilometersAtClose: number
   returns: { productId: string; state: ContainerState; quantity: number }[]
+  /** La plata que entregó el chofer. Null solo si rinde más tarde. */
+  settlement: { amountReceived: number; notes: string | null } | null
 }
 
 export interface CloseSessionResult {
@@ -80,6 +84,8 @@ export interface CloseSessionResult {
   cuadraTodo: boolean
   /** Lo que quedo colgado. Vacio si cuadro todo. */
   faltante: SessionStockLine[]
+  /** Efectivo cobrado menos entregado. Null si la plata todavía no se rindió. */
+  cashDifference: number | null
 }
 
 export interface SessionDeliveryItem {

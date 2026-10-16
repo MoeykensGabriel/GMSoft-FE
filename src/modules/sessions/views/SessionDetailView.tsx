@@ -114,6 +114,12 @@ export function SessionDetailView() {
           <LinkButton to={`/panel/salidas/${id}/recarga`} variant="secondary">Recargar</LinkButton>
         </div>
       )}
+      {cerrada && !s.isSettled && (
+        <p role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded border border-warning/40 bg-warning-soft px-4 py-3 text-base font-semibold text-warning">
+          Falta rendir el efectivo de esta salida.
+          <a href="#liquidacion" className="text-sm text-ink underline">Cargar la plata</a>
+        </p>
+      )}
       {cerrada && (
         <LinkButton to={`/panel/salidas/${id}/correccion`} variant="secondary" className="self-start">
           Corregir recepción
@@ -215,7 +221,9 @@ export function SessionDetailView() {
       <StockOnBoardPanel stock={s.stock} cerrada={cerrada} />
       {cerrada && <ReceptionCorrectionsPanel sessionId={id} />}
       <RestocksPanel restocks={s.restocks} />
-      <SettlementPanel sessionId={id} cerrada={cerrada} byMethod={cobros.data ? cobrado : undefined} />
+      <div id="liquidacion" className="scroll-mt-4">
+        <SettlementPanel sessionId={id} cerrada={cerrada} byMethod={cobros.data ? cobrado : undefined} />
+      </div>
     </Page>
   )
 }

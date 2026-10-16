@@ -68,7 +68,10 @@ export function SessionListView() {
             <tbody>{items.map((s) => <tr key={s.id}>
               <td className="font-semibold">{s.driverName}</td><td>{s.vehicleLicensePlate}<span className="block text-xs text-muted">{s.zoneName}</span></td>
               <td>{formatDateTime(s.openedAt, BUSINESS_TIME_ZONE)}</td><td>{s.closedAt ? formatDateTime(s.closedAt, BUSINESS_TIME_ZONE) : 'Pendiente'}</td>
-              <td><Badge tone={s.status === 'Open' ? 'info' : 'neutral'}>{s.status === 'Open' ? 'En la calle' : 'Recibida'}</Badge></td>
+              <td className="flex flex-wrap gap-1">
+                <Badge tone={s.status === 'Open' ? 'info' : 'neutral'}>{s.status === 'Open' ? 'En la calle' : 'Recibida'}</Badge>
+                {s.status === 'Closed' && !s.isSettled && <Badge tone="warning">Falta rendir</Badge>}
+              </td>
               <td><LinkButton to={`/panel/salidas/${s.id}`} aria-label={`Ver salida de ${s.driverName}`}>Ver salida</LinkButton></td>
             </tr>)}</tbody>
           </DataTable>}
