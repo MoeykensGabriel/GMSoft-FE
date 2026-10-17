@@ -4,23 +4,41 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
+    # La CSP va como <meta> en index.html (ver vite.config.ts). Estas cabeceras se repiten
+    # en cada location porque nginx descarta las del server si la location define otra.
+    add_header X-Frame-Options "DENY" always;
+    add_header Content-Security-Policy "frame-ancestors 'none'" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+    add_header Strict-Transport-Security "max-age=31536000" always;
+
     location = /index.html {
         add_header Cache-Control "no-store" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header Content-Security-Policy "frame-ancestors 'none'" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+        add_header Strict-Transport-Security "max-age=31536000" always;
     }
 
     # El service worker y el manifiesto se revisan siempre: si no, una versión nueva tarda en llegar.
     location = /sw.js {
         add_header Cache-Control "no-cache" always;
+        add_header X-Content-Type-Options "nosniff" always;
     }
 
     location = /manifest.webmanifest {
         add_header Cache-Control "no-cache" always;
+        add_header X-Content-Type-Options "nosniff" always;
         default_type application/manifest+json;
     }
 
     location /assets/ {
         try_files $uri =404;
         add_header Cache-Control "public, max-age=31536000, immutable";
+        add_header X-Content-Type-Options "nosniff" always;
     }
 
     location / {
