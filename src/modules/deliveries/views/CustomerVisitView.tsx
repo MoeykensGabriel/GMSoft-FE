@@ -38,7 +38,7 @@ export function CustomerVisitView() {
           <Button variant="secondary" onClick={() => setPanel(panel === 'containers' ? null : 'containers')} aria-expanded={panel === 'containers'} aria-controls="customer-containers">Envases prestados</Button>
           <Button variant="secondary" className="col-span-2" onClick={() => setPanel(panel === 'account' ? null : 'account')} aria-expanded={panel === 'account'} aria-controls="customer-account">Detalle de deuda</Button>
         </div>
-        {panel === 'containers' && <section id="customer-containers" className="ui-card p-3 text-sm"><h2 className="mb-2 font-semibold">Envases en poder del cliente</h2><CustomerContainersSummary account={account.data!} /></section>}
+        {panel === 'containers' && <section id="customer-containers" className="ui-card p-3 text-sm"><h2 className="mb-2 font-semibold">Envases en poder del cliente</h2><CustomerContainersSummary account={account.data!} vertical /></section>}
         {panel === 'account' && <div id="customer-account"><CustomerAccountMovements account={account.data!} /></div>}
         {/* Una visita de este cliente guardada en el celular: otra podría duplicarla si la primera llegó. */}
         {guardada && <p role="alert" className="rounded border border-warning/40 bg-warning-soft p-3 text-sm text-warning">
