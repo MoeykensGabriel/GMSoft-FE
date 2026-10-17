@@ -45,6 +45,8 @@ test('motivos, promociones, cobros y cambios administrativos conservan su signif
   assert.equal(detail.statementDetail({ ...base, kind: 'Payment' }).title, 'Cobro de deuda')
   assert.equal(detail.statementDetail({ ...base, kind: 'Promotion', lines: [product('20', 1)] }).title, 'Promoción · 1 × Bidón 20 lts')
   for (const [kind, title, quantity, reason, expected] of [
+    ['Loan', 'Préstamo', 1, null, 'Bidón 20 lts: +1'],
+    ['LoanReturn', 'Retiro de préstamo', -1, null, 'Bidón 20 lts: -1'],
     ['ContainerAdjustment', 'Ajuste de envases', 2, 'Recuento', 'Bidón 20 lts: +2 · Recuento'],
     ['ContainerLoss', 'Pérdida de envases', -1, 'Rotura', 'Bidón 20 lts: -1 · Rotura'],
     ['ContainerAdjustment', 'Ajuste de envases', -2, null, 'Bidón 20 lts: -2'],

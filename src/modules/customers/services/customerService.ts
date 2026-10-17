@@ -49,6 +49,7 @@ export interface CustomerStatementEntry {
   date: string
   kind: 'Sale' | 'ContainerOnly' | 'Promotion' | 'NoPurchase' | 'Payment' | 'ContainerAdjustment' | 'ContainerLoss'
     | 'RemovalRequested' | 'RemovalConfirmed' | 'RemovalRejected'
+    | 'Loan' | 'LoanReturn'
   referenceId: string
   lines: (CustomerContainerLine & { unitPrice: number; amount: number })[]
   containersDelivered: CustomerContainerLine[]

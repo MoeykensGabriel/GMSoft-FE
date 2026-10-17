@@ -21,6 +21,8 @@ export interface RegisterDeliveryRequest {
   items: { productId: string; quantity: number }[]
   containersOut: { productId: string; quantity: number }[]
   containersIn: { productId: string; quantity: number }[]
+  loansOut?: { productId: string; quantity: number }[]
+  loansIn?: { productId: string; quantity: number }[]
   /** Sin amount se cobra el total de la venta, que calcula el servidor. */
   payment: { method: PaymentMethod; amount?: number } | null
   notes: string | null

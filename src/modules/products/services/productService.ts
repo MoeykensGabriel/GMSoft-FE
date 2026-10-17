@@ -10,6 +10,7 @@ export interface Product {
   commercialDetail: string | null
   salePrice: number
   tracking: ContainerTracking
+  canBeLent: boolean
   isPublished: boolean
   imageUrl: string | null
 }

@@ -115,6 +115,8 @@ export interface SessionDelivery {
   notes: string | null
   items: SessionDeliveryItem[]
   containers: SessionDeliveryContainer[]
+  loansOut: SessionDeliveryContainer[]
+  loansIn: SessionDeliveryContainer[]
 }
 
 export interface SessionSettlement {

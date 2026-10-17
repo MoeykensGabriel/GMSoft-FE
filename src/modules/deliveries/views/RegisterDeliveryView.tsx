@@ -16,6 +16,7 @@ import type { Cobro } from '../components/SaleConfirmModal'
 import { useRegisterDelivery } from '../hooks/useRegisterDelivery'
 import type { NewCustomerLine, PaymentMethod, RegisterDeliveryResult } from '../services/deliveryService'
 import { visitOutboxItem } from '../utils/visitOutbox'
+import { loanLimits, loanSummary } from '../utils/loans'
 
 const CLIENTE_VACIO: NewCustomerLine = {
   businessName: null,
@@ -34,13 +35,6 @@ export function RegisterDeliveryView() {
   const userId = user?.userId ?? ''
   const bandeja = useOutbox(userId)
   const registrar = useRegisterDelivery()
-  const products = useQueries({ queries: (sesion?.stock ?? []).map((product) => ({
-    queryKey: ['products', 'sale', product.productId],
-    queryFn: () => productService.getById(product.productId),
-    staleTime: 0,
-  })) })
-  const prices = Object.fromEntries(products.filter((query) => query.data).map((query) => [query.data!.id, query.data!.salePrice]))
-
   const [customerId, setCustomerId] = useState<string | null>(params.get('customerId'))
   const [esNuevo, setEsNuevo] = useState(params.get('new') === '1')
   const specialPrices = useQuery({
@@ -49,20 +43,28 @@ export function RegisterDeliveryView() {
     enabled: !esNuevo && Boolean(customerId),
     staleTime: 0,
   })
-  for (const price of (!esNuevo && customerId ? specialPrices.data ?? [] : [])) prices[price.productId] = price.price
-  const pricesReady = products.every((query) => query.isSuccess && Number.isFinite(query.data.salePrice))
-    && (esNuevo || Boolean(customerId && specialPrices.isSuccess))
   const directo = Boolean(params.get('customerId'))
   const cliente = useQuery({
     queryKey: ['customers', 'detail', customerId],
     queryFn: () => customerService.getById(customerId!),
-    enabled: directo && Boolean(customerId),
+    enabled: !esNuevo && Boolean(customerId),
   })
   const cuenta = useQuery({
     queryKey: ['customers', 'account', customerId],
     queryFn: () => customerService.getAccount(customerId!),
-    enabled: directo && Boolean(customerId),
+    enabled: !esNuevo && Boolean(customerId),
   })
+  const balances = !esNuevo ? cuenta.data?.containers ?? [] : []
+  const productIds = [...new Set([...(sesion?.stock ?? []).map((p) => p.productId), ...balances.map((b) => b.productId)])]
+  const products = useQueries({ queries: productIds.map((id) => ({
+    queryKey: ['products', 'sale', id], queryFn: () => productService.getById(id), staleTime: 0,
+  })) })
+  const catalog = products.flatMap((query) => query.data ? [query.data] : [])
+  const prices = Object.fromEntries(catalog.map((p) => [p.id, p.salePrice]))
+  for (const price of (!esNuevo && customerId ? specialPrices.data ?? [] : [])) prices[price.productId] = price.price
+  const productsReady = products.every((query) => query.isSuccess)
+  const pricesReady = productsReady && catalog.every((p) => Number.isFinite(p.salePrice))
+    && (esNuevo || Boolean(customerId && specialPrices.isSuccess))
   const [nuevo, setNuevo] = useState<NewCustomerLine>(() => ({ ...CLIENTE_VACIO, visitDays: [currentBusinessWeekday()] }))
   const [lineas, setLineas] = useState<DeliveryLine[]>([])
   // Null hasta que el chofer responde en el resumen si cobro o queda a deuda.
@@ -82,6 +84,8 @@ export function RegisterDeliveryView() {
   const [notas, setNotas] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [hecho, setHecho] = useState<RegisterDeliveryResult | null>(null)
+  const resumenPrestamos = loanSummary(lineas)
+  const mostrarPrestamos = <ul className="flex flex-col gap-1 text-sm">{resumenPrestamos.map((text) => <li key={text}>{text}</li>)}</ul>
 
   if (isLoading) return <p className="p-6 text-muted">Cargando...</p>
 
@@ -105,6 +109,7 @@ export function RegisterDeliveryView() {
         {!enBandeja ? <>
           <PageHeader title={<>Visita registrada</>} />
           <p className="text-sm">La visita guardada en el celular ya llegó a la oficina.</p>
+          {mostrarPrestamos}
         </> : enBandeja.status === 'failed' ? <>
           <PageHeader title={<>No se pudo registrar</>} />
           <p role="alert" className="rounded border border-danger/30 bg-danger-soft p-3 text-sm text-danger">
@@ -132,6 +137,7 @@ export function RegisterDeliveryView() {
     return (
       <div className="ui-card mx-auto flex max-w-md flex-col gap-4 p-6">
         <PageHeader title={<>Visita registrada</>} />
+        {mostrarPrestamos}
         <div className="ui-card bg-surface p-3 text-sm">
           <div className="flex justify-between">
             <span className="text-muted">Total de la visita</span>
@@ -155,6 +161,15 @@ export function RegisterDeliveryView() {
     : undefined
 
   const vendeAlgo = lineas.some((l) => l.vende > 0)
+  const mueveAlgo = lineas.some((l) => l.vende > 0 || l.retiraEnvases > 0 || l.presta > 0 || l.retiraPrestamo > 0)
+  const prestamosValidos = lineas.every((l) => {
+    if (!l.presta && !l.retiraPrestamo) return true
+    const product = catalog.find((p) => p.id === l.productId)
+    const limits = loanLimits(sesion.stock.find((s) => s.productId === l.productId)?.fullOnBoard ?? 0,
+      l.vende, balances.find((b) => b.productId === l.productId)?.quantity ?? 0)
+    return product?.canBeLent && product.tracking === 'None' && l.presta <= limits.maxOut && l.retiraPrestamo <= limits.maxIn
+  })
+  const datosListos = productsReady && (esNuevo || cuenta.isSuccess)
   // En el orden del camion y en centavos, igual que el editor: es lo que se muestra
   // para confirmar. El importe definitivo lo calcula el servidor.
   const vendidas = sesion.stock.flatMap((producto) => {
@@ -168,20 +183,14 @@ export function RegisterDeliveryView() {
   function onSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
-    if (registrar.isPending || (vendeAlgo && !pricesReady) || guardada) return
+    if (registrar.isPending || !datosListos || !mueveAlgo || !prestamosValidos || (vendeAlgo && !pricesReady) || guardada) return
 
-    if (esNuevo && !nuevo.visitDays.length) {
+    if (esNuevo && (!nuevo.visitDays.length || !vendeAlgo)) {
       setError('Seleccioná al menos un día de visita.')
       return
     }
-    // Una venta pasa primero por el resumen, que pregunta si se cobro. Una visita
-    // de solo envases no tiene nada que cobrar y se registra directo.
-    if (vendeAlgo) {
-      setCobro(null)
-      setConfirmando(true)
-      return
-    }
-    void registrarVisita()
+    setCobro(null)
+    setConfirmando(true)
   }
 
   async function registrarVisita() {
@@ -195,6 +204,8 @@ export function RegisterDeliveryView() {
         type: vendeAlgo ? 'Sale' : 'ContainerOnly',
         items: lineas.filter((l) => l.vende > 0).map((l) => ({ productId: l.productId, quantity: l.vende })),
         containersOut: [],
+        loansOut: lineas.filter((l) => l.presta > 0).map((l) => ({ productId: l.productId, quantity: l.presta })),
+        loansIn: lineas.filter((l) => l.retiraPrestamo > 0).map((l) => ({ productId: l.productId, quantity: l.retiraPrestamo })),
         containersIn: lineas
           .filter((l) => l.retiraEnvases > 0)
           .map((l) => ({ productId: l.productId, quantity: l.retiraEnvases })),
@@ -217,7 +228,7 @@ export function RegisterDeliveryView() {
       const nombre = esNuevo ? nuevo.contactName : cliente.data?.displayName ?? 'Cliente del recorrido'
       const detalle = vendidas.map((l) => `${l.quantity} × ${l.productDetail}`).join(', ')
       const retira = lineas.filter((l) => l.retiraEnvases > 0).reduce((sum, l) => sum + l.retiraEnvases, 0)
-      const resumen = [detalle, retira ? `retira ${retira} envases` : ''].filter(Boolean).join(' · ') || 'visita'
+      const resumen = [detalle, retira ? `retira ${retira} envases` : '', ...resumenPrestamos].filter(Boolean).join(' · ') || 'visita'
       setGuardadaEnCelular(outbox.put(visitOutboxItem({ userId, sessionId: sesion!.id, body: cuerpo,
         label: `${nombre}: ${resumen}${vendeAlgo ? (cobro === 'cobrada' ? ' · cobrada' : ' · a deuda') : ''}` })))
     }
@@ -256,6 +267,7 @@ export function RegisterDeliveryView() {
         Ya hay una visita de este cliente guardada en el celular, esperando enviarse ({guardada.label}).
         Esperá a que se confirme antes de cargar otra.
       </p>}
+      <fieldset disabled={registrar.isPending || Boolean(guardada) || confirmando} className="flex min-w-0 flex-col gap-5">
       {directo ? <div className="flex flex-col gap-3 ui-card p-3">
         <h2 className="font-semibold">{cliente.data?.displayName ?? 'Cargando cliente…'}</h2>
         <p className="text-sm">{cliente.data?.address}</p>
@@ -271,6 +283,7 @@ export function RegisterDeliveryView() {
         onChange={({ customerId: id, esNuevo: nuevoElegido }) => {
           setCustomerId(id)
           setEsNuevo(nuevoElegido)
+          setLineas([])
         }}
       />}
 
@@ -283,7 +296,8 @@ export function RegisterDeliveryView() {
           if (!esNuevo && customerId) void specialPrices.refetch()
         }}>Reintentar</Button>
       </div>}
-      <DeliveryLinesEditor stock={sesion.stock} prices={pricesReady ? prices : {}} lineas={lineas} onChange={setLineas} />
+      <DeliveryLinesEditor stock={sesion.stock} prices={pricesReady ? prices : {}} lineas={lineas} onChange={setLineas}
+        products={catalog} balances={balances} />
 
       <Field
         label="Observaciones (opcional)"
@@ -291,6 +305,9 @@ export function RegisterDeliveryView() {
         value={notas}
         onChange={(e) => setNotas(e.target.value)}
       />
+      </fieldset>
+      {!prestamosValidos && <p role="alert" className="text-sm text-danger">Cambió el stock o lo que tiene prestado el cliente. Revisá las cantidades de préstamos.</p>}
+      {!esNuevo && cuenta.isError && <p role="alert">No se pudo consultar lo que tiene el cliente. Volvé a su ficha e intentá nuevamente.</p>}
 
       {esNuevo && !vendeAlgo && (
         <p className="text-sm text-warning">
@@ -305,7 +322,7 @@ export function RegisterDeliveryView() {
       )}
 
       <div className="flex gap-2">
-        <Button type="submit" disabled={registrar.isPending || Boolean(guardada) || (vendeAlgo && !pricesReady) || (!esNuevo && !customerId) || (directo && (!cliente.data || !cuenta.data || cliente.isError || cuenta.isError || cliente.data.zoneId !== sesion.zoneId || !cliente.data.isActive))}>
+        <Button type="submit" disabled={registrar.isPending || !datosListos || !mueveAlgo || !prestamosValidos || (esNuevo && !vendeAlgo) || Boolean(guardada) || (vendeAlgo && !pricesReady) || (!esNuevo && !customerId) || (directo && (!cliente.data || !cuenta.data || cliente.isError || cuenta.isError || cliente.data.zoneId !== sesion.zoneId || !cliente.data.isActive))}>
           {registrar.isPending ? 'Registrando...' : vendeAlgo ? 'Confirmar venta' : 'Registrar visita'}
         </Button>
         <Button type="button" variant="danger" onClick={() => navigate(directo && customerId ? `/reparto/clientes/${encodeURIComponent(customerId)}` : '/reparto')}>
@@ -317,6 +334,8 @@ export function RegisterDeliveryView() {
         <SaleConfirmModal
           lines={vendidas.map((linea) => ({ ...linea, subtotal: linea.centavos / 100 }))}
           total={totalVenta}
+          loanSummary={resumenPrestamos}
+          containersSummary={lineas.filter((l) => l.retiraEnvases > 0).map((l) => `Retira ${l.retiraEnvases} envases de ${l.productDetail}`)}
           cobro={cobro}
           metodo={metodo}
           onCobro={setCobro}
@@ -324,7 +343,7 @@ export function RegisterDeliveryView() {
           sending={registrar.isPending}
           error={error}
           onBack={() => { setConfirmando(false); setError(null) }}
-          onConfirm={() => { if (cobro !== null) void registrarVisita() }}
+          onConfirm={() => { if ((!vendeAlgo || cobro !== null) && prestamosValidos && datosListos) void registrarVisita() }}
         />
       )}
     </form>

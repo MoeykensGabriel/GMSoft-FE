@@ -40,6 +40,26 @@ const item = (id, createdAt = '2026-10-16T10:00:00Z') => ({ id, userId: 'chofer'
 const client = () => { const keys = []; return { keys, invalidateQueries: ({ queryKey }) => { keys.push(queryKey); return Promise.resolve() } } }
 const ids = (list) => list.map((i) => i.id)
 
+test('los préstamos viajan completos en la visita y se reintentan iguales después de recargar', async () => {
+  const visitSource = readFileSync(new URL('../src/modules/deliveries/utils/visitOutbox.ts', import.meta.url), 'utf8')
+  const compiled = ts.transpileModule(visitSource, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText
+  const visitModule = { exports: {} }
+  new Function('module', 'exports', compiled)(visitModule, visitModule.exports)
+  const body = { clientRequestId: 'prestamo', expectedSessionId: 'salida', customerId: 'cliente',
+    newCustomer: null, type: 'ContainerOnly', items: [], containersOut: [], containersIn: [], payment: null, notes: null,
+    loansOut: [{ productId: 'dispenser', quantity: 2 }], loansIn: [{ productId: 'dispenser', quantity: 1 }] }
+  const ls = storage()
+  const first = tab(ls, async (_path, sent) => { assert.deepEqual(sent, body); throw new TypeError('Sin señal') })
+  first.outbox.put(visitModule.exports.visitOutboxItem({ userId: 'chofer', sessionId: 'salida', label: 'Préstamo', body }))
+  await first.flushOutbox('chofer', client())
+  assert.deepEqual(first.outbox.list('chofer')[0].body, body)
+  const sent = []
+  const reloaded = tab(ls, async (path, retry) => { sent.push({ path, body: retry }) })
+  await reloaded.flushOutbox('chofer', client())
+  assert.deepEqual(sent, [{ path: '/api/deliveries', body }])
+  assert.deepEqual(reloaded.outbox.list('chofer'), [])
+})
+
 test('guardar, reemplazar por clave, marcar rechazado y quitar', () => {
   const ls = storage(); const { outbox } = tab(ls)
   assert.equal(outbox.put(item('a')), true)

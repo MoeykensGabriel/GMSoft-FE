@@ -188,7 +188,9 @@ export function SessionDetailView() {
                             {cobros.isPending && <span className="text-sm text-muted">Consultando cobro…</span>}
                           </div>
                         )}
-                        {v.items.length === 0 && <p className="mt-2 text-sm font-medium text-muted">Solo retiro de envases</p>}
+                        {v.items.length === 0 && <p className="mt-2 text-sm font-medium text-muted">Solo envases y préstamos</p>}
+                        {(v.loansOut ?? []).map((l) => <p key={`loan-${l.productId}`} className="mt-2 text-sm">Prestó {l.quantity} × {l.productDetail}</p>)}
+                        {(v.loansIn ?? []).map((l) => <p key={`return-${l.productId}`} className="mt-2 text-sm">Retiró {l.quantity} × {l.productDetail}</p>)}
                         {v.items.length > 0 && (
                           <ul className="mt-2 border-t border-line pt-2 text-sm text-ink">
                             {v.items.map((i) => (

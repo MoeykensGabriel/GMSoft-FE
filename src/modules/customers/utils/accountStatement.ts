@@ -8,6 +8,8 @@ export function statementDetail(entry: CustomerStatementEntry) {
     Sale: products || 'Venta',
     Promotion: products ? `Promoción · ${products}` : 'Promoción',
     ContainerOnly: 'Movimiento de envases',
+    Loan: 'Préstamo',
+    LoanReturn: 'Retiro de préstamo',
     NoPurchase: `No compró · ${noPurchaseLabel(entry.noPurchaseReason)}`,
     Payment: 'Cobro de deuda',
     ContainerAdjustment: 'Ajuste de envases',

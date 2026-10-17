@@ -27,6 +27,7 @@ export function ProductForm({ inicial, guardando, error, onSubmit }: Props) {
   const [salePrice, setSalePrice] = useState(inicial ? String(inicial.salePrice) : '')
   const [tracking, setTracking] = useState<ContainerTracking>(inicial?.tracking ?? 'ByBalance')
   const [isPublished, setIsPublished] = useState(inicial?.isPublished ?? true)
+  const [canBeLent, setCanBeLent] = useState(inicial?.canBeLent ?? false)
   const [imageUrl, setImageUrl] = useState(inicial?.imageUrl ?? '')
 
   function submit(e: FormEvent) {
@@ -39,6 +40,7 @@ export function ProductForm({ inicial, guardando, error, onSubmit }: Props) {
       commercialDetail: commercialDetail.trim() || null,
       salePrice: Number(salePrice),
       tracking,
+      canBeLent: tracking === 'None' && canBeLent,
       isPublished,
       imageUrl: imageUrl.trim() || null,
     })
@@ -95,6 +97,16 @@ export function ProductForm({ inicial, guardando, error, onSubmit }: Props) {
           que están afuera quedarían contados de una forma que el producto ya no usa.
         </span>
       </div>
+
+      <label className="flex min-h-11 items-center gap-2">
+        <input type="checkbox" name="canBeLent" checked={tracking === 'None' && canBeLent}
+          disabled={tracking !== 'None' || guardando} onChange={(e) => setCanBeLent(e.target.checked)}
+          className="h-4 w-4 rounded border-line" />
+        <span className="flex flex-col">
+          <span className="text-sm font-medium">Se puede prestar</span>
+          <span className="text-xs text-muted">Solo para productos sin envase. También se puede vender al precio de lista.</span>
+        </span>
+      </label>
 
       <label className="flex items-start gap-2">
         <input

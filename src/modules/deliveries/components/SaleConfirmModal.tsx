@@ -13,6 +13,8 @@ export interface SaleConfirmLine {
 interface Props {
   lines: SaleConfirmLine[]
   total: number
+  loanSummary?: string[]
+  containersSummary?: string[]
   /** Null hasta que el chofer elige: no hay opcion por defecto a proposito. */
   cobro: Cobro | null
   metodo: PaymentMethod
@@ -35,8 +37,9 @@ const METODOS: Record<PaymentMethod, string> = {
  * escribe: es el total de esta venta y lo fija el servidor. No cobra deuda anterior.
  */
 export function SaleConfirmModal({
-  lines, total, cobro, metodo, onCobro, onMetodo, sending, error, onBack, onConfirm,
+  lines, total, loanSummary = [], containersSummary = [], cobro, metodo, onCobro, onMetodo, sending, error, onBack, onConfirm,
 }: Props) {
+  const soloEnvases = lines.length === 0
   const opcion = (valor: Cobro, texto: string) => (
     <Button
       type="button"
@@ -52,13 +55,13 @@ export function SaleConfirmModal({
 
   return (
     <Modal
-      title="Confirmar venta"
+      title={soloEnvases ? 'Confirmar visita' : 'Confirmar venta'}
       onClose={onBack}
       busy={sending}
       footer={<>
         <Button type="button" variant="danger" disabled={sending} onClick={onBack}>Volver</Button>
-        <Button type="button" disabled={sending || cobro === null} onClick={onConfirm}>
-          {sending ? 'Registrando...' : 'Confirmar venta'}
+        <Button type="button" disabled={sending || (!soloEnvases && cobro === null)} onClick={onConfirm}>
+          {sending ? 'Registrando...' : soloEnvases ? 'Confirmar visita' : 'Confirmar venta'}
         </Button>
       </>}
     >
@@ -70,7 +73,11 @@ export function SaleConfirmModal({
           </li>
         ))}
       </ul>
+      <ul className="flex flex-col gap-1 text-sm">
+        {[...containersSummary, ...loanSummary].map((text) => <li key={text}>{text}</li>)}
+      </ul>
 
+      {!soloEnvases && <>
       <div className="flex justify-between rounded border-2 border-brand p-3 text-lg font-semibold">
         <span>Total a cobrar</span><span>{formatMoney(total)}</span>
       </div>
@@ -104,6 +111,7 @@ export function SaleConfirmModal({
         {cobro === 'cobrada' && `Se registra COBRADA: ${formatMoney(total)} en ${METODOS[metodo]}.`}
         {cobro === 'deuda' && `Se registra A DEUDA: ${formatMoney(total)} quedan en la cuenta del cliente.`}
       </p>
+      </>}
 
       {error && <p role="alert" className="text-sm text-danger">{error}</p>}
     </Modal>
