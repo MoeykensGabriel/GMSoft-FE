@@ -23,7 +23,11 @@ class ApiError extends Error {
   constructor(status) { super('Rechazo confirmado'); this.status = status }
 }
 
+// Igual que core: 401, 408 y 429 no dicen nada del envío; el resto de los 4xx es un rechazo.
+const isDefiniteRejection = (status) => status >= 400 && status < 500 && ![401, 408, 429].includes(status)
+
 function hookHarness(write) {
+  const box = new Map()
   const slots = []
   let cursor = 0
   const invalidated = []
@@ -53,12 +57,16 @@ function hookHarness(write) {
   }
   const { useNoPurchaseWrite } = load('deliveries/hooks/useNoPurchaseWrite.ts', {
     react, '@tanstack/react-query': query,
-    '../../core': { ApiError, newRequestId: randomUUID },
-    '../../sessions': { SESION_ACTUAL: ['session', 'current'] },
+    '../../core': { ApiError, newRequestId: randomUUID, isDefiniteRejection,
+      outbox: { put: (item) => box.set(item.id, item), remove: (_, id) => box.delete(id) } },
+    '../../auth': { useAuth: () => ({ user: { userId: 'chofer' } }) },
+    '../../sessions': { SESION_ACTUAL: ['session', 'current'], useCurrentSession: () => ({ data: { id: 'salida' } }) },
+    '../../customers': { NO_PURCHASE_REASONS: { NotHome: 'No estaba', NoMoney: 'Sin dinero', Other: 'Otro' } },
     '../services/deliveryService': { deliveryService: { register: write } },
+    '../utils/visitOutbox': { visitOutboxItem: ({ body, sessionId, label }) => ({ id: body.clientRequestId, sessionId, label, body }) },
   })
   // eslint-disable-next-line react-hooks/rules-of-hooks -- Simulador de renders offline.
-  return { render() { cursor = 0; return useNoPurchaseWrite('cliente') }, invalidated }
+  return { render() { cursor = 0; return useNoPurchaseWrite('cliente', 'Rosa') }, invalidated, box }
 }
 
 test('motivos únicos, nota obligatoria y límite de 300', () => {
@@ -86,13 +94,20 @@ test('doble toque y respuesta incierta conservan clave y motivo aunque se intent
   const pending = hook.send('NotHome', ' Nota ')
   await hook.send('NoMoney', 'Otro')
   assert.equal(calls.length, 1)
+  // Se guarda en la bandeja antes de mandar, una sola vez aunque haya doble toque.
+  assert.equal(harness.box.size, 1)
+  assert.equal([...harness.box.values()][0].label, 'Rosa: no compró (No estaba)')
   rejectFirst(new TypeError('Respuesta perdida'))
-  await pending
+  assert.equal(await pending, 'saved')
+  // Respuesta perdida: queda en la bandeja para que se reenvíe sola.
+  assert.equal(harness.box.size, 1)
   hook = harness.render()
   assert.equal(hook.locked, true)
   assert.equal(hook.canCorrect, false)
   hook.correct()
-  assert.equal(await hook.send('Other', 'Cambio'), true)
+  assert.equal(await hook.send('Other', 'Cambio'), 'ok')
+  // Confirmado: sale de la bandeja.
+  assert.equal(harness.box.size, 0)
   assert.deepEqual(calls[0], calls[1])
   assert.equal(calls[0].noPurchaseReason, 'NotHome')
   assert.equal(calls[0].notes, 'Nota')
@@ -107,7 +122,9 @@ test('rechazo confirmado permite corregir con clave nueva; 500 conserva intento'
   for (const status of [400, 403, 404, 409, 500]) {
     const calls = []
     const harness = hookHarness(async (body) => { calls.push(structuredClone(body)); throw new ApiError(status) })
-    await harness.render().send('NotHome', '')
+    assert.equal(await harness.render().send('NotHome', ''), status === 500 ? 'saved' : 'error')
+    // Un rechazo no queda en la bandeja; un 500 sí, para reenviarse.
+    assert.equal(harness.box.size, status === 500 ? 1 : 0)
     const hook = harness.render()
     assert.equal(hook.canCorrect, status !== 500)
     hook.correct()

@@ -2,14 +2,15 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { CustomerRouteList, RouteUpdateNotice } from '../../customers'
+import { CustomerRouteList, RouteUpdateNotice, useRouteLater } from '../../customers'
 import { useAuth } from '../../auth'
 import { RouteHeader } from '../components/RouteHeader'
-import { Button, formatDateTime, InstallAppButton, LinkButton, Page } from '../../core'
+import { Button, formatDateTime, InstallAppButton, LinkButton, Page, useOutbox } from '../../core'
 import { sessionService } from '../services/sessionService'
 import type { Session } from '../services/sessionService'
 import { RestocksPanel } from '../components/RestocksPanel'
 import { RestockNotice } from '../components/RestockNotice'
+import { OutboxNotice } from '../components/OutboxNotice'
 
 type Modo = 'ventas' | 'promociones'
 
@@ -48,10 +49,16 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
     refetchInterval: 30_000,
     staleTime: 0, refetchOnMount: 'always', refetchOnWindowFocus: true, refetchOnReconnect: true,
   })
-  const visitados = [...new Set((visitas.data ?? []).map((visita) => visita.customerId))]
+  // Lo guardado en el celular de esta salida cuenta como visitado: no hay que volver a atenderlo.
+  const bandeja = useOutbox(user?.userId ?? '')
+  const guardadas = bandeja.filter((item) => item.sessionId === sesion.id && item.status === 'pending')
+  const visitados = [...new Set([...(visitas.data ?? []).map((visita) => visita.customerId),
+    ...guardadas.flatMap((item) => item.customerId ? [item.customerId] : [])])]
+  const masTarde = useRouteLater(sesion.id)
   return (
     <Page className="mx-auto flex max-w-3xl flex-col gap-3 p-3">
       {user && <RestockNotice userId={user.userId} session={sesion} />}
+      {user && <OutboxNotice userId={user.userId} items={bandeja.filter((item) => item.sessionId === sesion.id || item.status === 'failed')} />}
       <RouteUpdateNotice key={sesion.id} vehicleId={sesion.vehicleId} zoneId={sesion.zoneId} routeDays={sesion.routeDays} />
       <RouteHeader zoneName={sesion.zoneName ?? 'Zona'} date={sesion.openedAt} userName={user?.userName ?? sesion.driverName} routeDays={sesion.routeDays} />
       {modo === null && (
@@ -63,14 +70,19 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
       {modo !== null && <Button variant="secondary" onClick={() => elegir(null)}>← Menú principal</Button>}
       {modo === 'ventas' && <>
         <LinkButton to="/reparto/visita?new=1" variant="primary" className="min-h-14">+ Agregar cliente</LinkButton>
-        <CustomerRouteList vehicleId={sesion.vehicleId} zoneId={sesion.zoneId} routeDays={sesion.routeDays} noPurchaseReasons={Object.fromEntries((visitas.data ?? []).flatMap((v) => v.type === 'NoPurchase' && v.noPurchaseReason ? [[v.customerId, v.noPurchaseReason]] : []))} visitedCustomerIds={visitados} onSelect={(id) => navigate(`/reparto/clientes/${encodeURIComponent(id)}`)} />
+        {/* Sin las visitas no se sabe quién ya fue atendido: mejor avisar que mostrar a todos como pendientes. */}
+        {visitas.isError && <div role="alert" className="flex flex-col gap-2 rounded border border-danger/30 bg-danger-soft p-3 text-sm">
+          <p>No se pudieron leer las visitas de hoy. La lista puede mostrar como pendientes a clientes ya visitados.</p>
+          <Button variant="secondary" onClick={() => void visitas.refetch()}>Reintentar</Button>
+        </div>}
+        <CustomerRouteList vehicleId={sesion.vehicleId} zoneId={sesion.zoneId} routeDays={sesion.routeDays} noPurchaseReasons={Object.fromEntries((visitas.data ?? []).flatMap((v) => v.type === 'NoPurchase' && v.noPurchaseReason ? [[v.customerId, v.noPurchaseReason]] : []))} visitedCustomerIds={visitados} laterCustomerIds={masTarde} onSelect={(id) => navigate(`/reparto/clientes/${encodeURIComponent(id)}`)} />
       </>}
       {modo === 'promociones' && <>
         <LinkButton to="/reparto/promocion" variant="primary" className="min-h-14">+ Registrar promoción</LinkButton>
         {promotions}
       </>}
       <details className="ui-card p-3">
-        <summary className="cursor-pointer py-1 text-sm font-medium">Vehículo y carga a bordo</summary>
+        <summary className="min-h-11 cursor-pointer py-3 text-sm font-medium">Vehículo y carga a bordo</summary>
       <div className="mt-3">
         <p className="mt-1 text-sm text-muted">
           {sesion.zoneName} · {sesion.vehicleName} ({sesion.vehicleLicensePlate})

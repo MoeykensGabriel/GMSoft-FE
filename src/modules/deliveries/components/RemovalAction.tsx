@@ -43,7 +43,12 @@ export function RemovalAction({ customerId, customerName, account }: {
   const valid = validRemoval(reason, notes, hasContainers, notReturned)
   // Un rechazo de validación permite corregir con una clave nueva; otro error conserva la misma.
   const editable = !write.isPending && !(write.isError && !(write.error instanceof ApiError && [400, 409].includes(write.error.status)))
-  const close = () => { if (!write.isPending) { setOpen(false); write.reset(); requestId.current = null } }
+  // Cerrar después de una respuesta perdida no olvida el envío: al reabrir se reintenta con la misma clave.
+  const close = () => {
+    if (write.isPending) return
+    setOpen(false)
+    if (editable) { write.reset(); requestId.current = null }
+  }
 
   return <>
     <Button variant="dark" className="min-h-14" onClick={() => setOpen(true)}>Dar de baja</Button>

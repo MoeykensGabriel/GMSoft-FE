@@ -98,6 +98,12 @@ export function OpenSessionView() {
 
         {carga.isLoading ? (
           <p className="text-sm text-muted">Cargando...</p>
+        ) : carga.isError ? (
+          // Un error de lectura no es un camión vacío: decirlo así haría salir sin carga.
+          <div role="alert" className="flex flex-col gap-2 rounded border border-danger/30 bg-danger-soft p-3 text-sm">
+            <p>No se pudo leer la carga del camión.</p>
+            <Button type="button" variant="secondary" onClick={() => void carga.refetch()}>Reintentar</Button>
+          </div>
         ) : lineas.length === 0 ? (
           <p className="rounded border border-warning/30 bg-warning-soft p-3 text-sm text-warning">
             El camión figura vacío. Si tenés mercadería arriba, avisale a la oficina antes de
@@ -133,6 +139,10 @@ export function OpenSessionView() {
           </option>
         ))}
       </Select>
+      {zonas.isError && <div role="alert" className="flex flex-col gap-2 text-sm">
+        <p>No se pudieron cargar las zonas.</p>
+        <Button type="button" variant="secondary" onClick={() => void zonas.refetch()}>Reintentar</Button>
+      </div>}
       <SuggestedZoneNotice suggestion={suggestion.data} zoneId={zoneId} />
       {routeDays.length > 0 && <p className="text-sm">Días del recorrido: <strong>{weekdayLabels(routeDays)}</strong></p>}
 
@@ -153,7 +163,7 @@ export function OpenSessionView() {
         </p>
       )}
 
-      <Button type="submit" disabled={abrir.isPending}>
+      <Button type="submit" disabled={abrir.isPending || carga.isLoading || carga.isError}>
         {abrir.isPending ? 'Abriendo...' : suggestion.data?.zoneId && zoneId !== suggestion.data.zoneId ? 'Guardar igual y abrir salida' : 'Abrir salida'}
       </Button>
       <InstallAppButton />

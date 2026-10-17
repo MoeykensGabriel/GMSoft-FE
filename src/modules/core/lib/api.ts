@@ -79,13 +79,16 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   if (res.status === 204) return undefined as T
 
   const texto = await res.text()
-  const data = texto ? JSON.parse(texto) : null
 
   if (!res.ok) {
-    throw new ApiError(res.status, data?.title ?? 'Error', data?.detail, data?.errors, data?.type)
+    // Un rechazo que no es JSON (HTML de un proxy, texto) conserva igual su estado HTTP:
+    // de eso depende si el envío se puede corregir o hay que reintentarlo.
+    let data: { title?: string; detail?: string; errors?: Record<string, string[]>; type?: string } | null = null
+    try { data = texto ? JSON.parse(texto) : null } catch { data = null }
+    throw new ApiError(res.status, data?.title ?? `Error ${res.status}`, data?.detail, data?.errors, data?.type)
   }
 
-  return data as T
+  return (texto ? JSON.parse(texto) : null) as T
 }
 
 export const api = {

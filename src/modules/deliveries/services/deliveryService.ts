@@ -26,6 +26,8 @@ export interface RegisterDeliveryRequest {
   notes: string | null
   /** Identifica la visita para que un reintento no la duplique. */
   clientRequestId: string
+  /** La salida en que se cargó: un reenvío no cae en otra salida si esta ya se cerró. */
+  expectedSessionId?: string | null
 }
 
 export interface RegisterDeliveryResult {

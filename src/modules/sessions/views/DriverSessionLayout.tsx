@@ -2,7 +2,7 @@ import { useCallback, useEffect, useSyncExternalStore } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth'
-import { Button, ErrorMessage, ScreenErrorBoundary, tokenStorage } from '../../core'
+import { Button, ErrorMessage, OutboxSender, ScreenErrorBoundary, tokenStorage } from '../../core'
 import { useCurrentSession } from '../hooks/useCurrentSession'
 import { sessionService } from '../services/sessionService'
 import { activeDepartureStorage } from '../states/activeDepartureStorage'
@@ -92,6 +92,8 @@ export function DriverSessionLayout() {
   </div>
 
   return <>
+    {/* Reenvía lo guardado en el celular desde cualquier pantalla del chofer. */}
+    <OutboxSender userId={userId} />
     {sessionId && status.isError && <p role="status" className="mx-auto max-w-3xl border-b border-line p-3 text-sm">Se perdió la conexión. Tu salida permanece abierta; se comprobará al reconectar.</p>}
     <ScreenErrorBoundary resetKey={pathname}><Outlet /></ScreenErrorBoundary>
   </>

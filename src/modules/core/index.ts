@@ -7,6 +7,9 @@
  */
 export { api, ApiError, tokenStorage, setOnUnauthorized } from './lib/api'
 export { queryClient } from './lib/queryClient'
+export { outbox, useOutbox, flushOutbox, isDefiniteRejection } from './lib/outbox'
+export type { OutboxItem } from './lib/outbox'
+export { OutboxSender } from './components/OutboxSender'
 export { formatMoney, formatDate, formatDateTime, currentBusinessDate, BUSINESS_TIME_ZONE } from './utils/format'
 export { newRequestId } from './utils/requestId'
 export { Button } from './components/Button'

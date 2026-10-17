@@ -5,18 +5,21 @@ import { NO_PURCHASE_REASONS, validNoPurchase } from '../../customers'
 import type { NoPurchaseReason } from '../../customers'
 import { useNoPurchaseWrite } from '../hooks/useNoPurchaseWrite'
 
-export function NoPurchaseAction({ customerId, customerName }: { customerId: string; customerName: string }) {
+/** `blocked`: hay una visita de este cliente guardada en el celular; no se abre otra. */
+export function NoPurchaseAction({ customerId, customerName, blocked = false }: { customerId: string; customerName: string; blocked?: boolean }) {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [reason, setReason] = useState<NoPurchaseReason | null>(null)
   const [notes, setNotes] = useState('')
-  const write = useNoPurchaseWrite(customerId)
+  const write = useNoPurchaseWrite(customerId, customerName)
   const back = () => { if (!write.isPending) { write.correct(); setOpen(false) } }
   async function confirm() {
-    if (reason && validNoPurchase(reason, notes) && await write.send(reason, notes)) navigate('/reparto')
+    if (!reason || !validNoPurchase(reason, notes)) return
+    // Confirmado o guardado en el celular (se envía solo): en los dos casos se sigue el recorrido.
+    if (await write.send(reason, notes) !== 'error') navigate('/reparto')
   }
   return <>
-    <Button variant="danger" className="min-h-14" onClick={() => setOpen(true)}>No compró</Button>
+    <Button variant="danger" className="min-h-14" disabled={blocked && !open} onClick={() => setOpen(true)}>No compró</Button>
     {open && <Modal title="¿Por qué no compró?" onClose={back} busy={write.isPending} footer={<>
       <Button variant="danger" disabled={write.isPending} onClick={back}>Volver</Button>
       <Button disabled={write.isPending || !validNoPurchase(reason, notes)} onClick={() => { void confirm() }}>
@@ -38,7 +41,6 @@ export function NoPurchaseAction({ customerId, customerName }: { customerId: str
         onChange={(event) => setNotes(event.target.value)} />
       <p className="text-sm text-muted">{notes.length}/300 caracteres</p>
       <ErrorMessage error={write.error} />
-      {write.error && !write.canCorrect && <p role="status">No pudimos confirmar el resultado. Reintentá con Confirmar; conservamos el mismo envío.</p>}
       {write.canCorrect && <Button variant="secondary" onClick={write.correct}>Corregir datos</Button>}
     </Modal>}
   </>

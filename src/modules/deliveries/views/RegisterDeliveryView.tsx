@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useQueries } from '@tanstack/react-query'
 import { productService } from '../../products'
 import { customerService, CustomerAccountSummary } from '../../customers'
-import { ApiError, Button, Field, formatMoney, currentBusinessWeekday, newRequestId, PageHeader } from '../../core'
+import { ApiError, Button, Field, formatMoney, currentBusinessWeekday, isDefiniteRejection, newRequestId, outbox, PageHeader, useOutbox } from '../../core'
+import { useAuth } from '../../auth'
 import { useCurrentSession } from '../../sessions'
 import { CustomerPicker } from '../components/CustomerPicker'
 import { DeliveryLinesEditor } from '../components/DeliveryLinesEditor'
@@ -14,6 +15,7 @@ import { SaleConfirmModal } from '../components/SaleConfirmModal'
 import type { Cobro } from '../components/SaleConfirmModal'
 import { useRegisterDelivery } from '../hooks/useRegisterDelivery'
 import type { NewCustomerLine, PaymentMethod, RegisterDeliveryResult } from '../services/deliveryService'
+import { visitOutboxItem } from '../utils/visitOutbox'
 
 const CLIENTE_VACIO: NewCustomerLine = {
   businessName: null,
@@ -28,6 +30,9 @@ export function RegisterDeliveryView() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const { data: sesion, isLoading } = useCurrentSession()
+  const { user } = useAuth()
+  const userId = user?.userId ?? ''
+  const bandeja = useOutbox(userId)
   const registrar = useRegisterDelivery()
   const products = useQueries({ queries: (sesion?.stock ?? []).map((product) => ({
     queryKey: ['products', 'sale', product.productId],
@@ -65,7 +70,14 @@ export function RegisterDeliveryView() {
   const [confirmando, setConfirmando] = useState(false)
   // Identifica esta visita: si el envio se repite, el backend devuelve la ya
   // registrada en vez de duplicar venta, envases y cobro.
-  const [requestId] = useState(newRequestId)
+  const [requestId, setRequestId] = useState(newRequestId)
+  // Lo que se mandó con esa clave. Si la respuesta se pierde, el reintento manda lo mismo:
+  // el backend devuelve la venta original y un cambio (cobrada → a deuda) no se aplicaría.
+  const pendiente = useRef<Parameters<typeof registrar.mutateAsync>[0] | null>(null)
+  // La respuesta se perdió: la visita quedó en la bandeja del celular y se envía sola.
+  const [incierto, setIncierto] = useState(false)
+  // False si el celular no dejó guardarla: queda en memoria y se pierde si se cierra la app.
+  const [guardadaEnCelular, setGuardadaEnCelular] = useState(true)
   const [metodo, setMetodo] = useState<PaymentMethod>('Cash')
   const [notas, setNotas] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -81,6 +93,37 @@ export function RegisterDeliveryView() {
         <Link to="/reparto" className="mt-2 inline-block text-sm text-ink underline">
           Volver
         </Link>
+      </div>
+    )
+  }
+
+  if (incierto) {
+    // La bandeja la sigue reenviando en segundo plano: si la confirma o la rechaza, se ve acá.
+    const enBandeja = bandeja.find((item) => item.id === requestId)
+    return (
+      <div className="ui-card mx-auto flex max-w-md flex-col gap-4 p-6">
+        {!enBandeja ? <>
+          <PageHeader title={<>Visita registrada</>} />
+          <p className="text-sm">La visita guardada en el celular ya llegó a la oficina.</p>
+        </> : enBandeja.status === 'failed' ? <>
+          <PageHeader title={<>No se pudo registrar</>} />
+          <p role="alert" className="rounded border border-danger/30 bg-danger-soft p-3 text-sm text-danger">
+            {enBandeja.error} Avisale a la oficina; la visita queda anotada en tu salida hasta que la revisen.
+          </p>
+        </> : <>
+          <PageHeader title={<>Visita guardada en el celular</>} />
+          <p className="rounded border border-warning/40 bg-warning-soft p-3 text-sm text-warning">
+            No pudimos confirmar si llegó. Quedó guardada y se envía sola cuando vuelva la señal, sin duplicarse.
+            No la cargues de nuevo.
+          </p>
+          {!guardadaEnCelular && <p role="alert" className="text-sm text-danger">
+            El celular no dejó guardarla: se reintenta mientras la app esté abierta. No la cierres hasta que se confirme.
+          </p>}
+          <Button type="button" disabled={registrar.isPending} onClick={() => void registrarVisita()}>
+            {registrar.isPending ? 'Enviando…' : 'Reintentar ahora'}
+          </Button>
+        </>}
+        <Button variant="secondary" onClick={() => navigate('/reparto')}>Volver a la salida</Button>
       </div>
     )
   }
@@ -106,6 +149,11 @@ export function RegisterDeliveryView() {
     )
   }
 
+  // Ya hay una visita de este cliente esperando en la bandeja: otra podría duplicarla si la primera llegó.
+  const guardada = !esNuevo && customerId
+    ? bandeja.find((item) => item.customerId === customerId && item.sessionId === sesion.id)
+    : undefined
+
   const vendeAlgo = lineas.some((l) => l.vende > 0)
   // En el orden del camion y en centavos, igual que el editor: es lo que se muestra
   // para confirmar. El importe definitivo lo calcula el servidor.
@@ -120,7 +168,7 @@ export function RegisterDeliveryView() {
   function onSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
-    if (registrar.isPending || (vendeAlgo && !pricesReady)) return
+    if (registrar.isPending || (vendeAlgo && !pricesReady) || guardada) return
 
     if (esNuevo && !nuevo.visitDays.length) {
       setError('Seleccioná al menos un día de visita.')
@@ -139,8 +187,7 @@ export function RegisterDeliveryView() {
   async function registrarVisita() {
     if (registrar.isPending) return
     setError(null)
-    try {
-      const resultado = await registrar.mutateAsync({
+    const cuerpo = pendiente.current ?? {
         customerId: esNuevo ? null : customerId,
         newCustomer: esNuevo ? nuevo : null,
         // Sin venta es una visita de solo envases. Lo decide lo que se cargo, no
@@ -155,14 +202,44 @@ export function RegisterDeliveryView() {
         payment: vendeAlgo && cobro === 'cobrada' ? { method: metodo } : null,
         notes: notas.trim() === '' ? null : notas.trim(),
         clientRequestId: requestId,
-      })
-
+        expectedSessionId: sesion!.id,
+      }
+    if (!pendiente.current) {
+      // Otra pestaña pudo haber guardado una visita de este cliente recién: se vuelve a mirar.
+      if (!esNuevo && customerId && outbox.list(userId).some((item) =>
+        item.customerId === customerId && item.sessionId === sesion!.id && item.status === 'pending')) {
+        setError('Ya hay una visita de este cliente guardada en el celular, esperando enviarse.')
+        setConfirmando(false)
+        return
+      }
+      // A salvo antes de mandar: si se corta la señal o se cierra la app, la bandeja la reenvía.
+      // Solo en el primer envío: un reintento ya está guardado y no rearma nada del formulario.
+      const nombre = esNuevo ? nuevo.contactName : cliente.data?.displayName ?? 'Cliente del recorrido'
+      const detalle = vendidas.map((l) => `${l.quantity} × ${l.productDetail}`).join(', ')
+      const retira = lineas.filter((l) => l.retiraEnvases > 0).reduce((sum, l) => sum + l.retiraEnvases, 0)
+      const resumen = [detalle, retira ? `retira ${retira} envases` : ''].filter(Boolean).join(' · ') || 'visita'
+      setGuardadaEnCelular(outbox.put(visitOutboxItem({ userId, sessionId: sesion!.id, body: cuerpo,
+        label: `${nombre}: ${resumen}${vendeAlgo ? (cobro === 'cobrada' ? ' · cobrada' : ' · a deuda') : ''}` })))
+    }
+    pendiente.current = cuerpo
+    try {
+      const resultado = await registrar.mutateAsync(cuerpo)
+      outbox.remove(userId, cuerpo.clientRequestId)
+      pendiente.current = null
+      setIncierto(false)
       setHecho(resultado)
     } catch (err) {
-      if (err instanceof ApiError) {
+      // 401, 408 y 429 no dicen nada del envío anterior: se conserva en la bandeja.
+      if (err instanceof ApiError && isDefiniteRejection(err.status)) {
+        // Rechazo definitivo: no se registró nada. Corregir es un envío nuevo, con otra clave.
+        outbox.remove(userId, cuerpo.clientRequestId)
+        pendiente.current = null
+        setIncierto(false)
+        setRequestId(newRequestId())
         setError(err.fieldMessages[0] ?? err.detail ?? err.title)
       } else {
-        setError('No se pudo conectar con el servidor.')
+        setIncierto(true)
+        setError(null)
       }
     }
   }
@@ -172,9 +249,13 @@ export function RegisterDeliveryView() {
       <div>
         <PageHeader title={<>Registrar visita</>} />
         <p className="mt-1 text-sm text-muted">{sesion.zoneName}</p>
-        {directo && customerId && <Link to={`/reparto/clientes/${encodeURIComponent(customerId)}`} className="inline-block py-2 text-sm underline">← Volver a la ficha</Link>}
+        {directo && customerId && <Link to={`/reparto/clientes/${encodeURIComponent(customerId)}`} className="inline-flex min-h-11 items-center text-sm underline">← Volver a la ficha</Link>}
       </div>
 
+      {guardada && <p role="alert" className="rounded border border-warning/40 bg-warning-soft p-3 text-sm text-warning">
+        Ya hay una visita de este cliente guardada en el celular, esperando enviarse ({guardada.label}).
+        Esperá a que se confirme antes de cargar otra.
+      </p>}
       {directo ? <div className="flex flex-col gap-3 ui-card p-3">
         <h2 className="font-semibold">{cliente.data?.displayName ?? 'Cargando cliente…'}</h2>
         <p className="text-sm">{cliente.data?.address}</p>
@@ -224,7 +305,7 @@ export function RegisterDeliveryView() {
       )}
 
       <div className="flex gap-2">
-        <Button type="submit" disabled={registrar.isPending || (vendeAlgo && !pricesReady) || (!esNuevo && !customerId) || (directo && (!cliente.data || !cuenta.data || cliente.isError || cuenta.isError || cliente.data.zoneId !== sesion.zoneId || !cliente.data.isActive))}>
+        <Button type="submit" disabled={registrar.isPending || Boolean(guardada) || (vendeAlgo && !pricesReady) || (!esNuevo && !customerId) || (directo && (!cliente.data || !cuenta.data || cliente.isError || cuenta.isError || cliente.data.zoneId !== sesion.zoneId || !cliente.data.isActive))}>
           {registrar.isPending ? 'Registrando...' : vendeAlgo ? 'Confirmar venta' : 'Registrar visita'}
         </Button>
         <Button type="button" variant="danger" onClick={() => navigate(directo && customerId ? `/reparto/clientes/${encodeURIComponent(customerId)}` : '/reparto')}>
