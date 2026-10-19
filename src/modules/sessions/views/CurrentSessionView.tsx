@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { CustomerRouteList, RouteUpdateNotice, useRouteLater } from '../../customers'
 import { useAuth } from '../../auth'
 import { RouteHeader } from '../components/RouteHeader'
@@ -39,6 +39,7 @@ function guardarModo(modo: Modo | null) {
 /** La salida en curso: con que salio, donde reparte y que tiene a bordo ahora. */
 export function CurrentSessionView({ sesion, promotions }: { sesion: Session; promotions?: ReactNode }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user } = useAuth()
   const [modo, setModo] = useState<Modo | null>(leerModo)
   const elegir = (nuevo: Modo | null) => { guardarModo(nuevo); setModo(nuevo) }
@@ -57,6 +58,7 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
   const masTarde = useRouteLater(sesion.id)
   return (
     <Page className="mx-auto flex max-w-3xl flex-col gap-3 p-3">
+      {location.state?.routeSaved && <p role="status" className="ui-card p-3">Recorrido guardado</p>}
       {user && <RestockNotice userId={user.userId} session={sesion} />}
       {user && <OutboxNotice userId={user.userId} items={bandeja.filter((item) => item.sessionId === sesion.id || item.status === 'failed')} />}
       <RouteUpdateNotice key={sesion.id} vehicleId={sesion.vehicleId} zoneId={sesion.zoneId} routeDays={sesion.routeDays} />
@@ -70,6 +72,7 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
       {modo !== null && <BackButton onClick={() => elegir(null)} label="Volver al menú principal" />}
       {modo === 'ventas' && <>
         <LinkButton to="/reparto/visita?new=1" variant="primary" className="min-h-14">+ Agregar cliente</LinkButton>
+        <LinkButton to="/reparto/organizar" variant="secondary" className="min-h-14">Organizar recorrido</LinkButton>
         {/* Sin las visitas no se sabe quién ya fue atendido: mejor avisar que mostrar a todos como pendientes. */}
         {visitas.isError && <div role="alert" className="flex flex-col gap-2 rounded border border-danger/30 bg-danger-soft p-3 text-sm">
           <p>No se pudieron leer las visitas de hoy. La lista puede mostrar como pendientes a clientes ya visitados.</p>

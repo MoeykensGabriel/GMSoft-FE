@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { LoginView, ProtectedRoute, ROLES } from '../modules/auth'
 import { RegisterDeliveryView, CustomerVisitView } from '../modules/deliveries'
-import { DeliveryRouteView, DriverSessionLayout } from '../modules/sessions'
+import { DeliveryRouteView, DriverSessionLayout, OrganizeRouteView } from '../modules/sessions'
 import { HomeView } from './HomeView'
 import { PendingPromotions, RegisterPromotionView } from '../modules/promotions'
 
@@ -28,6 +28,7 @@ export function AppRouter() {
         <Route element={<DriverSessionLayout />}>
           <Route path="/reparto" element={<DeliveryRouteView promotions={<PendingPromotions />} />} />
           <Route path="/reparto/promocion" element={<RegisterPromotionView />} />
+          <Route path="/reparto/organizar" element={<OrganizeRouteView />} />
           <Route path="/reparto/visita" element={<RegisterDeliveryView />} />
           <Route path="/reparto/clientes/:id" element={<CustomerVisitView />} />
         </Route>

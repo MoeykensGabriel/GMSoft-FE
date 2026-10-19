@@ -1,7 +1,7 @@
 import { CoverageWarning, scheduleService } from '../../schedule'
 import type { CoverageWarningItem } from '../../schedule'
 import { useEffect, useRef, useState } from 'react'
-import { ApiError, Badge, Button, DataTable, ErrorMessage, Select, WEEKDAYS } from '../../core'
+import { ApiError, Badge, Button, DataTable, ErrorMessage, Select, WEEKDAYS, formatDateTime, BUSINESS_TIME_ZONE } from '../../core'
 import type { Vehicle } from '../../vehicles'
 import type { RouteCustomer, RouteFilters, RouteSnapshot } from '../types'
 import { routePlanningService } from '../services/routePlanningService'
@@ -137,6 +137,7 @@ export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSav
   }
 
   return <section className="flex min-w-0 flex-col gap-3" aria-label="Edición del recorrido" aria-busy={pending}>
+    {baseline.lastChange && <p className="text-sm text-muted">Último cambio: {baseline.lastChange.changedByUserName ?? 'Usuario no disponible'}, {formatDateTime(baseline.lastChange.changedAt, BUSINESS_TIME_ZONE)}</p>}
     <div className="ui-toolbar flex flex-wrap items-center gap-3">
       <Button disabled={!dirty || pending || conflict} onClick={() => void save()}>{pending ? 'Procesando…' : 'Guardar cambios'}</Button>
       <Button variant="danger" disabled={!dirty || pending} onClick={() => {

@@ -107,6 +107,9 @@ export function SessionDetailView() {
       </div>
 
       <OutsideWorkingHoursEvents events={s.outsideWorkingHoursEvents} />
+      <p className="ui-card p-3 text-sm">{s.driverRouteOrderChange
+        ? `El chofer reordenó el recorrido: ${s.driverRouteOrderChange.changedByUserName ?? s.driverName}, ${formatDateTime(s.driverRouteOrderChange.changedAt, BUSINESS_TIME_ZONE)} · ${s.driverRouteOrderChange.movedCount} clientes cambiaron de lugar.`
+        : 'El chofer no reordenó el recorrido en esta salida.'}</p>
 
       {!cerrada && (
         <div className="flex flex-wrap gap-3">

@@ -19,6 +19,7 @@ export interface RouteCustomer {
 }
 
 export interface RouteSnapshot {
+  lastChange?: { changedAt: string; changedByUserName: string | null; movedCount: number } | null
   items: RouteCustomer[]
   version: string
 }

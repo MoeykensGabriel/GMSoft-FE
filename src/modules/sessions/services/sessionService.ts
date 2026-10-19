@@ -2,6 +2,7 @@ import type { Customer, LastNoPurchase, NoPurchaseReason } from '../../customers
 import { api } from '../../core'
 import type { PagedResult } from '../../core'
 import type { SessionWorkingHours } from '../../workingHours'
+import type { RouteOrderChange } from './routeOrderService'
 
 export type SessionStatus = 'Open' | 'Closed'
 export type ContainerState = 'Full' | 'Empty'
@@ -42,6 +43,7 @@ export interface ActiveDeparture {
 }
 
 export interface Session extends SessionWorkingHours {
+  driverRouteOrderChange: RouteOrderChange | null
   id: string
   driverId: string
   driverName: string
