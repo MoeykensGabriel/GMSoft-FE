@@ -13,7 +13,8 @@ export function PromotionDetailView() {
     queryFn: () => driverService.getById(promotion!.closedByDriverId!), enabled: Boolean(promotion?.closedByDriverId),
   })
   return <Page className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
-    <PageHeader title="Detalle de promoción" actions={<BackButton to="/panel/promociones" label="Volver a Promociones" />} />
+    <BackButton to="/panel/promociones" label="Volver a Promociones" />
+    <PageHeader title="Detalle de promoción" />
     {detail.isPending ? <p role="status">Cargando promoción...</p> : detail.isError ? <>
       <ErrorMessage error={detail.error} /><Button variant="secondary" onClick={() => detail.refetch()}>Reintentar</Button>
     </> : promotion && <>

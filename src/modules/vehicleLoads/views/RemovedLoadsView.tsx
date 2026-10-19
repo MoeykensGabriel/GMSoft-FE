@@ -17,8 +17,8 @@ export function RemovedLoadsView() {
 
   return (
     <Page className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
-      <PageHeader title="Cargas bajadas" description="Lo que se bajó de un camión antes de que saliera."
-        actions={<BackButton to="/panel/carga" label="Volver a Carga inicial" />} />
+      <BackButton to="/panel/carga" label="Volver a Carga inicial" />
+      <PageHeader title="Cargas bajadas" description="Lo que se bajó de un camión antes de que saliera." />
 
       <div className="ui-toolbar flex flex-wrap items-end gap-3">
         <Select label="Vehículo" name="vehicleId" value={vehicleId}

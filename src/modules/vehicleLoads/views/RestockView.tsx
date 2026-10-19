@@ -46,7 +46,8 @@ function RestockForm({ sessionId }: { sessionId: string }) {
   const published = products.data?.items ?? []
   const valid = items.length > 0 && items.every((line) => Number.isInteger(line.quantity) && line.quantity > 0 && published.some((p) => p.id === line.productId)) && notes.length <= 500
   return <Page className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
-    <PageHeader title="Recarga en ruta" actions={back} />
+    {back}
+    <PageHeader title="Recarga en ruta" />
     <VehicleAssignmentSummary vehicleName={s.vehicleName} licensePlate={s.vehicleLicensePlate} driverNames={[s.driverName]} />
     <p>Zona: {s.zoneName}</p>
     <StockOnBoardPanel stock={s.stock} cerrada={s.status === 'Closed'} />

@@ -46,7 +46,8 @@ export function AdminOpenSessionView() {
 
   return (
     <Page className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
-      <PageHeader title="Abrir salida" actions={<BackButton to="/panel/salidas" label="Volver a Salidas" />} />
+      <BackButton to="/panel/salidas" label="Volver a Salidas" />
+      <PageHeader title="Abrir salida" />
 
       <Panel title="Salida en nombre de un chofer">
         <form className="flex max-w-md flex-col gap-4" onSubmit={(event) => { event.preventDefault(); abrir.mutate(false) }}>

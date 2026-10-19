@@ -258,9 +258,9 @@ export function RegisterDeliveryView() {
   return (
     <form onSubmit={onSubmit} className="ui-card mx-auto flex max-w-md flex-col gap-5 p-6">
       <div>
+        {directo && customerId && <BackButton to={`/reparto/clientes/${encodeURIComponent(customerId)}`} label="Volver a la ficha" appearance="link" />}
         <PageHeader title={<>Registrar visita</>} />
         <p className="mt-1 text-sm text-muted">{sesion.zoneName}</p>
-        {directo && customerId && <BackButton to={`/reparto/clientes/${encodeURIComponent(customerId)}`} label="Volver a la ficha" appearance="link" />}
       </div>
 
       {guardada && <p role="alert" className="rounded border border-warning/40 bg-warning-soft p-3 text-sm text-warning">
