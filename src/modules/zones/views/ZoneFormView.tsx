@@ -1,6 +1,6 @@
-import { Page, PageHeader } from '../../core'
+import { Page, PageHeader, BackButton } from '../../core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ZoneForm } from '../components/ZoneForm'
 import { zoneService } from '../services/zoneService'
 import type { ZoneInput } from '../services/zoneService'
@@ -36,9 +36,7 @@ export function ZoneFormView() {
   return (
     <Page className="mx-auto flex max-w-3xl flex-col gap-4 p-6">
       <div>
-        <Link to="/panel/zonas" className="text-sm text-muted hover:underline">
-          ← Zonas
-        </Link>
+        <BackButton to="/panel/zonas" label="Volver a Zonas" appearance="link" />
         <PageHeader title={<>
           {id ? 'Editar zona' : 'Nueva zona'}
         </>} />

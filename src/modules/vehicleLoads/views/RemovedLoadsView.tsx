@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
-import { BUSINESS_TIME_ZONE, DataTable, ErrorMessage, LinkButton, Page, PageHeader, Select, formatDateTime } from '../../core'
+import { BUSINESS_TIME_ZONE, DataTable, ErrorMessage, Page, PageHeader, Select, formatDateTime, BackButton } from '../../core'
 import { vehicleService } from '../../vehicles'
 
 /** Historial de lo que se bajó de un camión antes de salir: qué, cuándo y quién. */
@@ -18,7 +18,7 @@ export function RemovedLoadsView() {
   return (
     <Page className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
       <PageHeader title="Cargas bajadas" description="Lo que se bajó de un camión antes de que saliera."
-        actions={<LinkButton to="/panel/carga">← Volver a Carga inicial</LinkButton>} />
+        actions={<BackButton to="/panel/carga" label="Volver a Carga inicial" />} />
 
       <div className="ui-toolbar flex flex-wrap items-end gap-3">
         <Select label="Vehículo" name="vehicleId" value={vehicleId}

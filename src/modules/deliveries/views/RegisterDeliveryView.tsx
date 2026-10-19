@@ -4,7 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useQueries } from '@tanstack/react-query'
 import { productService } from '../../products'
 import { customerService, CustomerAccountSummary } from '../../customers'
-import { ApiError, Button, Field, formatMoney, currentBusinessWeekday, isDefiniteRejection, newRequestId, outbox, PageHeader, useOutbox } from '../../core'
+import { ApiError, Button, Field, formatMoney, currentBusinessWeekday, isDefiniteRejection, newRequestId, outbox, PageHeader, useOutbox, BackButton } from '../../core'
 import { useAuth } from '../../auth'
 import { useCurrentSession } from '../../sessions'
 import { CustomerPicker } from '../components/CustomerPicker'
@@ -260,7 +260,7 @@ export function RegisterDeliveryView() {
       <div>
         <PageHeader title={<>Registrar visita</>} />
         <p className="mt-1 text-sm text-muted">{sesion.zoneName}</p>
-        {directo && customerId && <Link to={`/reparto/clientes/${encodeURIComponent(customerId)}`} className="inline-flex min-h-11 items-center text-sm underline">← Volver a la ficha</Link>}
+        {directo && customerId && <BackButton to={`/reparto/clientes/${encodeURIComponent(customerId)}`} label="Volver a la ficha" appearance="link" />}
       </div>
 
       {guardada && <p role="alert" className="rounded border border-warning/40 bg-warning-soft p-3 text-sm text-warning">

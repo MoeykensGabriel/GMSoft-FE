@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { CustomerRouteList, RouteUpdateNotice, useRouteLater } from '../../customers'
 import { useAuth } from '../../auth'
 import { RouteHeader } from '../components/RouteHeader'
-import { Button, formatDateTime, InstallAppButton, LinkButton, Page, useOutbox } from '../../core'
+import { Button, formatDateTime, InstallAppButton, LinkButton, Page, useOutbox, BackButton } from '../../core'
 import { sessionService } from '../services/sessionService'
 import type { Session } from '../services/sessionService'
 import { RestocksPanel } from '../components/RestocksPanel'
@@ -67,7 +67,7 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
           <Button variant="primary" className="min-h-14" onClick={() => elegir('promociones')}>Promociones</Button>
         </div>
       )}
-      {modo !== null && <Button variant="secondary" onClick={() => elegir(null)}>← Menú principal</Button>}
+      {modo !== null && <BackButton onClick={() => elegir(null)} label="Volver al menú principal" />}
       {modo === 'ventas' && <>
         <LinkButton to="/reparto/visita?new=1" variant="primary" className="min-h-14">+ Agregar cliente</LinkButton>
         {/* Sin las visitas no se sabe quién ya fue atendido: mejor avisar que mostrar a todos como pendientes. */}

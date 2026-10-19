@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { BUSINESS_TIME_ZONE, Button, DataTable, ErrorMessage, LinkButton, Page, PageHeader, Panel, formatDateTime } from '../../core'
+import { BUSINESS_TIME_ZONE, Button, DataTable, ErrorMessage, Page, PageHeader, Panel, formatDateTime, BackButton } from '../../core'
 import { driverService } from '../../drivers'
 import { promotionService } from '../services/promotionService'
 import { PromotionSummary } from '../components/PromotionSummary'
@@ -13,7 +13,7 @@ export function PromotionDetailView() {
     queryFn: () => driverService.getById(promotion!.closedByDriverId!), enabled: Boolean(promotion?.closedByDriverId),
   })
   return <Page className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
-    <PageHeader title="Detalle de promoción" actions={<LinkButton to="/panel/promociones">Volver al listado</LinkButton>} />
+    <PageHeader title="Detalle de promoción" actions={<BackButton to="/panel/promociones" label="Volver a Promociones" />} />
     {detail.isPending ? <p role="status">Cargando promoción...</p> : detail.isError ? <>
       <ErrorMessage error={detail.error} /><Button variant="secondary" onClick={() => detail.refetch()}>Reintentar</Button>
     </> : promotion && <>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Button, ErrorMessage, Field, Page, PageHeader, Textarea, formatMoney } from '../../core'
+import { Button, ErrorMessage, Field, Page, PageHeader, Textarea, formatMoney, BackButton } from '../../core'
 import { receptionQuery } from '../hooks/receptionQuery'
 import { sessionService } from '../services/sessionService'
 import type { ContainerState, CorrectReceptionRequest, Reception } from '../services/sessionService'
@@ -90,7 +90,7 @@ function CorrectionForm({ sessionId, reception, subtitle }: { sessionId: string;
   return (
     <form onSubmit={onSubmit} className="ui-card mx-auto flex max-w-3xl flex-col gap-5 p-6">
       <div>
-        <Link to={`/panel/salidas/${sessionId}`} className="text-sm text-muted hover:underline">← Salida</Link>
+        <BackButton to={`/panel/salidas/${sessionId}`} label="Volver a la salida" appearance="link" />
         <PageHeader title={<>Corregir recepción</>} />
         <p className="mt-1 text-sm text-muted">{subtitle}</p>
         <p className="mt-2 text-sm text-muted">

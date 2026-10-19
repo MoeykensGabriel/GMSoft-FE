@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { BUSINESS_TIME_ZONE, Button, ErrorMessage, LinkButton, Page, PageHeader, Textarea, formatDateTime } from '../../core'
+import { BUSINESS_TIME_ZONE, Button, ErrorMessage, Page, PageHeader, Textarea, formatDateTime, BackButton } from '../../core'
 import { productService } from '../../products'
 import { sessionService, StockOnBoardPanel } from '../../sessions'
 import { LoadEditor } from '../components/LoadEditor'
@@ -24,7 +24,7 @@ function RestockForm({ sessionId }: { sessionId: string }) {
   // El resumen también queda congelado si se actualiza el catálogo o el stock mientras está abierto.
   const [review, setReview] = useState<{ openedAt: Date; lines: LoadConfirmLine[] } | null>(null)
   const write = useRestockWrite(sessionId)
-  const back = <LinkButton to={`/panel/salidas/${sessionId}`}>Volver</LinkButton>
+  const back = <BackButton to={`/panel/salidas/${sessionId}`} label="Volver a la salida" />
 
   if (write.isSuccess && write.data) return <Page className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
     <PageHeader title="Recarga registrada" />

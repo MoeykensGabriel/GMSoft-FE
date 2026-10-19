@@ -1,6 +1,6 @@
-import { Page, PageHeader } from '../../core'
+import { Page, PageHeader, BackButton } from '../../core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ProductForm } from '../components/ProductForm'
 import { productService } from '../services/productService'
 import type { ProductInput } from '../services/productService'
@@ -39,9 +39,7 @@ export function ProductFormView() {
   return (
     <Page className="mx-auto flex max-w-3xl flex-col gap-4 p-6">
       <div>
-        <Link to="/panel/catalogo" className="text-sm text-muted hover:underline">
-          ← Catálogo
-        </Link>
+        <BackButton to="/panel/catalogo" label="Volver a Productos" appearance="link" />
         <PageHeader title={<>
           {id ? 'Editar producto' : 'Nuevo producto'}
         </>} />

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Button, ErrorMessage, Page, PageHeader } from '../../core'
+import { Button, ErrorMessage, Page, PageHeader, BackButton } from '../../core'
 import { VehicleSchedulePanel } from '../components/VehicleSchedulePanel'
 import { VehicleForm } from '../components/VehicleForm'
 import { vehicleService } from '../services/vehicleService'
@@ -25,7 +25,7 @@ export function VehicleFormView() {
   if (id && vehicle.isError) return <div className="flex flex-col gap-3 p-6"><ErrorMessage error={vehicle.error} /><Button variant="secondary" onClick={() => vehicle.refetch()}>Reintentar</Button><Link to="/panel/vehiculos">Volver a vehículos</Link></div>
 
   return <Page className="mx-auto flex max-w-3xl flex-col gap-5 p-4 md:p-6">
-    <Link to="/panel/vehiculos" className="text-sm underline">← Vehículos</Link>
+    <BackButton to="/panel/vehiculos" label="Volver a Vehículos" appearance="link" />
     <PageHeader title={<>{id ? 'Editar vehículo' : 'Nuevo vehículo'}</>} />
     <VehicleForm key={id ?? 'new'} initial={vehicle.data} saving={save.isPending} error={save.error} onSubmit={(input) => save.mutate(input)} />
     {id && <VehicleSchedulePanel vehicleId={id} />}

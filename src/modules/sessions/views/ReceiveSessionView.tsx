@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
-import { Button, ErrorMessage, Field, Modal, Page, PageHeader, formatMoney } from '../../core'
+import { Button, ErrorMessage, Field, Modal, Page, PageHeader, formatMoney, BackButton } from '../../core'
 import { UnvisitedCustomersPanel } from '../components/UnvisitedCustomersPanel'
 import { ReturnsEditor } from '../components/ReturnsEditor'
 import type { ReturnLine } from '../components/ReturnsEditor'
@@ -158,9 +158,7 @@ export function ReceiveSessionView() {
   return (
     <form onSubmit={onSubmit} className="ui-card mx-auto flex max-w-3xl flex-col gap-5 p-6">
       <div>
-        <Link to={`/panel/salidas/${id}`} className="text-sm text-muted hover:underline">
-          ← Salida
-        </Link>
+        <BackButton to={`/panel/salidas/${id}`} label="Volver a la salida" appearance="link" />
         <PageHeader title={<>Recepción del camión</>} />
         <p className="mt-1 text-sm text-muted">
           {s.driverName} · {s.zoneName} · {s.vehicleName} ({s.vehicleLicensePlate})

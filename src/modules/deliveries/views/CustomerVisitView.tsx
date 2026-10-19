@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Button, ErrorMessage, LinkButton, Page, useOutbox } from '../../core'
+import { Button, ErrorMessage, LinkButton, Page, useOutbox, BackButton } from '../../core'
 import { useAuth } from '../../auth'
 import { customerService, CustomerProfileCard, CustomerBalanceCard, CustomerAccountMovements, CustomerContainersSummary, routeLaterStorage } from '../../customers'
 import { useCurrentSession } from '../../sessions'
@@ -23,7 +23,7 @@ export function CustomerVisitView() {
     && customer.data.visitDays?.some((day) => session.data?.routeDays.includes(day))
 
   return <Page className="mx-auto flex max-w-md flex-col gap-4 p-3">
-    <LinkButton to="/reparto" variant="navigation">← Menú principal</LinkButton>
+    <BackButton to="/reparto" label="Volver al menú principal" variant="navigation" />
     {session.isPending ? <p>Cargando salida…</p> : session.isError ? <ErrorMessage error={session.error} /> : !session.data ? <p>No tenés una salida abierta.</p>
       : customer.isPending || account.isPending ? <p role="status">Cargando cliente…</p>
       : customer.isError || account.isError ? <div className="flex flex-col gap-3"><ErrorMessage error={customer.error ?? account.error} /><Button variant="secondary" onClick={() => { void customer.refetch(); void account.refetch() }}>Reintentar</Button></div>

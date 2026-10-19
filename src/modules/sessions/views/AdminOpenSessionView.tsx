@@ -3,7 +3,7 @@ import { scheduleService } from '../../schedule'
 import { SuggestedZoneNotice } from '../components/SuggestedZoneNotice'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { ApiError, Button, ErrorMessage, Field, LinkButton, Modal, Page, PageHeader, Panel, Select } from '../../core'
+import { ApiError, Button, ErrorMessage, Field, Modal, Page, PageHeader, Panel, Select, BackButton } from '../../core'
 import { driverService } from '../../drivers'
 import { zoneService } from '../../zones'
 import { sessionService } from '../services/sessionService'
@@ -46,7 +46,7 @@ export function AdminOpenSessionView() {
 
   return (
     <Page className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
-      <PageHeader title="Abrir salida" actions={<LinkButton to="/panel/salidas">← Volver a Salidas</LinkButton>} />
+      <PageHeader title="Abrir salida" actions={<BackButton to="/panel/salidas" label="Volver a Salidas" />} />
 
       <Panel title="Salida en nombre de un chofer">
         <form className="flex max-w-md flex-col gap-4" onSubmit={(event) => { event.preventDefault(); abrir.mutate(false) }}>

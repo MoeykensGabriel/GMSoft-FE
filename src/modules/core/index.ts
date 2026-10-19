@@ -14,6 +14,7 @@ export { formatMoney, formatDate, formatDateTime, currentBusinessDate, BUSINESS_
 export { newRequestId } from './utils/requestId'
 export { Button } from './components/Button'
 export { LinkButton } from './components/LinkButton'
+export { BackButton } from './components/BackButton'
 export { WhatsAppButton } from './components/WhatsAppButton'
 export { InstallAppButton } from './components/InstallAppButton'
 export { Page, PageHeader } from './components/Page'

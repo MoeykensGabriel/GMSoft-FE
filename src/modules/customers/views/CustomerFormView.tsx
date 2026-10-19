@@ -3,7 +3,7 @@ import { CoverageWarning, scheduleService } from '../../schedule'
 import type { CoverageWarningItem } from '../../schedule'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Button, ErrorMessage, Page, PageHeader } from '../../core'
+import { Button, ErrorMessage, Page, PageHeader, BackButton } from '../../core'
 import { vehicleService } from '../../vehicles'
 import { zoneService } from '../../zones'
 import { CustomerForm } from '../components/CustomerForm'
@@ -47,7 +47,7 @@ export function CustomerFormView() {
     finally { lock.current = false; setChecking(false) }
   }
   return <Page className="mx-auto flex max-w-4xl flex-col gap-5 p-6">
-    <Link to="/panel/clientes" className="text-sm underline">← Clientes</Link>
+    <BackButton to="/panel/clientes" label="Volver a Clientes" appearance="link" />
     <PageHeader title={<>{id ? 'Editar cliente' : 'Nuevo cliente'}</>} />
     {(zones.isPending || vehicles.isPending || (id && customer.isPending)) ? <p>Cargando…</p>
       : (zones.isError || vehicles.isError || (id && customer.isError)) ? <div>

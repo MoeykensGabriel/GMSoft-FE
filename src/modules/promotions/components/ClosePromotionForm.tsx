@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Button, QuantityInput } from '../../core'
+import { Button, QuantityInput, BackButton } from '../../core'
 import type { ClosePromotion, Promotion } from '../services/promotionService'
 import { promotionService } from '../services/promotionService'
 import { usePromotionWrite } from '../hooks/usePromotionWrite'
@@ -36,7 +36,7 @@ export function ClosePromotionForm({ promotion, convert, onBack }: { promotion: 
   }
   if (write.data) return <div className="ui-card flex flex-col gap-3 p-4">
     <p role="status" className="font-semibold">{write.data.status === 'Converted' ? 'Promoción convertida en cliente. Los envases pasaron a su saldo.' : 'Promoción cerrada. Los retiros y las pérdidas quedaron registrados.'}</p>
-    <Button variant="navigation" onClick={onBack}>Volver a las pendientes</Button>
+    <BackButton onClick={onBack} label="Volver a las pendientes" variant="navigation" />
   </div>
 
   return <form onSubmit={review} className="ui-card flex flex-col gap-4 p-4">

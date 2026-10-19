@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
-import { Badge, Button, ErrorMessage, LinkButton, Page, PageHeader, Panel } from '../../core'
+import { Badge, Button, ErrorMessage, LinkButton, Page, PageHeader, Panel, BackButton } from '../../core'
 import { CustomerAccountMovements } from '../components/CustomerAccountMovements'
 import { CustomerBalanceCard } from '../components/CustomerBalanceCard'
 import { CustomerContainersSummary } from '../components/CustomerContainersSummary'
@@ -14,7 +14,7 @@ export function CustomerDetailView() {
 
   return <Page className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
     <PageHeader title={customer.data?.displayName ?? 'Ficha del cliente'} actions={<>
-      <LinkButton to="/panel/clientes" variant="navigation">← Clientes</LinkButton>
+      <BackButton to="/panel/clientes" label="Volver a Clientes" variant="navigation" />
       {customer.data && <LinkButton to={`/panel/clientes/${encodeURIComponent(customer.data.id)}/editar`}>Editar</LinkButton>}
     </>} />
     {customer.isPending || account.isPending ? <p role="status">Cargando cliente…</p>

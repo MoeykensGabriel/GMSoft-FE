@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { BUSINESS_TIME_ZONE, Badge, formatDateTime, formatMoney, LinkButton, Page, PageHeader, Panel } from '../../core'
+import { BUSINESS_TIME_ZONE, Badge, formatDateTime, formatMoney, LinkButton, Page, PageHeader, Panel, BackButton } from '../../core'
 import { OutsideWorkingHoursBadge, OutsideWorkingHoursEvents } from '../../workingHours'
 import { noPurchaseLabel } from '../../customers'
 import { ReceptionCorrectionsPanel } from '../components/ReceptionCorrectionsPanel'
@@ -94,7 +94,7 @@ export function SessionDetailView() {
 
   return (
     <Page className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
-      <LinkButton to="/panel/salidas" variant="secondary" className="self-start">← Volver a Salidas</LinkButton>
+      <BackButton to="/panel/salidas" label="Volver a Salidas" />
 
       <div className="flex flex-col gap-2">
         <PageHeader title={<>{s.driverName} · {s.zoneName}</>} />
