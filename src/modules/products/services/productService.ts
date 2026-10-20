@@ -11,6 +11,7 @@ export interface Product {
   salePrice: number
   tracking: ContainerTracking
   canBeLent: boolean
+  exchangeGroup: string | null
   isPublished: boolean
   imageUrl: string | null
 }

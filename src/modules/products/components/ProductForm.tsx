@@ -28,6 +28,7 @@ export function ProductForm({ inicial, guardando, error, onSubmit }: Props) {
   const [tracking, setTracking] = useState<ContainerTracking>(inicial?.tracking ?? 'ByBalance')
   const [isPublished, setIsPublished] = useState(inicial?.isPublished ?? true)
   const [canBeLent, setCanBeLent] = useState(inicial?.canBeLent ?? false)
+  const [exchangeGroup, setExchangeGroup] = useState(inicial?.exchangeGroup ?? '')
   const [imageUrl, setImageUrl] = useState(inicial?.imageUrl ?? '')
 
   function submit(e: FormEvent) {
@@ -41,6 +42,7 @@ export function ProductForm({ inicial, guardando, error, onSubmit }: Props) {
       salePrice: Number(salePrice),
       tracking,
       canBeLent: tracking === 'None' && canBeLent,
+      exchangeGroup: tracking === 'ByBalance' ? exchangeGroup.trim() || null : null,
       isPublished,
       imageUrl: imageUrl.trim() || null,
     })
@@ -97,6 +99,12 @@ export function ProductForm({ inicial, guardando, error, onSubmit }: Props) {
           que están afuera quedarían contados de una forma que el producto ya no usa.
         </span>
       </div>
+
+      {tracking === 'ByBalance' && <div className="flex flex-col gap-1">
+        <Field label="Grupo de intercambio" name="exchangeGroup" maxLength={50}
+          value={exchangeGroup} disabled={guardando} onChange={(e) => setExchangeGroup(e.target.value)} />
+        <span className="text-xs text-muted">Los productos con el mismo grupo pueden recibir los vacíos del otro cuando el cliente cambia de producto. Ej.: Bidones.</span>
+      </div>}
 
       <label className="flex min-h-11 items-center gap-2">
         <input type="checkbox" name="canBeLent" checked={tracking === 'None' && canBeLent}

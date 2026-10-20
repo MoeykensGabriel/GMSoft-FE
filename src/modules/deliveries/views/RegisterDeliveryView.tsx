@@ -16,6 +16,7 @@ import type { Cobro } from '../components/SaleConfirmModal'
 import { useRegisterDelivery } from '../hooks/useRegisterDelivery'
 import type { NewCustomerLine, PaymentMethod, RegisterDeliveryResult } from '../services/deliveryService'
 import { visitOutboxItem } from '../utils/visitOutbox'
+import { exchangeSummary } from '../utils/exchange'
 import { loanLimits, loanSummary } from '../utils/loans'
 
 const CLIENTE_VACIO: NewCustomerLine = {
@@ -84,6 +85,10 @@ export function RegisterDeliveryView() {
   const [notas, setNotas] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [hecho, setHecho] = useState<RegisterDeliveryResult | null>(null)
+  const [cambiosEnviados, setCambiosEnviados] = useState<string[] | null>(null)
+  // Conservamos el resumen al enviar: el refresco de saldos ya incluye esta visita.
+  const resumenCambios = cambiosEnviados ?? exchangeSummary(lineas, catalog, balances)
+  const mostrarCambios = <ul className="flex flex-col gap-1 text-sm">{resumenCambios.map((text) => <li key={text}>{text}</li>)}</ul>
   const resumenPrestamos = loanSummary(lineas)
   const mostrarPrestamos = <ul className="flex flex-col gap-1 text-sm">{resumenPrestamos.map((text) => <li key={text}>{text}</li>)}</ul>
 
@@ -110,6 +115,7 @@ export function RegisterDeliveryView() {
           <PageHeader title={<>Visita registrada</>} />
           <p className="text-sm">La visita guardada en el celular ya llegó a la oficina.</p>
           {mostrarPrestamos}
+          {mostrarCambios}
         </> : enBandeja.status === 'failed' ? <>
           <PageHeader title={<>No se pudo registrar</>} />
           <p role="alert" className="rounded border border-danger/30 bg-danger-soft p-3 text-sm text-danger">
@@ -138,6 +144,7 @@ export function RegisterDeliveryView() {
       <div className="ui-card mx-auto flex max-w-md flex-col gap-4 p-6">
         <PageHeader title={<>Visita registrada</>} />
         {mostrarPrestamos}
+        {mostrarCambios}
         <div className="ui-card bg-surface p-3 text-sm">
           <div className="flex justify-between">
             <span className="text-muted">Total de la visita</span>
@@ -225,6 +232,7 @@ export function RegisterDeliveryView() {
       }
       // A salvo antes de mandar: si se corta la señal o se cierra la app, la bandeja la reenvía.
       // Solo en el primer envío: un reintento ya está guardado y no rearma nada del formulario.
+      setCambiosEnviados(resumenCambios)
       const nombre = esNuevo ? nuevo.contactName : cliente.data?.displayName ?? 'Cliente del recorrido'
       const detalle = vendidas.map((l) => `${l.quantity} × ${l.productDetail}`).join(', ')
       const retira = lineas.filter((l) => l.retiraEnvases > 0).reduce((sum, l) => sum + l.retiraEnvases, 0)
@@ -247,6 +255,7 @@ export function RegisterDeliveryView() {
         pendiente.current = null
         setIncierto(false)
         setRequestId(newRequestId())
+        setCambiosEnviados(null)
         setError(err.fieldMessages[0] ?? err.detail ?? err.title)
       } else {
         setIncierto(true)
@@ -335,7 +344,7 @@ export function RegisterDeliveryView() {
           lines={vendidas.map((linea) => ({ ...linea, subtotal: linea.centavos / 100 }))}
           total={totalVenta}
           loanSummary={resumenPrestamos}
-          containersSummary={lineas.filter((l) => l.retiraEnvases > 0).map((l) => `Retira ${l.retiraEnvases} envases de ${l.productDetail}`)}
+          containersSummary={[...lineas.filter((l) => l.retiraEnvases > 0).map((l) => `Retira ${l.retiraEnvases} envases de ${l.productDetail}`), ...resumenCambios]}
           cobro={cobro}
           metodo={metodo}
           onCobro={setCobro}

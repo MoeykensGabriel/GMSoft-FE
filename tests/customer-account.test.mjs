@@ -28,6 +28,16 @@ const base = { date: '2026-10-14T01:00:00Z', kind: 'Sale', referenceId: 'sale', 
   payments: [], paid: 0, noPurchaseReason: null, notes: null, balanceAfter: 12000 }
 const product = (id, quantity) => ({ productId: id, productDetail: `Bidón ${id} lts`, quantity })
 
+test('cambio de envase queda junto a la devolución y usa la nota histórica', () => {
+  const result = detail.statementDetail({ ...base,
+    lines: [product('12', 1)], containersReturned: [product('20', 1)],
+    containerExchanges: [{ ...product('20', 1), notes: 'Cambio por Bidón 12 lts' }],
+  })
+  assert.deepEqual(result, { title: '1 × Bidón 12 lts', details: [
+    'dejó 0 · devolvió 1', 'Cambio de envase: devolvió 1 vacío de Bidón 20 lts y se llevó Bidón 12 lts',
+  ] })
+})
+
 test('detalle de venta agrupa productos y separa envases por producto', () => {
   assert.deepEqual(detail.statementDetail({ ...base,
     lines: [product('20', 4), product('12', 2)],

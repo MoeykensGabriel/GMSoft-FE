@@ -54,6 +54,7 @@ export interface CustomerStatementEntry {
   lines: (CustomerContainerLine & { unitPrice: number; amount: number })[]
   containersDelivered: CustomerContainerLine[]
   containersReturned: CustomerContainerLine[]
+  containerExchanges: (CustomerContainerLine & { notes: string | null })[]
   containerChanges: (CustomerContainerLine & { reason: string | null })[]
   charge: number
   payments: { amount: number; method: 'Cash' | 'Transfer' | 'Card' }[]

@@ -27,6 +27,10 @@ export function statementDetail(entry: CustomerStatementEntry) {
   const details = [...containers.values()].map((line) =>
     `${containers.size > 1 ? `${line.name}: ` : ''}dejó ${line.delivered} · devolvió ${line.returned}`,
   )
+  for (const exchange of entry.containerExchanges ?? []) {
+    const destination = exchange.notes?.replace(/^Cambio por /, '')
+    details.push(`Cambio de envase: devolvió ${exchange.quantity} vacío${exchange.quantity === 1 ? '' : 's'} de ${exchange.productDetail}${destination ? ` y se llevó ${destination}` : ''}`)
+  }
   for (const change of entry.containerChanges) {
     details.push(`${change.productDetail}: ${change.quantity > 0 ? '+' : ''}${change.quantity}${change.reason ? ` · ${change.reason}` : ''}`)
   }
