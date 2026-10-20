@@ -23,7 +23,7 @@ export function CancelSessionAction({ sessionId, driverName }: { sessionId: stri
   const close = () => { if (!cancel.isPending) { setOpen(false); cancel.reset() } }
 
   return <>
-    <Button variant="secondary" onClick={() => setOpen(true)}>Anular salida</Button>
+    <Button variant="danger" onClick={() => setOpen(true)}>Anular salida</Button>
     {open && <Modal title="Anular salida" busy={cancel.isPending} onClose={close} footer={<>
       <Button variant="secondary" disabled={cancel.isPending} onClick={close}>Volver</Button>
       <Button variant="danger" disabled={cancel.isPending || reason.trim() === ''} onClick={() => cancel.mutate()}>
