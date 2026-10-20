@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom'
 import { BUSINESS_TIME_ZONE, Badge, formatDateTime, formatMoney, LinkButton, Page, PageHeader, Panel, BackButton } from '../../core'
 import { OutsideWorkingHoursBadge, OutsideWorkingHoursEvents } from '../../workingHours'
 import { noPurchaseLabel } from '../../customers'
+import { CancelSessionAction } from '../components/CancelSessionAction'
 import { ReceptionCorrectionsPanel } from '../components/ReceptionCorrectionsPanel'
 import { RestocksPanel } from '../components/RestocksPanel'
 import { SettlementPanel } from '../components/SettlementPanel'
@@ -115,6 +116,7 @@ export function SessionDetailView() {
         <div className="flex flex-wrap gap-3">
           <LinkButton to={`/panel/salidas/${id}/recepcion`} variant="primary">Recibir el camión</LinkButton>
           <LinkButton to={`/panel/salidas/${id}/recarga`} variant="secondary">Recargar</LinkButton>
+          <CancelSessionAction sessionId={id} driverName={s.driverName} />
         </div>
       )}
       {cerrada && !s.isSettled && (

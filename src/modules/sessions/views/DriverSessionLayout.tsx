@@ -29,14 +29,16 @@ export function DriverSessionLayout() {
     refetchOnReconnect: true,
   })
 
-  const completeReception = useCallback(() => {
+  // Termina la salida en el celular: ADMIN recibió el camión o la anuló.
+  const endDeparture = useCallback((cancelled: boolean) => {
     restockSeenStorage.clear(userId)
     // Aviso efímero: la protección de rutas también puede redirigir al cerrar la cuenta.
-    window.sessionStorage.setItem('gmsoft.reception-completed', '1')
-    navigate('/login', { replace: true, state: { receptionCompleted: true } })
+    window.sessionStorage.setItem(cancelled ? 'gmsoft.departure-cancelled' : 'gmsoft.reception-completed', '1')
+    navigate('/login', { replace: true, state: cancelled ? { departureCancelled: true } : { receptionCompleted: true } })
     activeDepartureStorage.clear(userId)
     logout()
   }, [userId, logout, navigate])
+  const completeReception = useCallback(() => endDeparture(false), [endDeparture])
 
   useEffect(() => {
     if (userId && current.data?.status === 'Open') restockSeenStorage.activate(userId, current.data.id)
@@ -49,9 +51,10 @@ export function DriverSessionLayout() {
 
   useEffect(() => {
     // Una respuesta vacía o una caída de red no prueban que ADMIN haya recibido el camión.
-    if (!userId || !sessionId || status.data?.status !== 'Closed') return
-    completeReception()
-  }, [userId, sessionId, status.data, completeReception])
+    if (!userId || !sessionId) return
+    if (status.data?.status === 'Closed') completeReception()
+    else if (status.data?.status === 'Cancelled') endDeparture(true)
+  }, [userId, sessionId, status.data, completeReception, endDeparture])
 
   const departureOpen = status.data?.status === 'Open'
   useEffect(() => {
@@ -84,7 +87,7 @@ export function DriverSessionLayout() {
     }
   }, [sessionId, departureOpen, completeReception])
 
-  if (sessionId && status.data?.status === 'Closed') return null
+  if (sessionId && (status.data?.status === 'Closed' || status.data?.status === 'Cancelled')) return null
   if (sessionId && status.isPending) return <p className="p-6" role="status">Comprobando tu salida...</p>
   if (sessionId && status.isError && !status.data) return <div className="mx-auto flex max-w-md flex-col gap-4 p-6">
     <ErrorMessage error={status.error} fallback="No se pudo comprobar la salida. Sigue pendiente hasta que ADMIN reciba el camión." />

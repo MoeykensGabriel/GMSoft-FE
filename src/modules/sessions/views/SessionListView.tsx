@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useLocation } from 'react-router-dom'
 import { Badge, DataTable, LinkButton, BUSINESS_TIME_ZONE, Button, ErrorMessage, Field, Pagination, currentBusinessDate, formatDateTime, Page, PageHeader } from '../../core'
 import { sessionService } from '../services/sessionService'
 
@@ -19,6 +20,8 @@ function fechaLegible(iso: string): string {
  */
 export function SessionListView() {
   const hoy = currentBusinessDate()
+  // Aviso de vuelta desde «Anular salida».
+  const anulada = (useLocation().state as { cancelled?: string } | null)?.cancelled
   const [fecha, setFecha] = useState(hoy)
   const [page, setPage] = useState(1)
   const esHoy = fecha === hoy
@@ -34,6 +37,9 @@ export function SessionListView() {
   return (
     <Page className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
       <PageHeader title={<>Salidas de reparto</>} actions={<LinkButton to="/panel/salidas/abrir">Abrir salida</LinkButton>} />
+      {anulada && <p role="status" className="ui-card bg-accent-soft p-3 text-sm">
+        Se anuló la salida de {anulada}. La carga volvió a quedar pendiente en el camión.
+      </p>}
 
       <div className="ui-toolbar flex flex-wrap items-end gap-3">
         <Field

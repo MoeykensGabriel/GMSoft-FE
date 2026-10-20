@@ -4,7 +4,7 @@ import type { PagedResult } from '../../core'
 import type { SessionWorkingHours } from '../../workingHours'
 import type { RouteOrderChange } from './routeOrderService'
 
-export type SessionStatus = 'Open' | 'Closed'
+export type SessionStatus = 'Open' | 'Closed' | 'Cancelled'
 export type ContainerState = 'Full' | 'Empty'
 export interface RegisterRestockRequest {
   confirmOutsideWorkingHours?: boolean
@@ -248,6 +248,9 @@ export const sessionService = {
     ),
 
   getById: (sessionId: string) => api.get<Session>(`/api/sessions/${sessionId}`),
+
+  /** Solo ADMIN y sin movimientos: la carga vuelve a quedar pendiente en el camión. */
+  cancel: (sessionId: string, reason: string) => api.post<void>(`/api/sessions/${sessionId}/cancel`, { reason }),
 
   getDeliveries: (sessionId: string) =>
     api.get<SessionDelivery[]>(`/api/sessions/${sessionId}/deliveries`),

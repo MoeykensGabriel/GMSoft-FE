@@ -7,6 +7,7 @@ import { PageHeader, InstallAppButton } from '../../core'
 interface EstadoDeRuta {
   from?: { pathname: string }
   receptionCompleted?: boolean
+  departureCancelled?: boolean
 }
 
 export function LoginView() {
@@ -16,8 +17,12 @@ export function LoginView() {
   const [receptionCompleted] = useState(() =>
     window.sessionStorage.getItem('gmsoft.reception-completed') === '1' ||
     Boolean((location.state as EstadoDeRuta | null)?.receptionCompleted))
+  const [departureCancelled] = useState(() =>
+    window.sessionStorage.getItem('gmsoft.departure-cancelled') === '1' ||
+    Boolean((location.state as EstadoDeRuta | null)?.departureCancelled))
   useEffect(() => {
     window.sessionStorage.removeItem('gmsoft.reception-completed')
+    window.sessionStorage.removeItem('gmsoft.departure-cancelled')
   }, [])
 
   // Vuelve a donde queria ir antes de que lo mandaran al login.
@@ -31,6 +36,7 @@ export function LoginView() {
         <section className="ui-card flex w-full max-w-md flex-col gap-5 p-5">
           <PageHeader title="Inicio de sesión" description="Ingresá con tu usuario y contraseña." />
           {receptionCompleted && <p role="status" className="ui-card bg-accent-soft p-3 text-sm">ADMIN recibió el camión. Tu salida terminó y se cerró tu sesión.</p>}
+          {departureCancelled && <p role="status" className="ui-card bg-accent-soft p-3 text-sm">La oficina anuló tu salida. Si tenés que salir a repartir, volvé a entrar y abrí una nueva.</p>}
           <LoginForm onDone={() => navigate(destino, { replace: true })} />
           <InstallAppButton className="w-full" />
         </section>
