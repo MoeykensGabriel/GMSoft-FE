@@ -1,5 +1,7 @@
 # GMSoft — Frontend
 
+[Documentación general: manuales, arquitectura y operación](../GM-SoftBE/docs/README.md).
+
 Panel de administracion y app de reparto para GMSoft. React + Vite + TypeScript,
 contra el backend en [GMSoft-BE](https://github.com/MoeykensGabriel/GMSoft-BE).
 
