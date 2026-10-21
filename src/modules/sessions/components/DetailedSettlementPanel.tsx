@@ -8,6 +8,13 @@ import { detailedSettlementQuery } from '../hooks/detailedSettlementQuery'
  * orden del recorrido, con lo que llevo, los envases que devolvio, con que pago y
  * como quedo su cuenta.
  */
+/** El medio con que pagó se resalta; los que quedaron en cero pasan a segundo plano. */
+function PaymentAmount({ method, amount }: { method: string; amount: number }) {
+  return amount > 0
+    ? <span className="rounded bg-success-light px-2 py-1 text-black">{method} {formatMoney(amount)}</span>
+    : <span className="py-1 font-normal text-muted">{method} {formatMoney(amount)}</span>
+}
+
 export function DetailedSettlementPanel({ sessionId }: { sessionId: string }) {
   const detalle = useQuery(detailedSettlementQuery(sessionId))
 
@@ -16,7 +23,7 @@ export function DetailedSettlementPanel({ sessionId }: { sessionId: string }) {
   if (!detalle.data) return null
 
   return (
-    <section className="flex flex-col gap-3">
+    <section className="flex flex-col gap-4">
       <h3 className="text-sm font-medium text-muted">Detalle por cliente</h3>
 
       {detalle.data.length === 0 && (
@@ -26,7 +33,8 @@ export function DetailedSettlementPanel({ sessionId }: { sessionId: string }) {
       )}
 
       {detalle.data.map((c) => (
-        <div key={c.customerId} className="overflow-x-auto ui-card bg-surface text-sm">
+        // Borde marcado: al bajar por la lista se tiene que ver dónde empieza y termina cada cliente.
+        <div key={c.customerId} className="overflow-x-auto rounded border-2 border-muted bg-surface text-sm shadow-sm">
           <div className="grid gap-x-4 gap-y-1 bg-accent-soft px-3 py-2 font-semibold text-ink sm:grid-cols-[1fr_2fr_auto]">
             <span>{c.customerName}</span>
             <span>{c.customerAddress}</span>
@@ -68,10 +76,9 @@ export function DetailedSettlementPanel({ sessionId }: { sessionId: string }) {
           </DataTable>
 
           <div className="flex flex-wrap justify-between gap-x-6 gap-y-1 bg-canvas px-3 py-2 font-semibold text-ink">
-            <span>Efectivo {formatMoney(c.cash)}</span>
-            <span>Transferencia {formatMoney(c.transfer)}</span>
-            <span>Tarjeta {formatMoney(c.card)}</span>
-            <span>Saldo: {formatMoney(c.balance)}</span>
+            {([['Efectivo', c.cash], ['Transferencia', c.transfer], ['Tarjeta', c.card]] as const).map(([medio, monto]) =>
+              <PaymentAmount key={medio} method={medio} amount={monto} />)}
+            <span className="py-1">Saldo: {formatMoney(c.balance)}</span>
           </div>
         </div>
       ))}
