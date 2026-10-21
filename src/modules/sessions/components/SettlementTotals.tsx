@@ -15,15 +15,17 @@ function sumar(filas: Total[]): Total[] {
 }
 
 /**
- * Totales generales de la liquidación: cuánto entró por cada forma de pago, qué
- * envases volvieron y qué se vendió. Se calcula con el mismo detalle por cliente
+ * Totales generales de la liquidación: cuánto entró en efectivo y por transferencia,
+ * cuánto quedan debiendo los clientes visitados, qué envases volvieron y qué se vendió. Se calcula con el mismo detalle por cliente
  * que se muestra arriba, así los números siempre coinciden.
  */
 export function SettlementTotals({ settlements }: { settlements: CustomerSettlement[] }) {
   const pagos = [
     { label: 'Total efectivo', amount: settlements.reduce((sum, c) => sum + c.cash, 0) },
     { label: 'Total transferencia', amount: settlements.reduce((sum, c) => sum + c.transfer, 0) },
-    { label: 'Total tarjeta', amount: settlements.reduce((sum, c) => sum + c.card, 0) },
+    // Los clientes no pagan con tarjeta: en su lugar va lo que deben. Es el saldo de cada
+    // cuenta al cierre de la salida, con la deuda anterior; un saldo a favor no la descuenta.
+    { label: 'Total saldos (deuda)', amount: settlements.reduce((sum, c) => sum + Math.max(c.balance, 0), 0) },
   ]
   const envases = sumar(settlements.flatMap((c) => c.returnedContainers.map((envase) => (
     { detail: envase.productDetail, quantity: envase.quantity, amount: 0 }))))
