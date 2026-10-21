@@ -1,3 +1,4 @@
+import { zonesLabel } from '../../zones'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useLocation } from 'react-router-dom'
@@ -72,7 +73,7 @@ export function SessionListView() {
           {items.length > 0 && <DataTable label="Salidas y recepciones del día" className="min-w-[50rem]">
             <thead><tr><th scope="col">Chofer</th><th scope="col">Camión / zona</th><th scope="col">Salida</th><th scope="col">Recepción</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
             <tbody>{items.map((s) => <tr key={s.id}>
-              <td className="font-semibold">{s.driverName}</td><td>{s.vehicleLicensePlate}<span className="block text-xs text-muted">{s.zoneName}</span></td>
+              <td className="font-semibold">{s.driverName}</td><td>{s.vehicleLicensePlate}<span className="block text-xs text-muted">{zonesLabel(s)}</span></td>
               <td>{formatDateTime(s.openedAt, BUSINESS_TIME_ZONE)}</td><td>{s.closedAt ? formatDateTime(s.closedAt, BUSINESS_TIME_ZONE) : 'Pendiente'}</td>
               <td className="flex flex-wrap gap-1">
                 <Badge tone={s.status === 'Open' ? 'info' : 'neutral'}>{s.status === 'Open' ? 'En la calle' : 'Recibida'}</Badge>

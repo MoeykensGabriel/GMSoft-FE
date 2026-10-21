@@ -1,3 +1,4 @@
+import { zonesLabel } from '../../zones'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -161,7 +162,7 @@ export function ReceiveSessionView() {
         <BackButton to={`/panel/salidas/${id}`} label="Volver a la salida" appearance="link" />
         <PageHeader title={<>Recepción del camión</>} />
         <p className="mt-1 text-sm text-muted">
-          {s.driverName} · {s.zoneName} · {s.vehicleName} ({s.vehicleLicensePlate})
+          {s.driverName} · {zonesLabel(s)} · {s.vehicleName} ({s.vehicleLicensePlate})
         </p>
         <p className="text-sm text-muted">Salió con {s.kilometersAtOpen} km</p>
       </div>

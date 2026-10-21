@@ -1,3 +1,4 @@
+import type { OrderedZone } from '../../zones'
 import { useQuery } from '@tanstack/react-query'
 import { Select, formatMoney } from '../../core'
 import { customerService, purchaseActivityLabel } from '../../customers'
@@ -6,7 +7,7 @@ const NUEVO = '__nuevo__'
 
 interface Props {
   vehicleId: string
-  zoneId: string
+  zones: OrderedZone[]
   routeDays: number[]
   customerId: string | null
   esNuevo: boolean
@@ -18,12 +19,12 @@ interface Props {
  * de alta en la puerta. Al elegir uno existente muestra su cuenta, que es lo que el
  * chofer necesita saber antes de vender: cuanto debe y cuantos envases tiene.
  */
-export function CustomerPicker({ vehicleId, zoneId, routeDays, customerId, esNuevo, onChange }: Props) {
+export function CustomerPicker({ vehicleId, zones, routeDays, customerId, esNuevo, onChange }: Props) {
   const clientes = useQuery({
-    queryKey: ['customers', 'zone', vehicleId, zoneId, routeDays],
+    queryKey: ['customers', 'zone', vehicleId, zones, routeDays],
     refetchOnWindowFocus: true,
     refetchInterval: 60_000,
-    queryFn: () => customerService.listByZone(zoneId, 100, 1, routeDays, '', vehicleId),
+    queryFn: () => customerService.listRoute(zones, routeDays, vehicleId),
   })
 
   const cuenta = useQuery({
@@ -50,13 +51,12 @@ export function CustomerPicker({ vehicleId, zoneId, routeDays, customerId, esNue
       >
         <option value="">Elegí un cliente</option>
         <option value={NUEVO}>+ Cliente nuevo</option>
-        {clientes.data?.items.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.routeOrder}. {c.displayName} — {c.address}
-          </option>
-        ))}
+        {zones.map((zone) => zones.length > 1 ? <optgroup key={zone.zoneId} label={`${zone.zoneName} · ${clientes.data?.filter((c) => c.zoneId === zone.zoneId).length ?? 0} clientes`}>
+          {clientes.data?.filter((c) => c.zoneId === zone.zoneId).map((c) => <option key={c.id} value={c.id}>{c.routeOrder}. {c.displayName} — {c.address}</option>)}
+        </optgroup> : clientes.data?.map((c) => <option key={c.id} value={c.id}>{c.routeOrder}. {c.displayName} — {c.address}</option>))}
       </Select>
 
+      {clientes.isError && <p role="alert">No se pudieron cargar los clientes del recorrido.</p>}
       {cuenta.data && (
         <div className="ui-card bg-surface p-3 text-sm">
           <div className="flex justify-between">
