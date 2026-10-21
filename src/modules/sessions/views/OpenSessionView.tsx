@@ -3,6 +3,7 @@ import { scheduleService } from '../../schedule'
 import { SuggestedZoneNotice } from '../components/SuggestedZoneNotice'
 import type { FormEvent } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useAuth } from '../../auth'
 import { ApiError, Button, Field, InstallAppButton, Select, weekdayLabels, PageHeader } from '../../core'
 import { driverService } from '../../drivers'
 import { vehicleService } from '../../vehicles'
@@ -17,6 +18,16 @@ import { useOpenSession } from '../hooks/useCurrentSession'
  * muestra para que la confirme contra lo que ve arriba del camion. Que la declarara
  * el mismo chofer volvia el control de recepcion una copia de lo que el ya dijo.
  */
+/**
+ * Solo sin salida abierta: con una abierta la sesión la cierra la recepción, así el
+ * chofer no se sale a mitad del reparto. La bandeja del celular no se borra: lo que
+ * quedó sin enviar se manda cuando ese chofer vuelve a entrar.
+ */
+function LogoutButton() {
+  const { logout } = useAuth()
+  return <Button type="button" variant="secondary" onClick={logout}>Cerrar sesión</Button>
+}
+
 export function OpenSessionView() {
   const perfil = useQuery({ queryKey: ['driver', 'me'], queryFn: driverService.getMe })
   const zonas = useQuery({ queryKey: ['zones', 'active'], queryFn: () => zoneService.listActive() })
@@ -45,7 +56,10 @@ export function OpenSessionView() {
   }
 
   if (perfil.isError) {
-    return <p className="p-6 text-danger">No se pudo leer tu perfil de chofer.</p>
+    return <div className="mx-auto flex max-w-md flex-col gap-4 p-6">
+      <p className="text-danger">No se pudo leer tu perfil de chofer.</p>
+      <LogoutButton />
+    </div>
   }
 
   const chofer = perfil.data!
@@ -54,10 +68,11 @@ export function OpenSessionView() {
   // decirlo antes de que llene el formulario que despues de mandarlo.
   if (!chofer.vehicleId) {
     return (
-      <div className="p-6">
+      <div className="mx-auto flex max-w-md flex-col gap-4 p-6">
         <p className="text-muted">
           No tenés un vehículo asignado. Pedile al admin que te asigne uno antes de salir.
         </p>
+        <LogoutButton />
       </div>
     )
   }
@@ -167,6 +182,7 @@ export function OpenSessionView() {
         {abrir.isPending ? 'Abriendo...' : suggestion.data?.zoneId && zoneId !== suggestion.data.zoneId ? 'Guardar igual y abrir salida' : 'Abrir salida'}
       </Button>
       <InstallAppButton />
+      <LogoutButton />
     </form>
   )
 }
