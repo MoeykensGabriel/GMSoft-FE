@@ -7,7 +7,7 @@ export function ActiveDepartureSummary({ departure }: { departure: ActiveDepartu
     <div>
       <h3 className="break-words font-semibold">{departure.vehicleName} · {departure.vehicleLicensePlate}</h3>
       <p className="mt-1 break-words text-sm">Chofer: {departure.driverName || 'Sin nombre registrado'}</p>
-      <p className="break-words text-sm">Zona: {departure.zoneName || 'Sin nombre registrado'}</p>
+      <p className="break-words text-sm">{departure.zoneName.includes(' → ') ? 'Zonas' : 'Zona'}: {departure.zoneName || 'Sin nombre registrado'}</p>
       <p className="mt-1 text-xs text-muted">Salida: {formatDateTime(departure.openedAt, 'America/Argentina/Buenos_Aires')}</p>
     </div>
     <div className="min-w-0">

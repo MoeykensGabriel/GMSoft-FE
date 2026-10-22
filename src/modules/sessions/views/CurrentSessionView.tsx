@@ -1,3 +1,4 @@
+import { orderedZones, zonesLabel } from '../../zones'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -61,8 +62,8 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
       {location.state?.routeSaved && <p role="status" className="ui-card p-3">Recorrido guardado</p>}
       {user && <RestockNotice userId={user.userId} session={sesion} />}
       {user && <OutboxNotice userId={user.userId} items={bandeja.filter((item) => item.sessionId === sesion.id || item.status === 'failed')} />}
-      <RouteUpdateNotice key={sesion.id} vehicleId={sesion.vehicleId} zoneId={sesion.zoneId} routeDays={sesion.routeDays} />
-      <RouteHeader zoneName={sesion.zoneName ?? 'Zona'} date={sesion.openedAt} userName={user?.userName ?? sesion.driverName} routeDays={sesion.routeDays} />
+      <RouteUpdateNotice key={sesion.id} vehicleId={sesion.vehicleId} zones={orderedZones(sesion)} routeDays={sesion.routeDays} />
+      <RouteHeader zoneName={zonesLabel(sesion)} date={sesion.openedAt} userName={user?.userName ?? sesion.driverName} routeDays={sesion.routeDays} />
       {modo === null && (
         <div className="grid grid-cols-2 gap-2">
           <Button variant="navigation" className="min-h-14" onClick={() => elegir('ventas')}>Vender</Button>
@@ -78,7 +79,7 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
           <p>No se pudieron leer las visitas de hoy. La lista puede mostrar como pendientes a clientes ya visitados.</p>
           <Button variant="secondary" onClick={() => void visitas.refetch()}>Reintentar</Button>
         </div>}
-        <CustomerRouteList vehicleId={sesion.vehicleId} zoneId={sesion.zoneId} routeDays={sesion.routeDays} noPurchaseReasons={Object.fromEntries((visitas.data ?? []).flatMap((v) => v.type === 'NoPurchase' && v.noPurchaseReason ? [[v.customerId, v.noPurchaseReason]] : []))} visitedCustomerIds={visitados} laterCustomerIds={masTarde} onSelect={(id) => navigate(`/reparto/clientes/${encodeURIComponent(id)}`)} />
+        <CustomerRouteList vehicleId={sesion.vehicleId} zones={orderedZones(sesion)} routeDays={sesion.routeDays} noPurchaseReasons={Object.fromEntries((visitas.data ?? []).flatMap((v) => v.type === 'NoPurchase' && v.noPurchaseReason ? [[v.customerId, v.noPurchaseReason]] : []))} visitedCustomerIds={visitados} laterCustomerIds={masTarde} onSelect={(id) => navigate(`/reparto/clientes/${encodeURIComponent(id)}`)} />
       </>}
       {modo === 'promociones' && <>
         <LinkButton to="/reparto/promocion" variant="primary" className="min-h-14">+ Registrar promoción</LinkButton>
@@ -88,7 +89,7 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
         <summary className="min-h-11 cursor-pointer py-3 text-sm font-medium">Vehículo y carga a bordo</summary>
       <div className="mt-3">
         <p className="mt-1 text-sm text-muted">
-          {sesion.zoneName} · {sesion.vehicleName} ({sesion.vehicleLicensePlate})
+          {zonesLabel(sesion)} · {sesion.vehicleName} ({sesion.vehicleLicensePlate})
         </p>
         <p className="text-sm text-muted">
           Abierta {formatDateTime(sesion.openedAt)} · {sesion.kilometersAtOpen} km

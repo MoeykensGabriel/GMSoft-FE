@@ -1,28 +1,19 @@
+import type { OrderedZone } from '../../zones'
 import { useEffect, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '../../core'
 import { customerService } from '../services/customerService'
 import { routeMembershipChanged } from '../utils/routeMembership'
 
-export function RouteUpdateNotice({ vehicleId, zoneId, routeDays }: { vehicleId: string; zoneId: string; routeDays: number[] }) {
+export function RouteUpdateNotice({ vehicleId, zones, routeDays }: { vehicleId: string; zones: OrderedZone[]; routeDays: number[] }) {
   const cache = useQueryClient()
-  const scope = JSON.stringify([vehicleId, zoneId, [...routeDays].sort()])
+  const scope = JSON.stringify([vehicleId, zones, [...routeDays].sort()])
   const previous = useRef<{ scope: string; ids: string[] } | null>(null)
   const [visible, setVisible] = useState(false)
-  // A separate complete snapshot avoids false notices from search, loading another
-  // page or marking a visit, and detects changes beyond the visible first page.
+  // La foto completa evita avisos por búsquedas o visitas y detecta cambios en todas las zonas.
   const query = useQuery({
-    queryKey: ['customers', 'route-membership', vehicleId, zoneId, routeDays],
-    queryFn: async () => {
-      const ids: string[] = []
-      let page = 1
-      while (true) {
-        const result = await customerService.listByZone(zoneId, 100, page, routeDays, '', vehicleId)
-        ids.push(...result.items.map((item) => item.id))
-        if (!result.hasNextPage) return ids
-        page++
-      }
-    },
+    queryKey: ['customers', 'route-membership', vehicleId, zones, routeDays],
+    queryFn: async () => (await customerService.listRoute(zones, routeDays, vehicleId)).map((item) => item.id),
     refetchInterval: 30_000,
   })
   useEffect(() => {

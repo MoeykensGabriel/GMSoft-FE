@@ -5,6 +5,7 @@ export type DeliveryType = 'Sale' | 'ContainerOnly' | 'NoPurchase'
 export type PaymentMethod = 'Cash' | 'Transfer' | 'Card'
 
 export interface NewCustomerLine {
+  zoneId?: string
   businessName: string | null
   contactName: string
   phone: string

@@ -1,3 +1,4 @@
+import { zonesLabel } from '../../zones'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -36,7 +37,7 @@ export function CorrectReceptionView() {
   return (
     // Se rearma solo si otra corrección cambió la recepción, no en cada refresco.
     <CorrectionForm key={recepcion.data.corrections.length} sessionId={id} reception={recepcion.data}
-      subtitle={`${s.driverName} · ${s.zoneName} · ${s.vehicleName} (${s.vehicleLicensePlate})`} />
+      subtitle={`${s.driverName} · ${zonesLabel(s)} · ${s.vehicleName} (${s.vehicleLicensePlate})`} />
   )
 }
 

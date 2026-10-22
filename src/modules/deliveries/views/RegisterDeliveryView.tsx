@@ -1,10 +1,11 @@
+import { orderedZones, zonesLabel } from '../../zones'
 import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useQueries } from '@tanstack/react-query'
 import { productService } from '../../products'
 import { customerService, CustomerAccountSummary } from '../../customers'
-import { ApiError, Button, Field, formatMoney, currentBusinessWeekday, isDefiniteRejection, newRequestId, outbox, PageHeader, useOutbox, BackButton } from '../../core'
+import { ApiError, Button, Field, Select, formatMoney, currentBusinessWeekday, isDefiniteRejection, newRequestId, outbox, PageHeader, useOutbox, BackButton } from '../../core'
 import { useAuth } from '../../auth'
 import { useCurrentSession } from '../../sessions'
 import { CustomerPicker } from '../components/CustomerPicker'
@@ -176,6 +177,10 @@ export function RegisterDeliveryView() {
       l.vende, balances.find((b) => b.productId === l.productId)?.quantity ?? 0)
     return product?.canBeLent && product.tracking === 'None' && l.presta <= limits.maxOut && l.retiraPrestamo <= limits.maxIn
   })
+  const clienteValido = Boolean(cliente.data?.isActive && !cliente.data.removalPending
+    && cliente.data.vehicleId === sesion.vehicleId
+    && orderedZones(sesion).some((zone) => zone.zoneId === cliente.data?.zoneId)
+    && cliente.data.visitDays?.some((day) => sesion.routeDays.includes(day)))
   const datosListos = productsReady && (esNuevo || cuenta.isSuccess)
   // En el orden del camion y en centavos, igual que el editor: es lo que se muestra
   // para confirmar. El importe definitivo lo calcula el servidor.
@@ -190,7 +195,7 @@ export function RegisterDeliveryView() {
   function onSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
-    if (registrar.isPending || !datosListos || !mueveAlgo || !prestamosValidos || (vendeAlgo && !pricesReady) || guardada) return
+    if ((!esNuevo && !clienteValido) || registrar.isPending || !datosListos || !mueveAlgo || !prestamosValidos || (vendeAlgo && !pricesReady) || guardada) return
 
     if (esNuevo && (!nuevo.visitDays.length || !vendeAlgo)) {
       setError('Seleccioná al menos un día de visita.')
@@ -205,7 +210,7 @@ export function RegisterDeliveryView() {
     setError(null)
     const cuerpo = pendiente.current ?? {
         customerId: esNuevo ? null : customerId,
-        newCustomer: esNuevo ? nuevo : null,
+        newCustomer: esNuevo ? { ...nuevo, zoneId: nuevo.zoneId ?? orderedZones(sesion)[0]?.zoneId } : null,
         // Sin venta es una visita de solo envases. Lo decide lo que se cargo, no
         // una casilla aparte que el chofer se pueda olvidar de tildar.
         type: vendeAlgo ? 'Sale' : 'ContainerOnly',
@@ -269,7 +274,7 @@ export function RegisterDeliveryView() {
       <div>
         {directo && customerId && <BackButton to={`/reparto/clientes/${encodeURIComponent(customerId)}`} label="Volver a la ficha" appearance="link" />}
         <PageHeader title={<>Registrar visita</>} />
-        <p className="mt-1 text-sm text-muted">{sesion.zoneName}</p>
+        <p className="mt-1 text-sm text-muted">{zonesLabel(sesion)}</p>
       </div>
 
       {guardada && <p role="alert" className="rounded border border-warning/40 bg-warning-soft p-3 text-sm text-warning">
@@ -282,9 +287,9 @@ export function RegisterDeliveryView() {
         <p className="text-sm">{cliente.data?.address}</p>
         {cuenta.data && <CustomerAccountSummary account={cuenta.data} />}
         {(cliente.isError || cuenta.isError) && <p role="alert">No se pudo cargar el cliente. Volvé al recorrido e intentá nuevamente.</p>}
-        {cliente.data && (cliente.data.zoneId !== sesion.zoneId || !cliente.data.isActive) && <p role="alert">Este cliente no pertenece al recorrido activo.</p>}
+        {cliente.data && (!clienteValido) && <p role="alert">Este cliente no pertenece al camión, zonas y días de tu recorrido.</p>}
       </div> : params.get('new') === '1' ? <h2 className="font-semibold">Cliente nuevo</h2> : <CustomerPicker
-        zoneId={sesion.zoneId}
+        zones={orderedZones(sesion)}
         routeDays={sesion.routeDays}
         vehicleId={sesion.vehicleId}
         customerId={customerId}
@@ -296,6 +301,9 @@ export function RegisterDeliveryView() {
         }}
       />}
 
+      {esNuevo && orderedZones(sesion).length > 1 && <Select label="Zona" value={nuevo.zoneId ?? orderedZones(sesion)[0]?.zoneId} onChange={(event) => setNuevo({ ...nuevo, zoneId: event.target.value })}>
+        {orderedZones(sesion).map((zone) => <option key={zone.zoneId} value={zone.zoneId}>{zone.zoneName}</option>)}
+      </Select>}
       {esNuevo && <NewCustomerFields valor={nuevo} onChange={setNuevo} />}
 
       {(products.some((query) => query.isError) || (!esNuevo && customerId && specialPrices.isError)) && <div role="alert">
@@ -331,7 +339,7 @@ export function RegisterDeliveryView() {
       )}
 
       <div className="flex gap-2">
-        <Button type="submit" disabled={registrar.isPending || !datosListos || !mueveAlgo || !prestamosValidos || (esNuevo && !vendeAlgo) || Boolean(guardada) || (vendeAlgo && !pricesReady) || (!esNuevo && !customerId) || (directo && (!cliente.data || !cuenta.data || cliente.isError || cuenta.isError || cliente.data.zoneId !== sesion.zoneId || !cliente.data.isActive))}>
+        <Button type="submit" disabled={(!esNuevo && !clienteValido) || registrar.isPending || !datosListos || !mueveAlgo || !prestamosValidos || (esNuevo && !vendeAlgo) || Boolean(guardada) || (vendeAlgo && !pricesReady) || (!esNuevo && !customerId) || (directo && (!cliente.data || !cuenta.data || cliente.isError || cuenta.isError || !clienteValido))}>
           {registrar.isPending ? 'Registrando...' : vendeAlgo ? 'Confirmar venta' : 'Registrar visita'}
         </Button>
         <Button type="button" variant="danger" onClick={() => navigate(directo && customerId ? `/reparto/clientes/${encodeURIComponent(customerId)}` : '/reparto')}>

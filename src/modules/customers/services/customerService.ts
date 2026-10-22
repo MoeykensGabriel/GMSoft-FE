@@ -140,6 +140,19 @@ export interface RemovalRequestInput {
 }
 
 export const customerService = {
+  listRoute: async (zones: { zoneId: string }[], routeDays: number[], vehicleId: string, search = ''): Promise<Customer[]> => {
+    const blocks = await Promise.all(zones.map(async ({ zoneId }) => {
+      const items: Customer[] = []
+      let page = 1
+      while (true) {
+        const result = await customerService.listByZone(zoneId, 100, page, routeDays, search, vehicleId)
+        items.push(...result.items)
+        if (!result.hasNextPage) return items
+        page++
+      }
+    }))
+    return blocks.flat()
+  },
   requestRemoval: (customerId: string, body: RemovalRequestInput) =>
     api.post<CustomerRemoval>(`/api/customers/${customerId}/removal-requests`, body),
   removals: (status: RemovalStatus | null, page = 1) =>

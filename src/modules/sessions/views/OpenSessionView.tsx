@@ -4,10 +4,10 @@ import { SuggestedZoneNotice } from '../components/SuggestedZoneNotice'
 import type { FormEvent } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../../auth'
-import { ApiError, Button, Field, InstallAppButton, Select, weekdayLabels, PageHeader } from '../../core'
+import { ApiError, Button, Field, InstallAppButton, weekdayLabels, PageHeader } from '../../core'
 import { driverService } from '../../drivers'
 import { vehicleService } from '../../vehicles'
-import { zoneService } from '../../zones'
+import { zoneService, orderedZones, sameZones, OrderedZoneEditor } from '../../zones'
 import { useOpenSession } from '../hooks/useCurrentSession'
 
 /**
@@ -30,7 +30,7 @@ function LogoutButton() {
 
 export function OpenSessionView() {
   const perfil = useQuery({ queryKey: ['driver', 'me'], queryFn: driverService.getMe })
-  const zonas = useQuery({ queryKey: ['zones', 'active'], queryFn: () => zoneService.listActive() })
+  const zonas = useQuery({ queryKey: ['zones', 'opening-options'], queryFn: zoneService.listAll })
 
   const vehicleId = perfil.data?.vehicleId ?? ''
   const carga = useQuery({
@@ -41,13 +41,14 @@ export function OpenSessionView() {
 
   const abrir = useOpenSession()
 
-  const [chosenZone, setZoneId] = useState<string | null>(null)
+  const [chosenZones, setZoneIds] = useState<string[] | null>(null)
   const suggestion = useQuery({
     queryKey: ['sessions', 'suggested-zone', { vehicleId }],
     queryFn: () => scheduleService.suggested(),
     enabled: Boolean(vehicleId),
   })
-  const zoneId = chosenZone ?? suggestion.data?.zoneId ?? ''
+  const suggestedIds = orderedZones(suggestion.data).map((zone) => zone.zoneId)
+  const zoneIds = chosenZones ?? suggestedIds
   const [kilometros, setKilometros] = useState('')
   const [error, setError] = useState<string | null>(null)
 
@@ -82,7 +83,7 @@ export function OpenSessionView() {
     setError(null)
 
     try {
-      await abrir.mutateAsync({ zoneId, kilometersAtOpen: Number(kilometros) })
+      await abrir.mutateAsync({ zoneIds, kilometersAtOpen: Number(kilometros) })
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.status === 409 && err.type === 'outside-working-hours'
@@ -139,26 +140,13 @@ export function OpenSessionView() {
         )}
       </div>
 
-      <Select
-        // Los días los configura admin y se copian al abrir la salida.
-        label="Zona de reparto"
-        name="zoneId"
-        required
-        value={zoneId}
-        onChange={(e) => setZoneId(e.target.value)}
-      >
-        <option value="">Elegí una zona</option>
-        {zonas.data?.items.map((z) => (
-          <option key={z.id} value={z.id}>
-            {z.name}
-          </option>
-        ))}
-      </Select>
+      <OrderedZoneEditor value={zoneIds} options={zonas.data ?? []} onChange={setZoneIds} disabled={abrir.isPending} />
       {zonas.isError && <div role="alert" className="flex flex-col gap-2 text-sm">
         <p>No se pudieron cargar las zonas.</p>
         <Button type="button" variant="secondary" onClick={() => void zonas.refetch()}>Reintentar</Button>
       </div>}
-      <SuggestedZoneNotice suggestion={suggestion.data} zoneId={zoneId} />
+      {suggestion.isError && <div role="alert"><p>No se pudo leer la agenda sugerida.</p><Button type="button" variant="secondary" onClick={() => void suggestion.refetch()}>Reintentar agenda</Button></div>}
+      <SuggestedZoneNotice suggestion={suggestion.data} zoneIds={zoneIds} />
       {routeDays.length > 0 && <p className="text-sm">Días del recorrido: <strong>{weekdayLabels(routeDays)}</strong></p>}
 
       <Field
@@ -178,8 +166,8 @@ export function OpenSessionView() {
         </p>
       )}
 
-      <Button type="submit" disabled={abrir.isPending || carga.isLoading || carga.isError}>
-        {abrir.isPending ? 'Abriendo...' : suggestion.data?.zoneId && zoneId !== suggestion.data.zoneId ? 'Guardar igual y abrir salida' : 'Abrir salida'}
+      <Button type="submit" disabled={!zoneIds.length || suggestion.isLoading || abrir.isPending || carga.isLoading || carga.isError}>
+        {abrir.isPending ? 'Abriendo...' : suggestion.data && !sameZones(zoneIds, suggestedIds) ? 'Guardar igual y abrir salida' : 'Abrir salida'}
       </Button>
       <InstallAppButton />
       <LogoutButton />

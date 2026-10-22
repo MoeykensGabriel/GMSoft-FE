@@ -1,3 +1,4 @@
+import { zonesLabel } from '../../zones'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
@@ -98,7 +99,7 @@ export function SessionDetailView() {
       <BackButton to="/panel/salidas" label="Volver a Salidas" />
 
       <div className="flex flex-col gap-2">
-        <PageHeader title={<>{s.driverName} · {s.zoneName}</>} />
+        <PageHeader title={<>{s.driverName} · {zonesLabel(s)}</>} />
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-base text-ink">
           <Badge tone={cerrada ? 'neutral' : 'warning'}>{cerrada ? 'Camión recibido' : 'En la calle'}</Badge>
           <span className="font-medium">{s.vehicleName} · {s.vehicleLicensePlate}</span>

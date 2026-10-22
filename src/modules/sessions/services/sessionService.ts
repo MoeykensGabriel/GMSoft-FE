@@ -1,3 +1,4 @@
+import type { OrderedZone } from '../../zones'
 import type { Customer, LastNoPurchase, NoPurchaseReason } from '../../customers'
 import { api } from '../../core'
 import type { PagedResult } from '../../core'
@@ -43,6 +44,7 @@ export interface ActiveDeparture {
 }
 
 export interface Session extends SessionWorkingHours {
+  zones: OrderedZone[]
   driverRouteOrderChange: RouteOrderChange | null
   id: string
   driverId: string
@@ -66,7 +68,7 @@ export interface Session extends SessionWorkingHours {
 
 /** Sin carga: la subio la oficina al camion y la salida se lleva lo que haya arriba. */
 export interface OpenSessionRequest {
-  zoneId: string
+  zoneIds: string[]
   kilometersAtOpen: number
   /** Solo ADMIN: abre la salida de ese chofer. */
   driverId?: string

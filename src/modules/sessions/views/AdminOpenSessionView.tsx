@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { ApiError, Button, ErrorMessage, Field, Modal, Page, PageHeader, Panel, Select, BackButton } from '../../core'
 import { driverService } from '../../drivers'
-import { zoneService } from '../../zones'
+import { zoneService, orderedZones, sameZones, OrderedZoneEditor } from '../../zones'
 import { sessionService } from '../services/sessionService'
 
 const isOutside = (error: unknown): error is ApiError =>
@@ -19,21 +19,22 @@ export function AdminOpenSessionView() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const choferes = useQuery({ queryKey: ['drivers', 'active'], queryFn: driverService.listActive })
-  const zonas = useQuery({ queryKey: ['zones', 'active'], queryFn: () => zoneService.listActive() })
+  const zonas = useQuery({ queryKey: ['zones', 'opening-options'], queryFn: zoneService.listAll })
 
   const [driverId, setDriverId] = useState('')
-  const [chosenZone, setZoneId] = useState<string | null>(null)
+  const [chosenZones, setZoneIds] = useState<string[] | null>(null)
   const suggestion = useQuery({
     queryKey: ['sessions', 'suggested-zone', { driverId }],
     queryFn: () => scheduleService.suggested(driverId),
     enabled: Boolean(driverId),
   })
-  const zoneId = chosenZone ?? suggestion.data?.zoneId ?? ''
+  const suggestedIds = orderedZones(suggestion.data).map((zone) => zone.zoneId)
+  const zoneIds = chosenZones ?? suggestedIds
   const [kilometros, setKilometros] = useState('')
 
   const abrir = useMutation({
     mutationFn: (confirmOutsideWorkingHours: boolean) => sessionService.open({
-      driverId, zoneId, kilometersAtOpen: Number(kilometros), confirmOutsideWorkingHours,
+      driverId, zoneIds, kilometersAtOpen: Number(kilometros), confirmOutsideWorkingHours,
     }),
     onSuccess: async (id) => {
       await queryClient.invalidateQueries({ queryKey: ['sessions'] })
@@ -53,26 +54,24 @@ export function AdminOpenSessionView() {
         <form className="flex max-w-md flex-col gap-4" onSubmit={(event) => { event.preventDefault(); abrir.mutate(false) }}>
           <ErrorMessage error={choferes.error ?? zonas.error} />
 
-          <Select label="Chofer" name="driverId" required value={driverId} onChange={(e) => { setDriverId(e.target.value); setZoneId(null) }}>
+          <Select label="Chofer" name="driverId" required value={driverId} onChange={(e) => { setDriverId(e.target.value); setZoneIds(null) }}>
             <option value="">Elegí un chofer</option>
             {conCamion.map((c) => (
               <option key={c.id} value={c.id}>{c.firstName} {c.lastName} · {c.vehicleName} ({c.vehicleLicensePlate})</option>
             ))}
           </Select>
 
-          <Select label="Zona de reparto" name="zoneId" required value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
-            <option value="">Elegí una zona</option>
-            {zonas.data?.items.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
-          </Select>
+      <OrderedZoneEditor value={zoneIds} options={zonas.data ?? []} onChange={setZoneIds} disabled={abrir.isPending} />
 
-          <SuggestedZoneNotice suggestion={suggestion.data} zoneId={zoneId} />
+          {suggestion.isError && <div role="alert"><p>No se pudo leer la agenda sugerida.</p><Button type="button" variant="secondary" onClick={() => void suggestion.refetch()}>Reintentar agenda</Button></div>}
+      <SuggestedZoneNotice suggestion={suggestion.data} zoneIds={zoneIds} />
           <Field label="Kilometraje del vehículo" name="kilometersAtOpen" type="number" min={0} inputMode="numeric" required
             value={kilometros} onChange={(e) => setKilometros(e.target.value)} />
 
           {!fueraDeHorario && <ErrorMessage error={abrir.error} />}
 
-          <Button type="submit" className="self-start" disabled={abrir.isPending}>
-            {abrir.isPending ? 'Abriendo...' : suggestion.data?.zoneId && zoneId !== suggestion.data.zoneId ? 'Guardar igual y abrir salida' : 'Abrir salida'}
+          <Button type="submit" className="self-start" disabled={!zoneIds.length || suggestion.isLoading || abrir.isPending}>
+            {abrir.isPending ? 'Abriendo...' : suggestion.data && !sameZones(zoneIds, suggestedIds) ? 'Guardar igual y abrir salida' : 'Abrir salida'}
           </Button>
         </form>
       </Panel>

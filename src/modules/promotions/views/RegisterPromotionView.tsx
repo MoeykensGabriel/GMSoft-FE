@@ -1,7 +1,8 @@
+import { orderedZones } from '../../zones'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useQueries } from '@tanstack/react-query'
-import { Button, ErrorMessage, LinkButton, Page, PageHeader, QuantityInput, currentBusinessWeekday } from '../../core'
+import { Button, Select, ErrorMessage, LinkButton, Page, PageHeader, QuantityInput, currentBusinessWeekday } from '../../core'
 import { useCurrentSession } from '../../sessions'
 import { productService } from '../../products'
 import { promotionService } from '../services/promotionService'
@@ -46,7 +47,7 @@ export function RegisterPromotionView() {
       return
     }
     setValidation('')
-    setConfirmation(structuredClone({ prospect, lines }))
+    setConfirmation(structuredClone({ prospect: { ...prospect, zoneId: prospect.zoneId ?? orderedZones(session.data)[0]?.zoneId }, lines }))
     setShowModal(true)
   }
 
@@ -64,6 +65,9 @@ export function RegisterPromotionView() {
     {session.isSuccess && !session.data && <p>No tenés una salida abierta.</p>}
     {(session.data || write.locked) && <form onSubmit={review} className="flex flex-col gap-4">
       <fieldset disabled={write.locked || write.isPending} className="flex min-w-0 flex-col gap-4">
+        {orderedZones(session.data).length > 1 && <Select label="Zona" value={prospect.zoneId ?? orderedZones(session.data)[0]?.zoneId} onChange={(event) => setProspect({ ...prospect, zoneId: event.target.value })}>
+          {orderedZones(session.data).map((zone) => <option key={zone.zoneId} value={zone.zoneId}>{zone.zoneName}</option>)}
+        </Select>}
         <ProspectFields value={prospect} onChange={setProspect} />
         <h2 className="ui-section-heading">Productos de prueba</h2>
         {products.some((query) => query.isPending) && <p role="status">Comprobando productos a bordo...</p>}

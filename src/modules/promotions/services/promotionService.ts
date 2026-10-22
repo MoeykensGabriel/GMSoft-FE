@@ -2,6 +2,7 @@ import { api } from '../../core'
 import type { PagedResult } from '../../core'
 
 export interface Prospect {
+  zoneId?: string
   businessName: string | null
   contactName: string
   phone: string
