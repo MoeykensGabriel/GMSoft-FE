@@ -106,3 +106,11 @@
   /* Filas oscuras (clientes en negro): el título también tiene que leerse. */
   .ui-table-stack tr[class*="text-white"] > *::before { color: rgb(255 255 255 / 75%); }
 }
+
+/* Al imprimir (hoja de ruta) sale solo el contenido de la pantalla, sin el encabezado
+   ni el menú del panel. */
+@media print {
+  @page { margin: 10mm; }
+  .admin-shell { display: block; min-height: 0; background: white; }
+  .admin-shell > :not(#admin-content) { display: none !important; }
+}

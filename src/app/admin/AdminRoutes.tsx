@@ -23,6 +23,7 @@ import { AdminHomeView } from './AdminHomeView'
 
 // Estadísticas carga la librería de gráficos: se baja recién al entrar.
 const VehiclePerformanceView = lazy(() => import('../../modules/reports').then((module) => ({ default: module.VehiclePerformanceView })))
+const RouteSheetView = lazy(() => import('../../modules/reports').then((module) => ({ default: module.RouteSheetView })))
 
 /**
  * Las pantallas del panel, bajo /panel. El router las carga aparte (lazy): el admin
@@ -53,6 +54,7 @@ export function AdminRoutes() {
 
         <Route path="liquidacion" element={<RouteSettlementView />} />
         <Route path="resumen-diario" element={<DailySummaryView />} />
+        <Route path="hoja-de-ruta" element={<Suspense fallback={<p className="p-6 text-muted">Cargando la hoja de ruta...</p>}><RouteSheetView /></Suspense>} />
         <Route path="estadisticas" element={<Suspense fallback={<p className="p-6 text-muted">Cargando estadísticas...</p>}><VehiclePerformanceView /></Suspense>} />
 
         <Route path="salidas" element={<SessionListView />} />
