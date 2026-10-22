@@ -2,8 +2,8 @@ import type { SessionStockLine } from '../services/sessionService'
 
 export interface CountedLine {
   productId: string
-  llenos: number
-  vacios: number
+  llenos: number | null
+  vacios: number | null
 }
 
 /** Un producto cuyo conteo no coincide con lo que debía volver. Negativo: faltan; positivo: sobran. */

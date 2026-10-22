@@ -144,10 +144,10 @@ export function ReceiveSessionView() {
       // Solo las cantidades mayores a cero: devolver cero no es una devolucion, y
       // el backend rechaza esas lineas.
       returns: devoluciones.flatMap((l) => [
-        ...(l.llenos > 0
+        ...(l.llenos !== null && l.llenos > 0
           ? [{ productId: l.productId, state: 'Full' as const, quantity: l.llenos }]
           : []),
-        ...(l.vacios > 0
+        ...(l.vacios !== null && l.vacios > 0
           ? [{ productId: l.productId, state: 'Empty' as const, quantity: l.vacios }]
           : []),
       ]),
