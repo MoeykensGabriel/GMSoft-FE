@@ -16,6 +16,7 @@ const groups: Group[] = [
     { to: '/panel/promociones', label: 'Promociones' },
   ] },
   { id: 'reparto', label: 'Reparto', items: [
+    { to: '/panel/agenda', label: 'Agenda' },
     { to: '/panel/carga', label: 'Carga inicial' },
     { to: '/panel/recargas', label: 'Recargas' },
     { to: '/panel/salidas', label: 'Salidas y recepción' },

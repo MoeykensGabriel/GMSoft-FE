@@ -2,3 +2,4 @@
 // que se carga aparte: así el celular del chofer no descarga estas pantallas.
 export { VehicleListView } from './views/VehicleListView'
 export { VehicleFormView } from './views/VehicleFormView'
+export { ScheduleView } from './views/ScheduleView'

@@ -3,7 +3,9 @@ import { api } from '../../core'
 import type { PagedResult } from '../../core'
 
 export interface ScheduleDay { day: number; zones: OrderedZone[]; zoneId: string | null; zoneName: string | null }
-export interface VehicleSchedule { vehicleId: string; isConfigured: boolean; isSuggested: boolean; days: ScheduleDay[] }
+/** Clientes activos del camión de esa zona que se visitan ese día, esté o no la zona en la agenda. */
+export interface ScheduleCustomerCount { day: number; zoneId: string; zoneName: string; customers: number }
+export interface VehicleSchedule { vehicleId: string; isConfigured: boolean; isSuggested: boolean; days: ScheduleDay[]; customerCounts?: ScheduleCustomerCount[] }
 export interface SuggestedZone extends VehicleSchedule { zones: OrderedZone[]; zoneId: string | null; zoneName: string | null; routeDays: number[] }
 export interface CoverageDay { day: number; scheduledZoneId: string | null; scheduledZoneName: string | null; matches: boolean | null }
 export interface Coverage { covered: boolean | null; days: CoverageDay[] }
