@@ -31,10 +31,13 @@ export function AdminOpenSessionView() {
   const suggestedIds = orderedZones(suggestion.data).map((zone) => zone.zoneId)
   const zoneIds = chosenZones ?? suggestedIds
   const [kilometros, setKilometros] = useState('')
+  // Zonas de la agenda que se sacaron: se pregunta antes de abrir, igual que al chofer.
+  const [faltantes, setFaltantes] = useState<{ zoneId: string; zoneName: string | null }[] | null>(null)
+  const agenda = orderedZones(suggestion.data)
 
   const abrir = useMutation({
-    mutationFn: (confirmOutsideWorkingHours: boolean) => sessionService.open({
-      driverId, zoneIds, kilometersAtOpen: Number(kilometros), confirmOutsideWorkingHours,
+    mutationFn: ({ ids, confirmOutsideWorkingHours }: { ids: string[]; confirmOutsideWorkingHours: boolean }) => sessionService.open({
+      driverId, zoneIds: ids, kilometersAtOpen: Number(kilometros), confirmOutsideWorkingHours,
     }),
     onSuccess: async (id) => {
       await queryClient.invalidateQueries({ queryKey: ['sessions'] })
@@ -51,7 +54,12 @@ export function AdminOpenSessionView() {
       <PageHeader title="Abrir salida" />
 
       <Panel title="Salida en nombre de un chofer">
-        <form className="flex max-w-md flex-col gap-4" onSubmit={(event) => { event.preventDefault(); abrir.mutate(false) }}>
+        <form className="flex max-w-md flex-col gap-4" onSubmit={(event) => {
+          event.preventDefault()
+          const sinElegir = agenda.filter((z) => !zoneIds.includes(z.zoneId))
+          if (sinElegir.length) setFaltantes(sinElegir)
+          else abrir.mutate({ ids: zoneIds, confirmOutsideWorkingHours: false })
+        }}>
           <ErrorMessage error={choferes.error ?? zonas.error} />
 
           <Select label="Chofer" name="driverId" required value={driverId} onChange={(e) => { setDriverId(e.target.value); setZoneIds(null) }}>
@@ -80,7 +88,7 @@ export function AdminOpenSessionView() {
         <Modal title="Fuera del horario laboral" busy={abrir.isPending} onClose={() => abrir.reset()}
           footer={<>
             <Button type="button" variant="danger" disabled={abrir.isPending} onClick={() => abrir.reset()}>Cancelar</Button>
-            <Button type="button" disabled={abrir.isPending} onClick={() => abrir.mutate(true)}>
+            <Button type="button" disabled={abrir.isPending} onClick={() => abrir.mutate({ ids: abrir.variables?.ids ?? zoneIds, confirmOutsideWorkingHours: true })}>
               {abrir.isPending ? 'Abriendo...' : 'Abrir igual'}
             </Button>
           </>}>
@@ -88,6 +96,18 @@ export function AdminOpenSessionView() {
           <p className="text-muted">La salida va a quedar marcada como abierta fuera de horario.</p>
         </Modal>
       )}
+
+      {faltantes && <Modal title="Falta una zona de hoy" busy={abrir.isPending} onClose={() => setFaltantes(null)} footer={<>
+        <Button type="button" variant="secondary" onClick={() => { setFaltantes(null); abrir.mutate({ ids: zoneIds, confirmOutsideWorkingHours: false }) }}>Abrir sin esa zona</Button>
+        <Button type="button" onClick={() => {
+          const ids = [...new Set([...agenda.map((z) => z.zoneId), ...zoneIds])]
+          setZoneIds(ids); setFaltantes(null); abrir.mutate({ ids, confirmOutsideWorkingHours: false })
+        }}>Agregarla y abrir</Button>
+      </>}>
+        <p>Este camión tiene agendado hoy:</p>
+        <p className="text-lg font-semibold">{agenda.map((z) => z.zoneName).join(' → ')}</p>
+        <p>No elegiste <strong>{faltantes.map((z) => z.zoneName).join(' ni ')}</strong>. Sin esa zona, sus clientes no le aparecen al chofer en la hoja.</p>
+      </Modal>}
     </Page>
   )
 }
