@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Button, ErrorMessage, Page, PageHeader, BackButton } from '../../core'
 import { vehicleService } from '../../vehicles'
+import { AccessCard } from '../components/AccessCard'
 import { DriverForm } from '../components/DriverForm'
 import type { DriverFormValues } from '../components/DriverForm'
 import { DriverPasswordForm } from '../components/DriverPasswordForm'
@@ -13,6 +15,8 @@ export function DriverFormView() {
   const client = useQueryClient()
   const driver = useQuery({ queryKey: ['drivers', 'detail', id], queryFn: () => driverService.getById(id!), enabled: Boolean(id) })
   const vehicles = useQuery({ queryKey: ['vehicles', 'all'], queryFn: vehicleService.listAll })
+  // Al crear un chofer se muestran sus datos de acceso antes de volver a la lista.
+  const [creado, setCreado] = useState<{ userName: string; password: string; phone: string } | null>(null)
   const save = useMutation({
     mutationFn: async (values: DriverFormValues) => {
       const { userName, password, email, ...profile } = values
@@ -20,20 +24,27 @@ export function DriverFormView() {
       else {
         const { isActive: _isActive, ...newProfile } = profile
         await driverService.create({ ...newProfile, userName, password, email })
+        return { userName, password, phone: profile.phone }
       }
     },
-    onSuccess: async () => {
+    onSuccess: async (nuevo) => {
       await Promise.all(['drivers', 'sessions'].map((key) => client.invalidateQueries({ queryKey: [key] })))
-      navigate('/panel/choferes')
+      if (nuevo) setCreado(nuevo)
+      else navigate('/panel/choferes')
     },
   })
   if (vehicles.isPending || (id && driver.isPending)) return <p className="p-6">Cargando datos...</p>
   if (vehicles.isError || (id && driver.isError)) return <div className="flex flex-col gap-3 p-6"><ErrorMessage error={vehicles.error ?? driver.error} />
     <Button variant="secondary" onClick={() => { vehicles.refetch(); if (id) driver.refetch() }}>Reintentar</Button><Link to="/panel/choferes">Volver a choferes</Link></div>
+  if (creado) return <Page className="mx-auto flex max-w-3xl flex-col gap-5 p-4 md:p-6">
+    <PageHeader title="Chofer creado" />
+    <AccessCard userName={creado.userName} password={creado.password} phone={creado.phone} />
+    <Link to="/panel/choferes" className="self-start underline">Volver a Choferes</Link>
+  </Page>
   return <Page className="mx-auto flex max-w-3xl flex-col gap-5 p-4 md:p-6">
     <BackButton to="/panel/choferes" label="Volver a Choferes" appearance="link" />
     <PageHeader title={<>{id ? 'Editar chofer' : 'Nuevo chofer'}</>} />
     <DriverForm key={`profile-${id ?? 'new'}`} initial={id ? driver.data : undefined} vehicles={vehicles.data ?? []} saving={save.isPending} error={save.error} onSubmit={(values) => save.mutate(values)} />
-    {id && driver.data?.userName && <DriverPasswordForm key={`password-${id}`} driverId={id} userName={driver.data.userName} disabled={save.isPending} />}
+    {id && driver.data?.userName && <DriverPasswordForm key={`password-${id}`} driverId={id} userName={driver.data.userName} phone={driver.data.phone} disabled={save.isPending} />}
   </Page>
 }
