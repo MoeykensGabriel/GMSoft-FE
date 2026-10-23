@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { BUSINESS_TIME_ZONE, Badge, Button, DataTable, ErrorMessage, Modal, Page, PageHeader, Pagination, formatDateTime, formatMoney } from '../../core'
+import { BUSINESS_TIME_ZONE, Badge, Button, DataTable, ErrorMessage, Modal, Page, PageHeader, Pagination, Select, formatDateTime, formatMoney } from '../../core'
+import { vehicleService } from '../../vehicles'
 import { customerService } from '../services/customerService'
 import type { CustomerRemoval } from '../services/customerService'
 import { removalLabel } from '../utils/removal'
@@ -21,8 +22,11 @@ export function RemovalRequestsView() {
   const cache = useQueryClient()
   const [status, setStatus] = useState<RemovalStatus>('Pending')
   const [page, setPage] = useState(1)
+  const [vehicleId, setVehicleId] = useState('')
   const [review, setReview] = useState<{ removal: CustomerRemoval; confirm: boolean } | null>(null)
-  const list = useQuery({ queryKey: [...REMOVALS_KEY, status, page], queryFn: () => customerService.removals(status, page) })
+  const [confirmAll, setConfirmAll] = useState(false)
+  const vehicles = useQuery({ queryKey: ['vehicles', 'all'], queryFn: vehicleService.listAll })
+  const list = useQuery({ queryKey: [...REMOVALS_KEY, status, page, vehicleId], queryFn: () => customerService.removals(status, page, vehicleId) })
   const resolve = useMutation({
     mutationFn: ({ removal, confirm }: { removal: CustomerRemoval; confirm: boolean }) =>
       confirm ? customerService.confirmRemoval(removal.id) : customerService.rejectRemoval(removal.id),
@@ -31,7 +35,17 @@ export function RemovalRequestsView() {
       await cache.invalidateQueries({ queryKey: ['customers'] })
     },
   })
+  // Se manda cuántas veía la oficina: si llegó otra baja mientras tanto, el backend no confirma ninguna.
+  const resolveAll = useMutation({
+    mutationFn: () => customerService.confirmVehicleRemovals(vehicleId, list.data?.totalCount ?? 0),
+    onSuccess: async () => {
+      setConfirmAll(false)
+      await cache.invalidateQueries({ queryKey: ['customers'] })
+    },
+  })
   const items = list.data?.items ?? []
+  const camion = vehicles.data?.find((v) => v.id === vehicleId)
+  const pendientesDelCamion = status === 'Pending' && vehicleId ? list.data?.totalCount ?? 0 : 0
 
   return <Page className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
     <PageHeader title="Bajas pedidas por los choferes"
@@ -41,6 +55,17 @@ export function RemovalRequestsView() {
         onClick={() => { setStatus(tab.value); setPage(1) }}>
         {tab.label}{tab.value === 'Pending' && list.data ? ` (${list.data.pendingCount})` : ''}
       </Button>)}
+    </div>
+    <div className="flex flex-wrap items-end gap-3">
+      <div className="min-w-64">
+        <Select label="Camión" value={vehicleId} onChange={(e) => { setVehicleId(e.target.value); setPage(1) }}>
+          <option value="">Todos los camiones</option>
+          {(vehicles.data ?? []).map((v) => <option key={v.id} value={v.id}>{v.name} · {v.licensePlate}</option>)}
+        </Select>
+      </div>
+      {pendientesDelCamion > 0 && <Button variant="danger" onClick={() => { resolveAll.reset(); setConfirmAll(true) }}>
+        Confirmar todas las bajas ({pendientesDelCamion})
+      </Button>}
     </div>
 
     {list.isPending ? <p role="status">Cargando bajas…</p>
@@ -86,6 +111,19 @@ export function RemovalRequestsView() {
       {review.confirm && review.removal.debt > 0 && <p className="rounded border border-warning/40 bg-warning-soft p-3 text-warning">
         Debe {formatMoney(review.removal.debt)}.</p>}
       <ErrorMessage error={resolve.error} />
+    </Modal>}
+
+    {confirmAll && camion && <Modal title="Confirmar todas las bajas" busy={resolveAll.isPending}
+      onClose={() => { if (!resolveAll.isPending) setConfirmAll(false) }} footer={<>
+        <Button variant="secondary" disabled={resolveAll.isPending} onClick={() => setConfirmAll(false)}>Volver</Button>
+        <Button variant="danger" disabled={resolveAll.isPending} onClick={() => resolveAll.mutate()}>
+          {resolveAll.isPending ? 'Confirmando…' : `Confirmar las ${pendientesDelCamion} bajas`}
+        </Button>
+      </>}>
+      <p className="text-lg font-semibold">{camion.name} · {camion.licensePlate}</p>
+      <p>Se confirman las {pendientesDelCamion} bajas pendientes de este camión. Esos clientes quedan inactivos: no se borran, conservan su historial, su cuenta y sus envases, y los podés reactivar uno por uno.</p>
+      <p className="text-sm text-muted">Revisá antes la lista: las que tienen envases prestados o deuda también se confirman.</p>
+      <ErrorMessage error={resolveAll.error} />
     </Modal>}
   </Page>
 }

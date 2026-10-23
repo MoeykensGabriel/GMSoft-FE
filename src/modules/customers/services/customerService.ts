@@ -155,8 +155,11 @@ export const customerService = {
   },
   requestRemoval: (customerId: string, body: RemovalRequestInput) =>
     api.post<CustomerRemoval>(`/api/customers/${customerId}/removal-requests`, body),
-  removals: (status: RemovalStatus | null, page = 1) =>
-    api.get<CustomerRemovalPage>(`/api/customers/removal-requests?page=${page}&pageSize=20${status ? `&status=${status}` : ''}`),
+  removals: (status: RemovalStatus | null, page = 1, vehicleId = '') =>
+    api.get<CustomerRemovalPage>(`/api/customers/removal-requests?page=${page}&pageSize=20${status ? `&status=${status}` : ''}${vehicleId ? `&vehicleId=${encodeURIComponent(vehicleId)}` : ''}`),
+  /** Confirma todas las bajas pendientes del camión; falla si no son exactamente `expectedCount`. */
+  confirmVehicleRemovals: (vehicleId: string, expectedCount: number) =>
+    api.post<number>('/api/customers/removal-requests/confirm-vehicle', { vehicleId, expectedCount }),
   confirmRemoval: (requestId: string) => api.post<CustomerRemoval>(`/api/customers/removal-requests/${requestId}/confirm`, {}),
   rejectRemoval: (requestId: string) => api.post<CustomerRemoval>(`/api/customers/removal-requests/${requestId}/reject`, {}),
 
