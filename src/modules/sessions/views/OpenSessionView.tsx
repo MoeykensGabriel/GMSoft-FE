@@ -4,7 +4,7 @@ import { SuggestedZoneNotice } from '../components/SuggestedZoneNotice'
 import type { FormEvent } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../../auth'
-import { ApiError, Button, Field, InstallAppButton, weekdayLabels, PageHeader } from '../../core'
+import { ApiError, Button, Field, InstallAppButton, Modal, weekdayLabels, PageHeader } from '../../core'
 import { driverService } from '../../drivers'
 import { vehicleService } from '../../vehicles'
 import { zoneService, orderedZones, sameZones, OrderedZoneEditor } from '../../zones'
@@ -51,6 +51,9 @@ export function OpenSessionView() {
   const zoneIds = chosenZones ?? suggestedIds
   const [kilometros, setKilometros] = useState('')
   const [error, setError] = useState<string | null>(null)
+  // Zonas de la agenda que el chofer sacó: antes de abrir se le pregunta, para que no
+  // salga sin una zona por error (le quedarían sin aparecer todos sus clientes).
+  const [faltantes, setFaltantes] = useState<{ zoneId: string; zoneName: string | null }[] | null>(null)
 
   if (perfil.isLoading || zonas.isLoading) {
     return <p className="p-6 text-muted">Cargando...</p>
@@ -78,12 +81,21 @@ export function OpenSessionView() {
     )
   }
 
+  const agenda = orderedZones(suggestion.data)
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
+    const sinElegir = agenda.filter((z) => !zoneIds.includes(z.zoneId))
+    if (sinElegir.length) { setFaltantes(sinElegir); return }
+    await abrirCon(zoneIds)
+  }
+
+  async function abrirCon(ids: string[]) {
+    setFaltantes(null)
     setError(null)
 
     try {
-      await abrir.mutateAsync({ zoneIds, kilometersAtOpen: Number(kilometros) })
+      await abrir.mutateAsync({ zoneIds: ids, kilometersAtOpen: Number(kilometros) })
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.status === 409 && err.type === 'outside-working-hours'
@@ -171,6 +183,17 @@ export function OpenSessionView() {
       </Button>
       <InstallAppButton />
       <LogoutButton />
+
+      {faltantes && <Modal title="Te falta una zona de hoy" busy={abrir.isPending} onClose={() => setFaltantes(null)} footer={<>
+        <Button type="button" variant="secondary" onClick={() => void abrirCon(zoneIds)}>Salir sin esa zona</Button>
+        <Button type="button" onClick={() => { const ids = [...new Set([...agenda.map((z) => z.zoneId), ...zoneIds])]; setZoneIds(ids); void abrirCon(ids) }}>
+          Agregarla y abrir
+        </Button>
+      </>}>
+        <p>Hoy tenés agendado:</p>
+        <p className="text-lg font-semibold">{agenda.map((z) => z.zoneName).join(' → ')}</p>
+        <p>No elegiste <strong>{faltantes.map((z) => z.zoneName).join(' ni ')}</strong>. Si salís sin esa zona, sus clientes no te van a aparecer en la hoja.</p>
+      </Modal>}
     </form>
   )
 }
