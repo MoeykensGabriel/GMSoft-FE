@@ -21,12 +21,15 @@ export function DriverListView() {
     {drivers.isPending ? <p role="status">Cargando choferes...</p> : drivers.isError ? <div><ErrorMessage error={drivers.error} /><Button variant="secondary" onClick={() => drivers.refetch()}>Reintentar</Button></div> : <>
       <p className="text-sm text-muted">{drivers.data.totalCount} choferes</p>
       {!drivers.data.items.length ? <p>{search || active ? 'No se encontraron choferes para estos filtros.' : 'Todavía no hay choferes. Creá uno con su usuario de acceso y un vehículo asignado.'}</p> : <DataTable label="Choferes registrados" className="min-w-[48rem]">
-        <thead><tr><th scope="col">Chofer</th><th scope="col">Usuario</th><th scope="col">Contacto</th><th scope="col">Vehículo</th><th scope="col">Estado</th><th scope="col" className="w-16"><span className="sr-only">Editar</span></th></tr></thead>
+        <thead><tr><th scope="col">Chofer</th><th scope="col">Usuario</th><th scope="col">Contraseña</th><th scope="col">Contacto</th><th scope="col">Vehículo</th><th scope="col">Estado</th><th scope="col" className="w-16"><span className="sr-only">Editar</span></th></tr></thead>
         {/* Doble clic en la fila abre la ficha; el lápiz hace lo mismo con un toque o el teclado. */}
         <tbody>{drivers.data.items.map((driver) => <tr key={driver.id} className="cursor-pointer" title="Doble clic para editar"
           onDoubleClick={() => navigate(`/panel/choferes/${driver.id}`)}>
           <td className="font-semibold">{driver.firstName} {driver.lastName}</td>
-          <td>{driver.userName ?? 'Sin usuario vinculado'}</td><td><div className="flex flex-wrap items-center gap-2"><span>{driver.phone}</span><WhatsAppButton phone={driver.phone} name={`${driver.firstName} ${driver.lastName}`} /></div></td>
+          <td>{driver.userName ?? 'Sin usuario vinculado'}</td>
+          <td>{driver.password ? <span className="font-mono">{driver.password}</span>
+            : <span className="text-sm text-muted" title="Se ve desde la próxima vez que se la cambies">Cambiala para verla</span>}</td>
+          <td><div className="flex flex-wrap items-center gap-2"><span>{driver.phone}</span><WhatsAppButton phone={driver.phone} name={`${driver.firstName} ${driver.lastName}`} /></div></td>
           <td>{driver.vehicleId ? <>{driver.vehicleName ?? 'Vehículo'}<span className="block text-xs text-muted">{driver.vehicleLicensePlate}</span></> : 'Sin asignar: no puede iniciar un reparto'}</td>
           <td><Badge tone={driver.isActive ? 'success' : 'neutral'}>{driver.isActive ? 'Activo' : 'Inactivo'}</Badge></td>
           <td><LinkButton to={`/panel/choferes/${driver.id}`} className="min-h-11 min-w-11 px-0" aria-label={`Editar chofer ${driver.firstName} ${driver.lastName}`} title="Editar">

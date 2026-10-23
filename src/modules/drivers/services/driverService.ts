@@ -11,6 +11,8 @@ export interface DriverProfile {
   vehicleName: string | null
   vehicleLicensePlate: string | null
   userName: string | null
+  /** Solo en la lista de la oficina: la última contraseña puesta; nula si se puso antes de que se guardara. */
+  password?: string | null
   email: string | null
   isActive: boolean
 }
