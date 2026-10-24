@@ -6,16 +6,18 @@ interface Props {
   value: number
   onChange: (value: number) => void
   max?: number
+  /** En una tabla la columna ya dice qué es: la etiqueta queda solo para lectores de pantalla. */
+  hideLabel?: boolean
 }
 
-export function QuantityInput({ label, value, onChange, max = 2147483647 }: Props) {
+export function QuantityInput({ label, value, onChange, max = 2147483647, hideLabel = false }: Props) {
   const id = useId()
   const limit = Math.max(0, Math.floor(max))
   function change(next: number) {
     onChange(Number.isFinite(next) ? Math.min(limit, Math.max(0, Math.floor(next))) : 0)
   }
   return <div className="flex flex-col gap-1">
-    <label htmlFor={id} className="text-sm">{label}</label>
+    <label htmlFor={id} className={hideLabel ? 'sr-only' : 'text-sm'}>{label}</label>
     <div className="flex gap-2">
       <Button type="button" variant="danger" aria-label={`Restar: ${label}`} disabled={value <= 0} onClick={() => change(value - 1)}
         className="w-11 shrink-0 px-0 text-xl">−</Button>

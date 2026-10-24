@@ -98,8 +98,10 @@ export const vehicleService = {
     routeDays: number[],
     clientRequestId: string,
     confirmOutsideWorkingHours = false,
+    /** Los items son la carga completa: lo que estaba arriba se baja en la misma operación. */
+    replacePending = false,
   ) =>
-    api.post<{ loadedAt: string }>(`/api/vehicles/${vehicleId}/load`, { vehicleId, items, routeDays, clientRequestId, confirmOutsideWorkingHours }),
+    api.post<{ loadedAt: string }>(`/api/vehicles/${vehicleId}/load`, { vehicleId, items, routeDays, clientRequestId, confirmOutsideWorkingHours, replacePending }),
 
   updateRouteDays: (vehicleId: string, routeDays: number[]) =>
     api.put<void>(`/api/vehicles/${vehicleId}/load/route-days`, { vehicleId, routeDays }),

@@ -1,90 +1,85 @@
 import { useRef, useState } from 'react'
-import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { ApiError, BUSINESS_TIME_ZONE, Button, ErrorMessage, LinkButton, Modal, Select, WeekdaysField, formatDateTime, currentBusinessWeekday, newRequestId, Page, PageHeader } from '../../core'
-import { OutsideWorkingHoursBadge } from '../../workingHours'
+import { ApiError, BUSINESS_TIME_ZONE, Button, DataTable, ErrorMessage, LinkButton, Modal, QuantityInput, Select, WeekdaysField, formatDateTime, currentBusinessWeekday, newRequestId, Page, PageHeader } from '../../core'
 import { productService } from '../../products'
 import { driverService } from '../../drivers'
 import { VehicleAssignmentSummary } from '../components/VehicleAssignmentSummary'
-import { LoadEditor } from '../components/LoadEditor'
-import type { LoadLine } from '../components/LoadEditor'
 import { LoadConfirmModal } from '../components/LoadConfirmModal'
+import { draftItems, sameLoad, totalsByProduct } from '../utils/loadTable'
 import { vehicleService } from '../../vehicles'
 
 /**
  * Cargar el camion, de manana, antes de que salga el chofer.
  *
- * Lo que se sube queda esperando sin dueno hasta que alguien abre una salida con ese
- * vehiculo: ahi se convierte en la carga inicial de esa salida. Por eso se puede
- * cargar sin saber todavia que chofer lo va a llevar.
+ * Una sola tabla con lo que hay arriba del camión, un renglón por producto. Con
+ * «Editar» (naranja) se cambian las cantidades con − y +; «Confirmar» (verde) abre el
+ * resumen y guarda la carga tal como quedó en la tabla; «Vaciar carga» (rojo) baja todo.
+ * Lo que se sube queda esperando hasta que el chofer abre la salida con ese camión.
  */
 export function VehicleLoadView() {
   const queryClient = useQueryClient()
-  const attempt = useRef<{ vehicleId: string; items: LoadLine[]; routeDays: number[]; requestId: string; confirmOutsideWorkingHours: boolean } | null>(null)
+  const attempt = useRef<{ vehicleId: string; items: { productId: string; quantity: number }[]; routeDays: number[]; requestId: string; confirmOutsideWorkingHours: boolean } | null>(null)
   const sending = useRef(false)
   const [vehicleId, setVehicleId] = useState('')
-  const [tanda, setTanda] = useState<LoadLine[]>([])
+  // La tabla en edición: cuánto tiene que quedar arriba de cada producto. Null es solo mirar.
+  const [draft, setDraft] = useState<Record<string, number> | null>(null)
   const [success, setSuccess] = useState(false)
-  // Identifica la tanda que se esta armando. Se conserva entre reintentos de la misma
-  // carga y cambia cuando cambia lo que se va a enviar, asi un reintento no duplica.
+  // Identifica el pedido que se está armando: se conserva entre reintentos, así no se duplica.
   const [requestId, setRequestId] = useState(newRequestId)
-  // Cuando se abrio el resumen; null si esta cerrado.
   const [confirmandoDesde, setConfirmandoDesde] = useState<Date | null>(null)
-  // Hora que devolvio el servidor para la ultima carga registrada.
   const [loadedAt, setLoadedAt] = useState<string | null>(null)
   const [editedDays, setEditedDays] = useState<number[] | null>(null)
+  const [vaciando, setVaciando] = useState(false)
   const drivers = useQuery({ queryKey: ['drivers', 'active'], queryFn: driverService.listActive })
-
-  const vehiculos = useQuery({
-    queryKey: ['vehicles', 'load-status'],
-    queryFn: vehicleService.getLoadStatus,
-  })
-
-  const productos = useQuery({
-    queryKey: ['products', 'published'],
-    queryFn: () => productService.listPublished(),
-  })
-
+  const vehiculos = useQuery({ queryKey: ['vehicles', 'load-status'], queryFn: vehicleService.getLoadStatus })
+  const productos = useQuery({ queryKey: ['products', 'published'], queryFn: () => productService.listPublished() })
   const carga = useQuery({
     queryKey: ['vehicles', 'load', vehicleId],
     queryFn: () => vehicleService.getPendingLoad(vehicleId),
     enabled: Boolean(vehicleId),
   })
 
+  const lineas = carga.data ?? []
+  const arriba = totalsByProduct(lineas)
+  const listaProductos = productos.data?.items ?? []
+  // Un camión vacío no tiene nada que mirar: arranca directamente en edición.
+  const vacio = carga.isSuccess && lineas.length === 0
+  const tabla = draft ?? (vacio ? {} : null)
+  const editando = tabla !== null
+  const cambioCarga = editando && !sameLoad(tabla, arriba)
+
+  const pendingDays = [...new Set(lineas.flatMap((line) => line.routeDays ?? []))].sort((a, b) => a - b)
+  const routeDays = editedDays ?? (pendingDays.length ? pendingDays : [currentBusinessWeekday()])
+  const daysChanged = routeDays.join(',') !== pendingDays.join(',')
+
   async function refrescar() {
-    // Tambien el estado de la flota: al cargar, el camion pasa de "disponible" a
-    // "ya cargado" y el selector tiene que reflejarlo.
+    // También el estado de la flota: al cargar, el camión pasa de "vacío" a "ya cargado".
     await queryClient.invalidateQueries({ queryKey: ['vehicles'] })
   }
 
-  const pendingDays = [...new Set((carga.data ?? []).flatMap((line) => line.routeDays ?? []))].sort((a, b) => a - b)
-  const todayIso = currentBusinessWeekday()
-  const routeDays = editedDays ?? (pendingDays.length ? pendingDays : [todayIso])
-  const daysChanged = routeDays.join(',') !== pendingDays.join(',')
+  function reiniciar() {
+    setDraft(null); setEditedDays(null); setConfirmandoDesde(null); setRequestId(newRequestId())
+  }
 
   const cargar = useMutation({
     retry: false,
     mutationFn: async (confirmOutside: boolean) => {
-      if (!tanda.length) {
+      if (!cambioCarga) {
         await vehicleService.updateRouteDays(vehicleId, routeDays)
         return null
       }
-      if (!attempt.current) attempt.current = structuredClone({ vehicleId, items: tanda, routeDays, requestId, confirmOutsideWorkingHours: false })
+      if (!attempt.current) attempt.current = structuredClone({ vehicleId, items: draftItems(tabla!), routeDays, requestId, confirmOutsideWorkingHours: false })
       // El consentimiento se captura en el clic, antes de que la mutación limpie el error.
-      if (confirmOutside) {
-        attempt.current.confirmOutsideWorkingHours = true
-      }
+      if (confirmOutside) attempt.current.confirmOutsideWorkingHours = true
       const body = attempt.current
-      return (await vehicleService.registerLoad(body.vehicleId, body.items, body.routeDays, body.requestId, body.confirmOutsideWorkingHours)).loadedAt
+      // Reemplaza: el camión queda exactamente con lo que dice la tabla, aunque se hayan bajado cantidades.
+      return (await vehicleService.registerLoad(body.vehicleId, body.items, body.routeDays, body.requestId, body.confirmOutsideWorkingHours, true)).loadedAt
     },
     onSuccess: async (registrada) => {
       await refrescar()
       attempt.current = null
-      setTanda([])
-      setEditedDays(null)
-      setConfirmandoDesde(null)
-      setRequestId(newRequestId())
+      reiniciar()
       setLoadedAt(registrada)
       setSuccess(true)
     },
@@ -99,233 +94,141 @@ export function VehicleLoadView() {
     finally { sending.current = false }
   }
 
-  // Qué se está por bajar: un renglón, o 'todo' para vaciar el camión. Siempre se confirma.
-  const [porBajar, setPorBajar] = useState<string | null>(null)
-  const bajar = useMutation({
-    mutationFn: async (target: string) => {
-      if (target === 'todo') await vehicleService.clearLoad(vehicleId)
-      else await vehicleService.removeLoad(vehicleId, target)
-    },
-    onSuccess: refrescar,
-    onSettled: () => setPorBajar(null),
+  const vaciar = useMutation({
+    mutationFn: () => vehicleService.clearLoad(vehicleId),
+    onSuccess: async () => { await refrescar(); reiniciar(); setSuccess(false) },
+    onSettled: () => setVaciando(false),
   })
 
-  function onSubmit(e: FormEvent) {
-    e.preventDefault()
-    if (cargar.isPending || bajar.isPending || !vehicleId || !routeDays.length || carga.isPending || carga.isError) return
-    if (!tanda.length && (!carga.data?.length || !daysChanged)) return
-    // Con productos, primero el resumen: nada se registra hasta confirmarlo ahi.
-    if (tanda.length) {
-      cargar.reset()
-      setSuccess(false)
-      setConfirmandoDesde(new Date())
+  const ocupado = cargar.isPending || vaciar.isPending
+  const puedeConfirmar = !ocupado && !carga.isPending && !carga.isError && routeDays.length > 0
+    && ((cambioCarga && draftItems(tabla!).length > 0) || (!editando && lineas.length > 0 && daysChanged))
+
+  function confirmar() {
+    if (!puedeConfirmar) return
+    // Con cambios en la tabla, primero el resumen: nada se registra hasta confirmarlo ahí.
+    if (cambioCarga) {
+      cargar.reset(); setSuccess(false); setConfirmandoDesde(new Date())
       return
     }
     cargar.mutate(false)
   }
 
-  const lineas = carga.data ?? []
   const flota = vehiculos.data ?? []
   const selectedVehicle = flota.find((vehicle) => vehicle.id === vehicleId)
-
-  // El camion que esta en la calle no esta en el deposito: no se puede cargar y el
-  // backend lo rechaza igual. Queda afuera de la lista en vez de fallar al apretar.
+  // El camión que está en la calle no está en el depósito: no se puede cargar.
   const enLaCalle = flota.filter((v) => v.isOnRoute)
   const enDeposito = flota.filter((v) => !v.isOnRoute)
-
-  // Los que ya tienen carga arriba se muestran aparte, no se esconden: se carga en
-  // varias tandas, y si una linea se cargo mal hay que poder entrar a bajarla.
   const vacios = enDeposito.filter((v) => v.pendingUnits === 0)
   const yaCargados = enDeposito.filter((v) => v.pendingUnits > 0)
+  const totalTabla = listaProductos.reduce((sum, p) => sum + ((tabla ?? arriba)[p.id] ?? 0), 0)
 
   return (
     <Page className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
       <div>
         <PageHeader title={<>Carga inicial de vehículos</>}
           actions={<LinkButton to={vehicleId ? `/panel/carga/bajadas?vehiculo=${vehicleId}` : '/panel/carga/bajadas'}>Cargas bajadas</LinkButton>} />
-        <p className="text-sm text-muted">
-          Prepará los productos llenos que llevará el vehículo antes de iniciar el reparto.
-        </p>
+        <p className="text-sm text-muted">Prepará los productos llenos que llevará el vehículo antes de iniciar el reparto.</p>
       </div>
 
-      <Select
-        label="Vehículo"
-        name="vehicleId"
-        value={vehicleId}
-        disabled={cargar.isPending || bajar.isPending}
-        onChange={(e) => {
-          setVehicleId(e.target.value)
-          setTanda([])
-          setEditedDays(null)
-          setSuccess(false)
-          setLoadedAt(null)
-          setConfirmandoDesde(null)
-          setRequestId(newRequestId())
-          cargar.reset()
-          bajar.reset()
-        }}
-      >
+      <Select label="Vehículo" name="vehicleId" value={vehicleId} disabled={ocupado}
+        onChange={(e) => { setVehicleId(e.target.value); reiniciar(); setSuccess(false); setLoadedAt(null); cargar.reset(); vaciar.reset() }}>
         <option value="">Elegí un vehículo</option>
-
-        {vacios.length > 0 && (
-          <optgroup label="Vacíos, listos para cargar">
-            {vacios.map((v) => (
-              <option key={v.id} value={v.id}>
-                {v.name} ({v.licensePlate})
-              </option>
-            ))}
-          </optgroup>
-        )}
-
-        {yaCargados.length > 0 && (
-          <optgroup label="Ya tienen carga arriba">
-            {yaCargados.map((v) => (
-              <option key={v.id} value={v.id}>
-                {v.name} ({v.licensePlate}) · {v.pendingUnits} arriba
-              </option>
-            ))}
-          </optgroup>
-        )}
+        {vacios.length > 0 && <optgroup label="Vacíos, listos para cargar">
+          {vacios.map((v) => <option key={v.id} value={v.id}>{v.name} ({v.licensePlate})</option>)}
+        </optgroup>}
+        {yaCargados.length > 0 && <optgroup label="Ya tienen carga arriba">
+          {yaCargados.map((v) => <option key={v.id} value={v.id}>{v.name} ({v.licensePlate}) · {v.pendingUnits} arriba</option>)}
+        </optgroup>}
       </Select>
       <ErrorMessage error={vehiculos.error ?? drivers.error} />
       {selectedVehicle && !drivers.isPending && !drivers.isError && <VehicleAssignmentSummary
         vehicleName={selectedVehicle.name} licensePlate={selectedVehicle.licensePlate}
         drivers={(drivers.data ?? []).filter((driver) => driver.vehicleId === vehicleId)} />}
-      {success && <p role="status">{loadedAt
-        ? `Carga registrada el ${formatDateTime(loadedAt, BUSINESS_TIME_ZONE)}. El chofer ya puede abrir la salida.`
+      {success && <p role="status" className="rounded border border-success bg-success-light p-3 text-black">{loadedAt
+        ? `Carga registrada el ${formatDateTime(loadedAt, BUSINESS_TIME_ZONE)}: el chofer ya puede abrir la salida.`
         : 'Días del recorrido guardados.'}</p>}
 
-      {/* Una ausencia sin explicar se lee como un error: si falta un camion de la
-          lista hay que decir por que, o el proximo paso es revisar si se borro. */}
-      {enLaCalle.length > 0 && (
-        <p className="text-xs text-muted">
-          No aparecen {enLaCalle.map((v) => v.licensePlate).join(', ')}: están en la calle con
-          una salida abierta. Si se quedaron sin stock, se recargan desde{' '}
-          <Link to="/panel/recargas" className="ui-link">Recargas</Link>.
-        </p>
-      )}
+      {/* Una ausencia sin explicar se lee como un error: si falta un camión hay que decir por qué. */}
+      {enLaCalle.length > 0 && <p className="text-xs text-muted">
+        No aparecen {enLaCalle.map((v) => v.licensePlate).join(', ')}: están en la calle con una salida abierta.
+        Si se quedaron sin stock, se recargan desde <Link to="/panel/recargas" className="ui-link">Recargas</Link>.
+      </p>}
 
-      {!vehicleId ? (
-        <p className="text-sm text-muted">Elegí un vehículo para cargarlo.</p>
-      ) : (
-        <>
-          <section className="flex flex-col gap-2">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-sm font-medium text-muted">Arriba del camión ahora</h2>
-              {lineas.length > 0 && (
-                <Button variant="danger" type="button" onClick={() => { bajar.reset(); setPorBajar('todo') }}
-                  disabled={bajar.isPending || cargar.isPending}>
-                  Vaciar carga
-                </Button>
-              )}
-            </div>
+      {!vehicleId || !selectedVehicle ? <p className="text-sm text-muted">Elegí un vehículo para cargarlo.</p> : <>
+        <section className="ui-card flex flex-col gap-4 p-4">
+          <h2 className="text-lg font-semibold">Carga actual del camión: {selectedVehicle.name} · {selectedVehicle.licensePlate}</h2>
+          <ErrorMessage error={productos.error ?? carga.error ?? vaciar.error} />
+          {carga.isPending || productos.isPending ? <p className="text-sm text-muted">Cargando...</p>
+            : !listaProductos.length ? <p className="text-sm text-muted">No hay productos publicados. Publicalos en el catálogo antes de cargar el camión.</p>
+            : <>
+              {vacio && <p className="text-sm text-muted">El camión está vacío. Poné cuánto lleva de cada producto y confirmá.</p>}
+              <DataTable stack={false} label="Carga del camión" className="w-full">
+                <thead><tr><th scope="col">Producto</th><th scope="col" className="w-56 text-center">Cantidad</th></tr></thead>
+                <tbody>{listaProductos.map((p) => {
+                  const actual = arriba[p.id] ?? 0
+                  const valor = tabla?.[p.id] ?? (editando ? 0 : actual)
+                  return <tr key={p.id}>
+                    <td className="font-medium">{p.detail}
+                      {editando && !vacio && valor !== actual && <span className="block text-xs text-muted">Antes: {actual}</span>}</td>
+                    <td className="text-center">{editando
+                      ? <QuantityInput hideLabel label={`Cantidad de ${p.detail}`} value={valor}
+                          onChange={(q) => { setDraft({ ...(tabla ?? {}), [p.id]: q }); setSuccess(false); setRequestId(newRequestId()) }} />
+                      : <span className={`text-lg font-semibold ${actual ? '' : 'text-muted'}`}>{actual || '—'}</span>}</td>
+                  </tr>
+                })}</tbody>
+              </DataTable>
+              <p className="text-right font-medium">Total: {totalTabla} unidades</p>
+            </>}
 
-            <ErrorMessage error={bajar.error} />
-
-            {carga.isLoading ? (
-              <p className="text-sm text-muted">Cargando...</p>
-            ) : lineas.length === 0 ? (
-              <p className="ui-card bg-surface p-3 text-sm text-muted">
-                El camión está vacío. Registrá una carga para habilitar la salida del chofer.
-              </p>
-            ) : (
-              <ul className="flex flex-col gap-2">
-                {lineas.map((l) => (
-                  <li
-                    key={l.id}
-                    className="flex items-center justify-between ui-card bg-surface px-3 py-2"
-                  >
-                    <div>
-                      <p className="text-sm text-ink">
-                        {l.quantity} × {l.productDetail}
-                      </p>
-                      <p className="text-xs text-muted">{formatDateTime(l.loadedAt, BUSINESS_TIME_ZONE)}</p>
-                      <OutsideWorkingHoursBadge marked={l.isOutsideWorkingHours} />
-                    </div>
-                    <Button variant="danger"
-                      type="button"
-                      onClick={() => { bajar.reset(); setPorBajar(l.id) }}
-                      disabled={bajar.isPending || cargar.isPending}
-
-                    >
-                      Bajar
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <form onSubmit={onSubmit} className="flex flex-col gap-3">
-            <WeekdaysField label="Días de reparto que cubrirá esta salida" value={routeDays}
-              disabled={cargar.isPending || bajar.isPending || carga.isPending || carga.isError}
-              onChange={(days) => { setEditedDays(days); setSuccess(false); setRequestId(newRequestId()) }} />
-            <p className="text-sm text-muted">Podés combinar varios días para recuperar un reparto. Los clientes aparecerán una sola vez, en el orden habitual.</p>
-            <h2 className="ui-card py-4 text-center font-semibold">{lineas.length ? 'Agregar productos a la carga' : 'Carga inicial'}</h2>
-            <ErrorMessage error={productos.error ?? carga.error} />
-
-            <fieldset disabled={cargar.isPending || bajar.isPending}>
-            <LoadEditor
-              productos={productos.data?.items ?? []}
-              valor={tanda}
-              onChange={(lines) => { setTanda(lines); setRequestId(newRequestId()) }}
-            />
-            </fieldset>
-
-            {!confirmandoDesde && <ErrorMessage error={cargar.error} />}
-
-            <p className="text-right font-medium">Total a cargar: {tanda.reduce((sum, line) => sum + line.quantity, 0)} unidades</p>
-            <Button type="submit" className="self-end" disabled={cargar.isPending || bajar.isPending || productos.isPending || productos.isError || carga.isPending || carga.isError || !routeDays.length || (!tanda.length && (!lineas.length || !daysChanged))}>
-              {cargar.isPending ? 'Guardando...' : tanda.length ? 'Confirmar' : 'Guardar días del recorrido'}
+          <div className="flex flex-wrap justify-end gap-3">
+            {lineas.length > 0 && !editando && <Button type="button" variant="edit" disabled={ocupado}
+              onClick={() => { setDraft({ ...arriba }); setSuccess(false); setRequestId(newRequestId()) }}>Editar</Button>}
+            {lineas.length > 0 && editando && <Button type="button" variant="secondary" disabled={ocupado} onClick={() => setDraft(null)}>Cancelar cambios</Button>}
+            {lineas.length > 0 && <Button type="button" variant="danger" disabled={ocupado} onClick={() => { vaciar.reset(); setVaciando(true) }}>Vaciar carga</Button>}
+            <Button type="button" disabled={!puedeConfirmar} onClick={confirmar}>
+              {cargar.isPending ? 'Guardando...' : !cambioCarga && daysChanged && lineas.length ? 'Guardar días' : 'Confirmar'}
             </Button>
-          </form>
-        </>
-      )}
+          </div>
+          {!confirmandoDesde && <ErrorMessage error={cargar.error} />}
+        </section>
 
-      {confirmandoDesde && selectedVehicle && (
-        <LoadConfirmModal
-          vehicleName={selectedVehicle.name}
-          licensePlate={selectedVehicle.licensePlate}
-          driverNames={(drivers.data ?? [])
-            .filter((driver) => driver.vehicleId === vehicleId)
-            .map((driver) => `${driver.firstName} ${driver.lastName}`)}
-          routeDays={routeDays}
-          lines={(productos.data?.items ?? []).flatMap((producto) => {
-            const quantity = tanda.find((line) => line.productId === producto.id)?.quantity ?? 0
-            if (quantity === 0) return []
-            const yaArriba = lineas
-              .filter((line) => line.productId === producto.id)
-              .reduce((sum, line) => sum + line.quantity, 0)
-            return [{ productId: producto.id, productDetail: producto.detail, quantity, totalOnBoard: yaArriba + quantity }]
-          })}
-          openedAt={confirmandoDesde}
-          sending={cargar.isPending}
-          error={cargar.error}
-          backDisabled={!canCorrect}
-          notice={cargar.isError && !canCorrect ? 'No pudimos confirmar el resultado. Reintentá sin cambiar el pedido para evitar duplicarlo.' : undefined}
-          onBack={() => { attempt.current = null; setConfirmandoDesde(null); cargar.reset() }}
-          onConfirm={() => { void sendLoad() }}
-        />
-      )}
+        <WeekdaysField label="Días de reparto que cubrirá esta salida" value={routeDays}
+          disabled={ocupado || carga.isPending || carga.isError}
+          onChange={(days) => { setEditedDays(days); setSuccess(false); setRequestId(newRequestId()) }} />
+        <p className="text-sm text-muted">Podés combinar varios días para recuperar un reparto. Los clientes aparecerán una sola vez, en el orden habitual.</p>
+      </>}
 
-      {porBajar && (
-        <Modal title={porBajar === 'todo' ? 'Vaciar la carga' : 'Bajar del camión'} busy={bajar.isPending}
-          onClose={() => setPorBajar(null)}
-          footer={<>
-            <Button type="button" variant="danger" disabled={bajar.isPending} onClick={() => setPorBajar(null)}>Cancelar</Button>
-            <Button type="button" disabled={bajar.isPending} onClick={() => bajar.mutate(porBajar)}>
-              {bajar.isPending ? 'Bajando...' : porBajar === 'todo' ? 'Vaciar carga' : 'Bajar'}
-            </Button>
-          </>}>
-          <p>{porBajar === 'todo' ? 'Se baja todo lo que está arriba del camión:' : 'Se baja del camión:'}</p>
-          <ul className="flex flex-col gap-1 font-semibold">
-            {lineas.filter((l) => porBajar === 'todo' || l.id === porBajar).map((l) => (
-              <li key={l.id}>{l.quantity} × {l.productDetail}</li>
-            ))}
-          </ul>
-          {porBajar === 'todo' && <p className="text-muted">El chofer no va a poder salir hasta que registres una carga nueva.</p>}
-        </Modal>
-      )}
+      {confirmandoDesde && selectedVehicle && tabla && <LoadConfirmModal
+        vehicleName={selectedVehicle.name}
+        licensePlate={selectedVehicle.licensePlate}
+        driverNames={(drivers.data ?? []).filter((d) => d.vehicleId === vehicleId).map((d) => `${d.firstName} ${d.lastName}`)}
+        routeDays={routeDays}
+        lines={listaProductos.flatMap((p) => {
+          const queda = tabla[p.id] ?? 0
+          const antes = arriba[p.id] ?? 0
+          if (!queda && !antes) return []
+          return [{ productId: p.id, productDetail: p.detail, quantity: queda, totalOnBoard: queda, ...(lineas.length ? { before: antes } : {}) }]
+        })}
+        openedAt={confirmandoDesde}
+        sending={cargar.isPending}
+        error={cargar.error}
+        backDisabled={!canCorrect}
+        notice={cargar.isError && !canCorrect ? 'No pudimos confirmar el resultado. Reintentá sin cambiar el pedido para evitar duplicarlo.' : undefined}
+        onBack={() => { attempt.current = null; setConfirmandoDesde(null); cargar.reset() }}
+        onConfirm={() => { void sendLoad() }}
+      />}
+
+      {vaciando && <Modal title="Vaciar la carga" busy={vaciar.isPending} onClose={() => setVaciando(false)} footer={<>
+        <Button type="button" variant="secondary" disabled={vaciar.isPending} onClick={() => setVaciando(false)}>Cancelar</Button>
+        <Button type="button" variant="danger" disabled={vaciar.isPending} onClick={() => vaciar.mutate()}>{vaciar.isPending ? 'Vaciando...' : 'Vaciar carga'}</Button>
+      </>}>
+        <p>Se baja todo lo que está arriba del camión:</p>
+        <ul className="flex flex-col gap-1 font-semibold">
+          {listaProductos.filter((p) => arriba[p.id]).map((p) => <li key={p.id}>{arriba[p.id]} × {p.detail}</li>)}
+        </ul>
+        <p className="text-muted">El chofer no va a poder salir hasta que registres una carga nueva.</p>
+      </Modal>}
     </Page>
   )
 }

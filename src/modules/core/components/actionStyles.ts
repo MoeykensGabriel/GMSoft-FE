@@ -1,4 +1,4 @@
-export type ActionVariant = 'primary' | 'secondary' | 'danger' | 'navigation' | 'dark'
+export type ActionVariant = 'primary' | 'secondary' | 'danger' | 'navigation' | 'dark' | 'edit'
 
 const variants: Record<ActionVariant, string> = {
   primary: 'border-success bg-success text-white hover:bg-success-dark',
@@ -7,6 +7,8 @@ const variants: Record<ActionVariant, string> = {
   navigation: 'border-brand bg-brand text-white hover:bg-brand-dark',
   /** Acciones definitivas sobre un cliente, como darlo de baja. */
   dark: 'border-neutral-900 bg-neutral-900 text-white hover:bg-black',
+  /** Pasar a editar algo que ya está guardado: naranja, distinto de confirmar (verde) y borrar (rojo). */
+  edit: 'border-orange-600 bg-orange-500 text-white hover:bg-orange-600',
 }
 
 /** Botones y enlaces de acción comparten aspecto y conservan su semántica HTML. */

@@ -7,6 +7,8 @@ export interface LoadConfirmLine {
   quantity: number
   /** Lo que queda arriba del camion sumando lo que ya tenia. */
   totalOnBoard: number
+  /** Al reemplazar la carga: lo que había antes. Con esto se muestra Antes → Queda arriba. */
+  before?: number
 }
 
 interface Props {
@@ -37,6 +39,7 @@ export function LoadConfirmModal({
 }: Props) {
   const outside = error instanceof ApiError && error.status === 409 && error.type === 'outside-working-hours'
   const yaTeniaCarga = lines.some((line) => line.totalOnBoard !== line.quantity)
+  const reemplazo = lines.some((line) => line.before !== undefined)
 
   return (
     <Modal
@@ -67,16 +70,18 @@ export function LoadConfirmModal({
         <thead>
           <tr className="border-b border-brand text-left">
             <th scope="col" className="py-1 font-semibold">Producto</th>
-            <th scope="col" className="py-1 text-right font-semibold">Se carga</th>
-            {yaTeniaCarga && <th scope="col" className="py-1 text-right font-semibold">Queda arriba</th>}
+            {reemplazo && <th scope="col" className="py-1 text-right font-semibold">Antes</th>}
+            <th scope="col" className="py-1 text-right font-semibold">{reemplazo ? 'Queda arriba' : 'Se carga'}</th>
+            {yaTeniaCarga && !reemplazo && <th scope="col" className="py-1 text-right font-semibold">Queda arriba</th>}
           </tr>
         </thead>
         <tbody>
           {lines.map((line) => (
             <tr key={line.productId} className="border-b border-line">
               <td className="py-1">{line.productDetail}</td>
-              <td className="py-1 text-right">{line.quantity}</td>
-              {yaTeniaCarga && <td className="py-1 text-right">{line.totalOnBoard}</td>}
+              {reemplazo && <td className="py-1 text-right text-muted">{line.before ?? 0}</td>}
+              <td className="py-1 text-right font-semibold">{line.quantity}</td>
+              {yaTeniaCarga && !reemplazo && <td className="py-1 text-right">{line.totalOnBoard}</td>}
             </tr>
           ))}
         </tbody>

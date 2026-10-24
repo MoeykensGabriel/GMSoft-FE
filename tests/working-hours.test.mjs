@@ -122,7 +122,7 @@ function loadViewHarness(registerLoad) {
     useQueryClient: () => ({ invalidateQueries: async () => {} }),
     useQuery: ({ queryKey }) => ({ data: queryKey[0] === 'drivers' ? [] : queryKey[0] === 'products'
       ? { items: [{ id: 'p', detail: 'Bidón' }] } : queryKey[1] === 'load-status'
-      ? [{ id: 'v', name: 'Camión', licensePlate: 'AA', isOnRoute: false, pendingUnits: 0 }] : [], isPending: false, isError: false }),
+      ? [{ id: 'v', name: 'Camión', licensePlate: 'AA', isOnRoute: false, pendingUnits: 0 }] : [], isPending: false, isError: false, isSuccess: true }),
     useMutation(options) {
       const i = mutationCursor++
       const mutation = mutations[i] ??= { isIdle: true, isPending: false, isError: false, error: null }
@@ -141,12 +141,13 @@ function loadViewHarness(registerLoad) {
     react, 'react/jsx-runtime': { jsx, jsxs: jsx, Fragment: 'fragment' }, '@tanstack/react-query': query,
     'react-router-dom': { Link: 'link' },
     '../../core': { ApiError, Button: 'button', ErrorMessage: 'error', Select: 'select', WeekdaysField: 'weekdays', Page: 'page', PageHeader: 'header',
+      DataTable: 'table', Modal: 'modal', QuantityInput: 'quantity', LinkButton: 'linkbutton',
       newRequestId: () => `id-${++nextId}`, currentBusinessWeekday: () => 1, formatDateTime: () => 'Ahora' },
-    '../../workingHours': { OutsideWorkingHoursBadge: 'outside' },
+    '../utils/loadTable': load('vehicleLoads/utils/loadTable.ts'),
     '../../products': { productService: {} }, '../../drivers': { driverService: {} },
     '../../vehicles': { vehicleService: { registerLoad } },
     '../components/VehicleAssignmentSummary': { VehicleAssignmentSummary: 'assignment' },
-    '../components/LoadEditor': { LoadEditor: 'editor' }, '../components/LoadConfirmModal': { LoadConfirmModal: 'confirm' },
+    '../components/LoadConfirmModal': { LoadConfirmModal: 'confirm' },
   })
   return { ApiError, render() { cursor = 0; mutationCursor = 0; return VehicleLoadView() } }
 }
@@ -166,15 +167,16 @@ test('carga inicial conserva exactamente el pedido al confirmar excepción y rei
     return { loadedAt: '2026-10-14T01:00:00Z' }
   })
   findNode(harness.render(), 'select').props.onChange({ target: { value: 'v' } })
-  findNode(harness.render(), 'editor').props.onChange([{ productId: 'p', quantity: 5 }])
-  findNode(harness.render(), 'form').props.onSubmit({ preventDefault() {} })
+  findNode(harness.render(), 'quantity').props.onChange(5)
+  findNode(harness.render(), 'button').props.onClick()
   assert.equal(calls.length, 0)
   findNode(harness.render(), 'confirm').props.onConfirm()
   await flush()
   assert.equal(calls[0][4], false)
   findNode(harness.render(), 'confirm').props.onConfirm()
   await flush()
-  assert.deepEqual(calls[1], [...calls[0].slice(0, 4), true])
+  assert.deepEqual(calls[1], [...calls[0].slice(0, 4), true, true])
+  assert.deepEqual(calls[0][1], [{ productId: 'p', quantity: 5 }])
   const uncertain = findNode(harness.render(), 'confirm')
   assert.equal(uncertain.props.backDisabled, true)
   uncertain.props.onConfirm()
@@ -187,8 +189,8 @@ test('carga inicial: otro 409 conserva el manejo habitual, sin autorización de 
   const calls = []
   const harness = loadViewHarness(async (...args) => { calls.push(args); throw new harness.ApiError(409, 'otro-conflicto') })
   findNode(harness.render(), 'select').props.onChange({ target: { value: 'v' } })
-  findNode(harness.render(), 'editor').props.onChange([{ productId: 'p', quantity: 5 }])
-  findNode(harness.render(), 'form').props.onSubmit({ preventDefault() {} })
+  findNode(harness.render(), 'quantity').props.onChange(5)
+  findNode(harness.render(), 'button').props.onClick()
   findNode(harness.render(), 'confirm').props.onConfirm()
   await flush()
   findNode(harness.render(), 'confirm').props.onConfirm()
