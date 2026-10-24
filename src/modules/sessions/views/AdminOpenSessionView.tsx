@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { scheduleService } from '../../schedule'
 import { SuggestedZoneNotice } from '../components/SuggestedZoneNotice'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ApiError, Button, ErrorMessage, Field, Modal, Page, PageHeader, Panel, Select, BackButton } from '../../core'
 import { driverService } from '../../drivers'
 import { zoneService, orderedZones, sameZones, OrderedZoneEditor } from '../../zones'
@@ -21,7 +21,9 @@ export function AdminOpenSessionView() {
   const choferes = useQuery({ queryKey: ['drivers', 'active'], queryFn: driverService.listActive })
   const zonas = useQuery({ queryKey: ['zones', 'opening-options'], queryFn: zoneService.listAll })
 
-  const [driverId, setDriverId] = useState('')
+  // Viene elegido cuando se llega desde la carga del camión.
+  const [params] = useSearchParams()
+  const [driverId, setDriverId] = useState(() => params.get('chofer') ?? '')
   const [chosenZones, setZoneIds] = useState<string[] | null>(null)
   const suggestion = useQuery({
     queryKey: ['sessions', 'suggested-zone', { driverId }],

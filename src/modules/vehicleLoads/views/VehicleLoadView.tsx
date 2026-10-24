@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ApiError, BUSINESS_TIME_ZONE, Button, DataTable, ErrorMessage, LinkButton, Modal, QuantityInput, Select, WeekdaysField, formatDateTime, currentBusinessWeekday, newRequestId, Page, PageHeader } from '../../core'
 import { productService } from '../../products'
 import { driverService } from '../../drivers'
@@ -31,6 +31,9 @@ export function VehicleLoadView() {
   const [loadedAt, setLoadedAt] = useState<string | null>(null)
   const [editedDays, setEditedDays] = useState<number[] | null>(null)
   const [vaciando, setVaciando] = useState(false)
+  // Recién cargado: se ofrece abrir la salida ahí mismo, sin ir a Salidas y recepción.
+  const [recienCargado, setRecienCargado] = useState(false)
+  const navigate = useNavigate()
   const drivers = useQuery({ queryKey: ['drivers', 'active'], queryFn: driverService.listActive })
   const vehiculos = useQuery({ queryKey: ['vehicles', 'load-status'], queryFn: vehicleService.getLoadStatus })
   const productos = useQuery({ queryKey: ['products', 'published'], queryFn: () => productService.listPublished() })
@@ -82,6 +85,7 @@ export function VehicleLoadView() {
       reiniciar()
       setLoadedAt(registrada)
       setSuccess(true)
+      if (registrada) setRecienCargado(true)
     },
   })
 
@@ -218,6 +222,21 @@ export function VehicleLoadView() {
         onBack={() => { attempt.current = null; setConfirmandoDesde(null); cargar.reset() }}
         onConfirm={() => { void sendLoad() }}
       />}
+
+      {recienCargado && selectedVehicle && (() => {
+        const choferes = (drivers.data ?? []).filter((d) => d.vehicleId === vehicleId)
+        // Con un solo chofer asignado, la salida se abre ya con él elegido.
+        const destino = choferes.length === 1 ? `/panel/salidas/abrir?chofer=${choferes[0].id}` : '/panel/salidas/abrir'
+        return <Modal title="Carga registrada" onClose={() => setRecienCargado(false)} footer={<>
+          <Button type="button" variant="secondary" onClick={() => setRecienCargado(false)}>Dejarlo cargado</Button>
+          <Button type="button" disabled={!choferes.length} onClick={() => navigate(destino)}>Abrir salida ahora</Button>
+        </>}>
+          <p>El <strong>{selectedVehicle.name} · {selectedVehicle.licensePlate}</strong> quedó cargado.</p>
+          <p>{choferes.length
+            ? <>Podés abrir la salida ahora{choferes.length === 1 ? <> con <strong>{choferes[0].firstName} {choferes[0].lastName}</strong></> : ''}, o dejarlo cargado para que el chofer la abra desde su celular.</>
+            : 'Este camión no tiene chofer asignado: asignale uno en Choferes para que pueda salir.'}</p>
+        </Modal>
+      })()}
 
       {vaciando && <Modal title="Vaciar la carga" busy={vaciar.isPending} onClose={() => setVaciando(false)} footer={<>
         <Button type="button" variant="secondary" disabled={vaciar.isPending} onClick={() => setVaciando(false)}>Cancelar</Button>
