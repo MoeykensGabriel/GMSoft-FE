@@ -13,12 +13,12 @@ export function ActiveDeparturesCard() {
     actions={<Button variant="secondary" disabled={departures.isFetching} onClick={() => departures.refetch()}>
         {departures.isFetching ? 'Actualizando…' : 'Actualizar'}
       </Button>}>
-    <p className="mt-2 text-sm text-muted">Productos llenos con los que empezó cada salida.</p>
+    <p className="mt-2 text-sm text-muted">En el orden en que salieron: con qué salió cada camión, lo que entregó y lo que lleva a bordo ahora.</p>
     {departures.isPending && <p role="status" className="mt-4">Cargando camiones…</p>}
     {departures.isError && <div className="mt-4"><ErrorMessage error={departures.error} /><p className="text-sm">Usá Actualizar para reintentar.</p></div>}
     {departures.data && <>
       {departures.data.length === 0 ? <p className="mt-4 text-sm">No hay camiones en reparto.</p>
-        : <div className="mt-4 grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        : <div className="mt-4 flex flex-col gap-4">
           {departures.data.map((departure) => <ActiveDepartureSummary key={departure.sessionId} departure={departure} />)}
         </div>}
       <p className="mt-4 text-xs text-muted">Última actualización: {formatDateTime(new Date(departures.dataUpdatedAt), 'America/Argentina/Buenos_Aires')}{departures.isError ? ' · Datos anteriores' : ''}</p>

@@ -41,6 +41,8 @@ export interface ActiveDeparture {
   zoneName: string
   openedAt: string
   initialLoad: { productId: string; productDetail: string; quantity: number }[]
+  /** Por producto: con qué salió, recargas, entregados y lo que lleva a bordo ahora. */
+  stock?: { productId: string; productDetail: string; initial: number; restocked: number; delivered: number; fullOnBoard: number; emptyOnBoard: number }[]
 }
 
 export interface Session extends SessionWorkingHours {
