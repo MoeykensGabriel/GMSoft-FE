@@ -1,6 +1,7 @@
 import { RemovalRequestsNotice } from '../../modules/customers/admin'
 import { UncoveredCustomers } from '../../modules/routePlanning'
 import { ActiveDeparturesCard } from '../../modules/sessions'
+import { LoadedVehiclesCard } from '../../modules/vehicleLoads'
 import { Page, PageHeader } from '../../modules/core'
 
 export function AdminHomeView() {
@@ -8,6 +9,7 @@ export function AdminHomeView() {
     <PageHeader title="Home" description="Estado del reparto" />
     <RemovalRequestsNotice />
     <UncoveredCustomers summary />
+    <LoadedVehiclesCard />
     <div className="grid min-w-0 gap-5"><ActiveDeparturesCard /></div>
   </Page>
 }

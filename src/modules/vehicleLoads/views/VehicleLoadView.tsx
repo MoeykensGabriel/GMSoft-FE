@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { ApiError, BUSINESS_TIME_ZONE, Button, DataTable, ErrorMessage, LinkButton, Modal, QuantityInput, Select, WeekdaysField, formatDateTime, currentBusinessWeekday, newRequestId, Page, PageHeader } from '../../core'
 import { productService } from '../../products'
 import { driverService } from '../../drivers'
@@ -21,7 +21,8 @@ export function VehicleLoadView() {
   const queryClient = useQueryClient()
   const attempt = useRef<{ vehicleId: string; items: { productId: string; quantity: number }[]; routeDays: number[]; requestId: string; confirmOutsideWorkingHours: boolean } | null>(null)
   const sending = useRef(false)
-  const [vehicleId, setVehicleId] = useState('')
+  const [params] = useSearchParams()
+  const [vehicleId, setVehicleId] = useState(() => params.get('vehiculo') ?? '')
   // La tabla en edición: cuánto tiene que quedar arriba de cada producto. Null es solo mirar.
   const [draft, setDraft] = useState<Record<string, number> | null>(null)
   const [success, setSuccess] = useState(false)
