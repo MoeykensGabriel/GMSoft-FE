@@ -25,9 +25,12 @@ export function LoadedVehiclesCard() {
       const suyos = (choferes.data ?? []).filter((c) => c.vehicleId === v.id)
       // Con un solo chofer, la salida se abre ya con él elegido.
       const abrir = suyos.length === 1 ? `/panel/salidas/abrir?chofer=${suyos[0].id}` : '/panel/salidas/abrir'
-      return <li key={v.id} className="ui-card flex flex-wrap items-center justify-between gap-3 p-4">
+      // Listo para salir: cargado y con chofer. Sin chofer queda marcado en naranja.
+      const listo = suyos.length > 0
+      return <li key={v.id} className={`flex flex-wrap items-center justify-between gap-3 rounded border-2 p-4 ${listo ? 'border-success bg-success-soft' : 'border-warning bg-warning-soft'}`}>
         <div className="min-w-0">
-          <p className="text-lg font-semibold">{v.name} · {v.licensePlate}</p>
+          <p className="flex flex-wrap items-center gap-2 text-lg font-semibold">{v.name} · {v.licensePlate}
+            <span className={`rounded px-2 py-0.5 text-xs font-semibold ${listo ? 'bg-success-light text-black' : 'bg-warning-soft text-warning'}`}>{listo ? 'Listo para salir' : 'Falta chofer'}</span></p>
           <p className="text-sm">Chofer: <strong>{suyos.length ? suyos.map((c) => `${c.firstName} ${c.lastName}`).join(', ') : 'sin chofer asignado'}</strong>
             {resumen?.routeDays.length ? <> · Días: <strong>{weekdayLabels(resumen.routeDays)}</strong></> : null}</p>
           <p className="text-sm text-muted">
