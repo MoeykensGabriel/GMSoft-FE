@@ -15,6 +15,20 @@ export function moveZone(ids: string[], index: number, direction: -1 | 1) {
   return next
 }
 
+/**
+ * Las zonas que se pueden agregar, con cuántos clientes tiene el camión en cada una.
+ * Sin conteos, todas por nombre como siempre. Con conteos, primero las que tienen
+ * clientes (de más a menos) y después las vacías, que no le muestran nada al chofer.
+ */
+export function zoneChoices(options: { id: string; name: string; isActive: boolean }[], value: string[], counts?: Record<string, number>) {
+  const libres = options.filter((zone) => zone.isActive && !value.includes(zone.id))
+  if (!counts) return libres.map((zone) => ({ id: zone.id, label: zone.name, customers: null as number | null }))
+  return libres.map((zone) => ({ id: zone.id, name: zone.name, customers: counts[zone.id] ?? 0 }))
+    .sort((a, b) => b.customers - a.customers || a.name.localeCompare(b.name, 'es'))
+    .map(({ id, name, customers }) => ({ id, customers: customers as number | null,
+      label: customers ? `${name} — ${customers} ${customers === 1 ? 'cliente' : 'clientes'} hoy` : `${name} (sin clientes hoy)` }))
+}
+
 export function zoneBlocks<T extends { zoneId: string }>(zones: OrderedZone[], customers: T[]) {
   return zones.map((zone) => ({ ...zone, customers: customers.filter((customer) => customer.zoneId === zone.zoneId) }))
 }

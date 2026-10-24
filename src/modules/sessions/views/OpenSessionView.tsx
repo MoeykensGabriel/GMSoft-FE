@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { scheduleService } from '../../schedule'
+import { zoneCountsForDays } from '../utils/zoneCounts'
 import { SuggestedZoneNotice } from '../components/SuggestedZoneNotice'
 import type { FormEvent } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../../auth'
-import { ApiError, Button, Field, InstallAppButton, Modal, weekdayLabels, PageHeader } from '../../core'
+import { ApiError, Button, Field, InstallAppButton, Modal, weekdayLabels, PageHeader, currentBusinessWeekday } from '../../core'
 import { driverService } from '../../drivers'
 import { vehicleService } from '../../vehicles'
 import { zoneService, orderedZones, sameZones, OrderedZoneEditor } from '../../zones'
@@ -48,6 +49,8 @@ export function OpenSessionView() {
     enabled: Boolean(vehicleId),
   })
   const suggestedIds = orderedZones(suggestion.data).map((zone) => zone.zoneId)
+  // Cuántos clientes tiene el camión en cada zona, para que la lista de zonas diga cuáles sirven.
+  const agendaCamion = useQuery({ queryKey: ['vehicles', 'schedule', vehicleId], queryFn: () => scheduleService.get(vehicleId), enabled: Boolean(vehicleId) })
   const zoneIds = chosenZones ?? suggestedIds
   const [kilometros, setKilometros] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -152,7 +155,8 @@ export function OpenSessionView() {
         )}
       </div>
 
-      <OrderedZoneEditor value={zoneIds} options={zonas.data ?? []} onChange={setZoneIds} disabled={abrir.isPending} />
+      <OrderedZoneEditor value={zoneIds} options={zonas.data ?? []} onChange={setZoneIds} disabled={abrir.isPending}
+        counts={agendaCamion.data && suggestion.data ? zoneCountsForDays(agendaCamion.data.customerCounts ?? [], suggestion.data.routeDays, currentBusinessWeekday()) : undefined} />
       {zonas.isError && <div role="alert" className="flex flex-col gap-2 text-sm">
         <p>No se pudieron cargar las zonas.</p>
         <Button type="button" variant="secondary" onClick={() => void zonas.refetch()}>Reintentar</Button>

@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { scheduleService } from '../../schedule'
+import { zoneCountsForDays } from '../utils/zoneCounts'
 import { SuggestedZoneNotice } from '../components/SuggestedZoneNotice'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { ApiError, Button, ErrorMessage, Field, Modal, Page, PageHeader, Panel, Select, BackButton } from '../../core'
+import { ApiError, Button, ErrorMessage, Field, Modal, Page, PageHeader, Panel, Select, BackButton, currentBusinessWeekday } from '../../core'
 import { driverService } from '../../drivers'
 import { zoneService, orderedZones, sameZones, OrderedZoneEditor } from '../../zones'
 import { sessionService } from '../services/sessionService'
@@ -31,6 +32,9 @@ export function AdminOpenSessionView() {
     enabled: Boolean(driverId),
   })
   const suggestedIds = orderedZones(suggestion.data).map((zone) => zone.zoneId)
+  // Cuántos clientes tiene el camión en cada zona, para que la lista de zonas diga cuáles sirven.
+  const vehiculoDelChofer = (choferes.data ?? []).find((c) => c.id === driverId)?.vehicleId ?? ''
+  const agendaCamion = useQuery({ queryKey: ['vehicles', 'schedule', vehiculoDelChofer], queryFn: () => scheduleService.get(vehiculoDelChofer), enabled: Boolean(vehiculoDelChofer) })
   const zoneIds = chosenZones ?? suggestedIds
   const [kilometros, setKilometros] = useState('')
   // Zonas de la agenda que se sacaron: se pregunta antes de abrir, igual que al chofer.
@@ -71,7 +75,8 @@ export function AdminOpenSessionView() {
             ))}
           </Select>
 
-      <OrderedZoneEditor value={zoneIds} options={zonas.data ?? []} onChange={setZoneIds} disabled={abrir.isPending} />
+      <OrderedZoneEditor value={zoneIds} options={zonas.data ?? []} onChange={setZoneIds} disabled={abrir.isPending}
+        counts={agendaCamion.data && suggestion.data ? zoneCountsForDays(agendaCamion.data.customerCounts ?? [], suggestion.data.routeDays, currentBusinessWeekday()) : undefined} />
 
           {suggestion.isError && <div role="alert"><p>No se pudo leer la agenda sugerida.</p><Button type="button" variant="secondary" onClick={() => void suggestion.refetch()}>Reintentar agenda</Button></div>}
       <SuggestedZoneNotice suggestion={suggestion.data} zoneIds={zoneIds} />
