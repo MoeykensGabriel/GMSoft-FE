@@ -8,6 +8,8 @@ export interface SummaryStock {
   fullReturned: number
   fullDifference: number
   emptyCollected: number
+  /** De los vacíos contabilizados, los que los clientes tenían sin registrar. */
+  emptyRecovered?: number
   emptyReturned: number
   emptyDifference: number
 }

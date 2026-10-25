@@ -18,7 +18,6 @@ export function DailySummaryMoneyTable({ money, isClosed, label }: {
         <SummaryDifference value={money.cashDifference} isClosed={isClosed} money />
       </tr>
       <tr><th scope="row" className="font-normal">Transferencia (informativo)</th><td className="text-right tabular-nums">{formatMoney(money.transfer)}</td></tr>
-      <tr><th scope="row" className="font-normal">Tarjeta (informativo)</th><td className="text-right tabular-nums">{formatMoney(money.card)}</td></tr>
     </tbody>
   </DataTable>
 }
@@ -30,6 +29,8 @@ function StockCells({ stock, isClosed }: { stock: SummaryStock; isClosed: boolea
     <td className="text-right tabular-nums">{stock.fullReturned}</td>
     <SummaryDifference value={stock.fullDifference} isClosed={isClosed} />
     <td className="border-l border-line text-right tabular-nums">{stock.emptyCollected}</td>
+    {/* Vacíos que el cliente tenía sin registrar: ya están dentro de los contabilizados. */}
+    <td className="text-right tabular-nums text-success">{stock.emptyRecovered || '—'}</td>
     <td className="text-right tabular-nums">{stock.emptyReturned}</td>
     <SummaryDifference value={stock.emptyDifference} isClosed={isClosed} />
   </>
@@ -43,13 +44,13 @@ export function DailySummaryStockTable({ products, totals, isClosed, label, prov
   provisional?: boolean
 }) {
   const differenceTitle = isClosed ? 'Diferencia' : provisional ? 'Saldo provisional' : 'A bordo'
-  return <DataTable label={label} className="min-w-[58rem]">
-    <colgroup><col /></colgroup><colgroup span={4} /><colgroup span={3} />
+  return <DataTable label={label} className="min-w-[64rem]">
+    <colgroup><col /></colgroup><colgroup span={4} /><colgroup span={4} />
     <thead>
       <tr>
         <th scope="col" rowSpan={2}>Producto</th>
         <th scope="colgroup" colSpan={4} className="text-center">Envases llenos</th>
-        <th scope="colgroup" colSpan={3} className="border-l border-line text-center">Envases vacíos</th>
+        <th scope="colgroup" colSpan={4} className="border-l border-line text-center">Envases vacíos</th>
       </tr>
       <tr>
         <th scope="col" className="text-right">Cargados</th>
@@ -57,12 +58,13 @@ export function DailySummaryStockTable({ products, totals, isClosed, label, prov
         <th scope="col" className="text-right">Rendidos</th>
         <th scope="col" className="text-right">{differenceTitle}</th>
         <th scope="col" className="border-l border-line text-right">Contabilizados</th>
+        <th scope="col" className="text-right" title="De los contabilizados, los que el cliente tenía sin registrar">Recuperados</th>
         <th scope="col" className="text-right">Rendidos</th>
         <th scope="col" className="text-right">{differenceTitle}</th>
       </tr>
     </thead>
     <tbody>
-      {products.length === 0 && <tr><td colSpan={8} className="text-muted">Todavía no hay movimientos de productos.</td></tr>}
+      {products.length === 0 && <tr><td colSpan={9} className="text-muted">Todavía no hay movimientos de productos.</td></tr>}
       {products.map((product) => <tr key={product.productId}>
         <th scope="row" className="font-normal">{product.productDetail}</th>
         <StockCells stock={product.stock} isClosed={isClosed} />
