@@ -23,7 +23,8 @@ export function ActiveDepartureSummary({ departure }: { departure: ActiveDepartu
       </div>
       <div className="flex flex-wrap gap-2">
         <LinkButton to={`/panel/salidas/${departure.sessionId}`} aria-label={`Ver salida de ${departure.vehicleName} ${departure.vehicleLicensePlate}`}>Ver salida</LinkButton>
-        <LinkButton to={`/panel/salidas/${departure.sessionId}/recarga`} variant="primary" aria-label={`Recargar ${departure.vehicleName} ${departure.vehicleLicensePlate}`}>Recargar</LinkButton>
+        <LinkButton to={`/panel/salidas/${departure.sessionId}/recarga`} variant="navigation" aria-label={`Recargar ${departure.vehicleName} ${departure.vehicleLicensePlate}`}>Recargar</LinkButton>
+        <LinkButton to={`/panel/salidas/${departure.sessionId}/recepcion`} variant="primary" aria-label={`Recibir ${departure.vehicleName} ${departure.vehicleLicensePlate}`}>Recibir</LinkButton>
       </div>
     </div>
     {filas.length === 0 ? <p className="text-sm text-muted">Sin carga inicial registrada.</p>
