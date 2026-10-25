@@ -8,6 +8,7 @@ import { vehicleService } from '../../vehicles'
 import { zoneService, orderedZones, zoneChoices, addZone, moveZone, removeZone } from '../../zones'
 import { useOpenSession } from '../hooks/useCurrentSession'
 import { zoneCountsForDays } from '../utils/zoneCounts'
+import { checkKilometers } from '../utils/kilometers'
 
 /**
  * Solo sin salida abierta: con una abierta la sesión la cierra la recepción, así el
@@ -56,7 +57,10 @@ export function OpenSessionView() {
   const [paso, setPaso] = useState<1 | 2>(1)
   const [chosenZones, setZoneIds] = useState<string[] | null>(null)
   const [kilometros, setKilometros] = useState('')
-  const [faltaKm, setFaltaKm] = useState(false)
+  const [errorKm, setErrorKm] = useState<string | null>(null)
+  // Un salto grande sobre el último kilometraje se confirma una vez: casi siempre es un dígito de más.
+  const [saltoKm, setSaltoKm] = useState<number | null>(null)
+  const [saltoConfirmado, setSaltoConfirmado] = useState(false)
   const [error, setError] = useState<string | null>(null)
   // Zonas de la agenda que el chofer sacó: al tocar Siguiente se le pregunta, para que no
   // salga sin una zona por error (le quedarían sin aparecer todos sus clientes).
@@ -85,7 +89,9 @@ export function OpenSessionView() {
   const totalCarga = lineas.reduce((s, l) => s + l.quantity, 0)
 
   function siguiente() {
-    if (!kilometros.trim()) { setFaltaKm(true); return }
+    const km = checkKilometers(kilometros, chofer.vehicleKilometers)
+    if (!km.ok && 'error' in km) { setErrorKm(km.error); return }
+    if (!km.ok && !saltoConfirmado) { setSaltoKm(km.salto); return }
     const sinElegir = agenda.filter((z) => !zoneIds.includes(z.zoneId))
     if (sinElegir.length) { setFaltantes(sinElegir); return }
     setError(null); setPaso(2)
@@ -158,8 +164,13 @@ export function OpenSessionView() {
 
     <section className="ui-card p-4">
       <Field label="Kilometraje del vehículo" name="kilometersAtOpen" type="number" min={0} inputMode="numeric" required
-        value={kilometros} onChange={(e) => { setKilometros(e.target.value); setFaltaKm(false) }}
-        error={faltaKm ? 'Poné el kilometraje que marca el camión.' : undefined} />
+        value={kilometros} onChange={(e) => { setKilometros(e.target.value); setErrorKm(null); setSaltoKm(null); setSaltoConfirmado(false) }}
+        error={errorKm ?? undefined} />
+      {chofer.vehicleKilometers != null && <p className="mt-2 text-sm text-muted">Último registrado: <strong>{chofer.vehicleKilometers.toLocaleString('es-AR')} km</strong></p>}
+      {saltoKm != null && <div role="alert" className="mt-3 flex flex-col gap-2 rounded border border-warning/40 bg-warning-soft p-3 text-sm text-warning">
+        <p>Son <strong>{saltoKm.toLocaleString('es-AR')} km</strong> más que la última vez. ¿Está bien?</p>
+        <Button type="button" variant="secondary" className="self-start" onClick={() => { setSaltoConfirmado(true); setSaltoKm(null) }}>Sí, es correcto</Button>
+      </div>}
     </section>
 
     <section className="ui-card flex flex-col gap-3 p-4">

@@ -15,6 +15,8 @@ export interface DriverProfile {
   password?: string | null
   email: string | null
   isActive: boolean
+  /** Último kilometraje registrado del camión asignado. */
+  vehicleKilometers?: number | null
 }
 
 export type DriverInput = Pick<DriverProfile, 'firstName' | 'lastName' | 'documentNumber' | 'phone' | 'vehicleId' | 'isActive'>
