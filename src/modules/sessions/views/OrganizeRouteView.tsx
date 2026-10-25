@@ -137,7 +137,7 @@ function RouteOrderEditor({ sessionId, initial }: { sessionId: string; initial: 
     <ErrorMessage error={error} />
     {conflict && <Button className="min-h-11" disabled={busy} onClick={() => void retryReload()}>Volver a cargar el recorrido</Button>}
     {rows.map((zone) => <section key={zone.zoneId} className="flex flex-col gap-2">
-      {rows.length > 1 && <h2 className="font-semibold">{zone.zoneName} · {zone.items.length} clientes</h2>}
+      {rows.length > 1 && <h2 className="font-semibold text-danger">{zone.zoneName} · {zone.items.length} clientes</h2>}
       {!zone.items.length && <p>No hay clientes en esta zona.</p>}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(event) => moved(zone.zoneId, event)} autoScroll
         accessibility={{ screenReaderInstructions: { draggable: 'Para mover el cliente, presioná espacio. Usá las flechas para cambiar su lugar y espacio para soltarlo. Escape cancela.' },
