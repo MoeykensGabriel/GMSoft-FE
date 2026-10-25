@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../modules/auth'
-import { ScreenErrorBoundary } from '../../modules/core'
+import { Button, ScreenErrorBoundary } from '../../modules/core'
 import { AdminSidebar } from './AdminSidebar'
 
 /** El ancho desde el que el menú queda fijo al costado, como en la computadora. */
@@ -44,11 +44,11 @@ export function AdminLayout() {
     }
   }, [expanded])
 
-  const userName = user?.fullName || user?.userName || ''
+  const userName = user?.userName || user?.fullName || ''
 
-  return <div className="admin-shell min-h-screen bg-canvas text-ink md:grid md:grid-cols-[14rem_minmax(0,1fr)] md:grid-rows-[3.5rem_1fr]">
+  return <div className="admin-shell min-h-dvh bg-canvas text-ink md:grid md:grid-cols-[14rem_minmax(0,1fr)] md:grid-rows-[3.5rem_1fr]">
     <a href="#admin-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-10 focus:rounded focus:bg-surface focus:p-3">Ir al contenido</a>
-    <header inert={expanded} className="sticky top-0 z-20 flex min-h-14 items-center gap-3 bg-brand-dark px-2 py-2 text-white md:col-span-2 md:px-4">
+    <header inert={expanded} className="sticky top-0 z-20 grid h-14 grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-2 bg-brand-dark px-2 text-white md:col-span-2 md:px-4">
       <button ref={menuButton} type="button" aria-label="Abrir menú" aria-controls="admin-navigation" aria-expanded={expanded}
         onClick={() => setExpanded(true)}
         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:hidden">
@@ -56,11 +56,15 @@ export function AdminLayout() {
           <path d="M4 7h16M4 12h16M4 17h16" />
         </svg>
       </button>
-      <span className="font-semibold tracking-wide">GMSoft <span className="ml-2 text-xs font-normal">Administración</span></span>
-      <span className="ml-auto hidden text-sm md:block">{userName}</span>
+      <span className="col-start-2 text-center text-lg font-semibold tracking-wide">Administración</span>
     </header>
-    <AdminSidebar userName={userName} expanded={expanded}
-      onClose={() => setExpanded(false)} onLogout={logout} />
-    <div id="admin-content" tabIndex={-1} inert={expanded} className="min-w-0"><ScreenErrorBoundary resetKey={pathname}><Outlet /></ScreenErrorBoundary></div>
+    <AdminSidebar expanded={expanded} onClose={() => setExpanded(false)} />
+    <div id="admin-content" tabIndex={-1} inert={expanded} className="flex min-h-[calc(100dvh-3.5rem)] min-w-0 flex-col print:min-h-0">
+      <div className="min-w-0 flex-1"><ScreenErrorBoundary resetKey={pathname}><Outlet /></ScreenErrorBoundary></div>
+      <footer aria-label="Cuenta" className="flex flex-col items-end gap-2 border-t border-line bg-surface p-4 text-right md:px-6 print:hidden">
+        {userName && <p className="max-w-full text-sm text-muted wrap-anywhere">{userName}</p>}
+        <Button variant="secondary" onClick={logout}>Cerrar sesión</Button>
+      </footer>
+    </div>
   </div>
 }

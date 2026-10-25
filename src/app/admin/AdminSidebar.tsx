@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { Button } from '../../modules/core'
 
 interface Item { to: string; label: string; end?: boolean }
 interface Group { id: string; label: string; items: Item[] }
@@ -47,11 +46,9 @@ const linkClass = (isActive: boolean, nested = false) =>
  * entra desde la izquierda sobre la página, que se oscurece detrás; se cierra con la X,
  * tocando afuera, con Escape o al elegir una pantalla.
  */
-export function AdminSidebar({ userName, expanded, onClose, onLogout }: {
-  userName: string
+export function AdminSidebar({ expanded, onClose }: {
   expanded: boolean
   onClose: () => void
-  onLogout: () => void
 }) {
   const closeButton = useRef<HTMLButtonElement>(null)
   // Al abrirse, el foco pasa al menú para que el teclado y el lector de pantalla lo sigan.
@@ -72,8 +69,7 @@ export function AdminSidebar({ userName, expanded, onClose, onLogout }: {
         md:visible md:sticky md:top-14 md:bottom-auto md:z-auto md:h-[calc(100dvh-3.5rem)] md:w-auto md:max-w-none md:translate-x-0 md:border-r md:border-line md:shadow-none md:transition-none`}>
     <div className="flex items-start gap-3 bg-brand px-4 py-4 text-white md:hidden">
       <div className="min-w-0 flex-1">
-        <p className="text-lg font-semibold">GMSoft Administración</p>
-        {userName && <p className="mt-0.5 break-words text-sm text-white/80">Usuario: {userName}</p>}
+        <p className="text-lg font-semibold">Menú principal</p>
       </div>
       <button ref={closeButton} type="button" aria-label="Cerrar menú" onClick={onClose}
         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15 hover:bg-white/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
@@ -108,10 +104,6 @@ export function AdminSidebar({ userName, expanded, onClose, onLogout }: {
           </div>
         })}
       </nav>
-      <div className="mt-auto flex flex-col gap-3 border-t border-line p-4">
-        <p className="hidden break-words text-sm text-muted md:block">{userName}</p>
-        <Button variant="secondary" onClick={onLogout}>Cerrar sesión</Button>
-      </div>
     </div>
   </aside>
   </>
