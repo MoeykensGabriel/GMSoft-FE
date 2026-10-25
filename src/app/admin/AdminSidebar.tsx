@@ -16,10 +16,12 @@ const groups: Group[] = [
     { to: '/panel/promociones', label: 'Promociones' },
   ] },
   { id: 'reparto', label: 'Reparto', items: [
+    // En el orden del día: de la agenda y la carga de la mañana a la recepción y los números.
     { to: '/panel/agenda', label: 'Agenda' },
     { to: '/panel/carga', label: 'Carga inicial' },
+    { to: '/panel/salidas', label: 'Salidas' },
     { to: '/panel/recargas', label: 'Recargas' },
-    { to: '/panel/salidas', label: 'Salidas y recepción' },
+    { to: '/panel/recepcion', label: 'Recepción' },
     { to: '/panel/liquidacion', label: 'Liquidación' },
     { to: '/panel/resumen-diario', label: 'Resumen diario' },
     { to: '/panel/hoja-de-ruta', label: 'Hoja de ruta' },
