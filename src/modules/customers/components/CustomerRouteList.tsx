@@ -44,7 +44,7 @@ export function CustomerRouteList({ vehicleId, zones, routeDays, onSelect, noPur
       {customers.isSuccess && list.length === 0 && later.length === 0 && <p className="text-sm text-muted">{visited.length > 0 ? (debouncedSearch ? 'Los clientes de esa búsqueda ya fueron visitados.' : 'Ya visitaste a todos los clientes de esta salida.') : debouncedSearch ? 'No se encontraron clientes con esa búsqueda.' : 'No hay clientes programados para los días de esta salida en las zonas.'}</p>}
       {list.length > 0 && <div aria-hidden="true" className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)_minmax(0,1fr)] gap-2 rounded-t bg-accent px-2 py-3 text-xs font-semibold text-white"><span>Cliente</span><span>Dirección</span><span className="text-right">Deuda</span></div>}
       {zoneBlocks(zones, list).map((block) => <section key={block.zoneId} className="flex flex-col gap-2">
-        {zones.length > 1 && <h2 className="font-semibold">{block.zoneName} · {block.customers.length} clientes</h2>}
+        {zones.length > 1 && <h2 className="font-semibold text-danger">{block.zoneName} · {block.customers.length} clientes</h2>}
         <ul className="ui-card flex flex-col overflow-hidden">
           {block.customers.map((customer) => <li key={customer.id}><CustomerCard customer={customer} onSelect={onSelect} /></li>)}
         </ul>
