@@ -1,7 +1,9 @@
-export type ActionVariant = 'primary' | 'secondary' | 'danger' | 'navigation' | 'dark' | 'edit' | 'warning'
+export type ActionVariant = 'primary' | 'secondary' | 'danger' | 'navigation' | 'dark' | 'edit' | 'warning' | 'accent'
 
 const variants: Record<ActionVariant, string> = {
   warning: 'border-warning bg-warning text-white hover:bg-warning/90',
+  /** Celeste oscuro: lo de promociones, distinto del azul de navegación. */
+  accent: 'border-accent bg-accent text-white hover:bg-accent/90',
   primary: 'border-success bg-success text-white hover:bg-success-dark',
   secondary: 'border-line bg-surface text-brand hover:bg-accent-soft',
   danger: 'border-danger bg-danger text-white hover:bg-danger-dark',

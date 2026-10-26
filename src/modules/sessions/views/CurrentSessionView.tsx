@@ -70,8 +70,8 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
       <RouteHeader zoneName={zonesLabel(sesion)} date={sesion.openedAt} userName={user?.userName ?? sesion.driverName} routeDays={sesion.routeDays} />
       {modo === null && (
         <div className="grid grid-cols-3 gap-2">
-          <Button variant="navigation" className="min-h-14 px-2" onClick={() => elegir('ventas')}>Vender</Button>
-          <Button variant="primary" className="min-h-14 px-2" onClick={() => elegir('promociones')}>Promociones</Button>
+          <Button variant="primary" className="min-h-14 px-2" onClick={() => elegir('ventas')}>Vender</Button>
+          <Button variant="accent" className="min-h-14 px-2" onClick={() => elegir('promociones')}>Promociones</Button>
           <Button variant="warning" className="min-h-14 px-2" onClick={() => elegir('pedidos')}>Pedidos</Button>
         </div>
       )}
