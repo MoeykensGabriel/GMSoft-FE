@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
-import { Button, DataTable, ErrorMessage, Field, ManagementHeader, Pagination, Page } from '../../core'
+import { LinkButton, Button, DataTable, ErrorMessage, Field, ManagementHeader, Pagination, Page } from '../../core'
 import { vehicleService } from '../services/vehicleService'
 import { vehicleTypeLabels } from '../utils/vehicleTypeLabels'
 
@@ -19,7 +18,7 @@ export function VehicleListView() {
         <tbody>{vehicles.data.items.map((vehicle) => <tr key={vehicle.id}>
           <td className="font-semibold">{vehicle.name}</td><td>{vehicle.licensePlate}</td><td>{vehicleTypeLabels[vehicle.type]}</td>
           <td className="text-right tabular-nums">{vehicle.currentKilometers.toLocaleString('es-AR')}</td>
-          <td><Link to={`/panel/vehiculos/${vehicle.id}`} className="ui-link inline-flex min-h-11 items-center" aria-label={`Editar vehículo ${vehicle.name}`}>Editar</Link></td>
+          <td><LinkButton variant="edit" to={`/panel/vehiculos/${vehicle.id}`} aria-label={`Editar vehículo ${vehicle.name}`}>Editar</LinkButton></td>
         </tr>)}</tbody>
       </DataTable>}
       <Pagination {...vehicles.data} onChange={setPage} />

@@ -11,7 +11,15 @@ export interface Vehicle {
   currentKilometers: number
 }
 
-export type VehicleInput = Omit<Vehicle, 'id'>
+export type VehicleInput = Omit<Vehicle, 'id'> & { kilometersReason?: string }
+
+export interface VehicleKilometersCorrection {
+  correctedAt: string
+  previousKilometers: number
+  newKilometers: number
+  reason: string
+  correctedByName: string | null
+}
 
 /**
  * Una carga puesta arriba del camion y todavia sin salir. Va linea por linea y no
@@ -59,6 +67,7 @@ export interface RemovedVehicleLoad {
 }
 
 export const vehicleService = {
+  getKilometersCorrections: (id: string) => api.get<VehicleKilometersCorrection[]>(`/api/vehicles/${id}/kilometers-corrections`),
   listPage: (page: number, search: string) => api.get<PagedResult<Vehicle>>(
     `/api/vehicles?page=${page}&pageSize=20&search=${encodeURIComponent(search)}`),
   create: (input: VehicleInput) => api.post<string>('/api/vehicles', input),

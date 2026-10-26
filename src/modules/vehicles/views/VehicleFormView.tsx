@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Button, ErrorMessage, Page, PageHeader, BackButton } from '../../core'
 import { VehicleSchedulePanel } from '../components/VehicleSchedulePanel'
+import { VehicleKilometersCorrections } from '../components/VehicleKilometersCorrections'
 import { VehicleForm } from '../components/VehicleForm'
 import { vehicleService } from '../services/vehicleService'
 import type { VehicleInput } from '../services/vehicleService'
@@ -28,6 +29,7 @@ export function VehicleFormView() {
     <BackButton to="/panel/vehiculos" label="Volver a Vehículos" appearance="link" />
     <PageHeader title={<>{id ? 'Editar vehículo' : 'Nuevo vehículo'}</>} />
     <VehicleForm key={id ?? 'new'} initial={vehicle.data} saving={save.isPending} error={save.error} onSubmit={(input) => save.mutate(input)} />
+    {id && <VehicleKilometersCorrections vehicleId={id} />}
     {id && <VehicleSchedulePanel vehicleId={id} />}
   </Page>
 }
