@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { BUSINESS_TIME_ZONE, Button, DataTable, ErrorMessage, Field, Page, PageHeader, Pagination, Select, formatDateTime } from '../../core'
+import { BUSINESS_TIME_ZONE, Button, DataTable, ErrorMessage, Field, Page, PageHeader, Pagination, Select, WEEKDAYS, formatDateTime, weekdayLabels } from '../../core'
 import { OutsideWorkingHoursBadge } from '../../workingHours'
 import { vehicleService } from '../../vehicles'
 import type { PromotionFilters } from '../services/promotionService'
@@ -24,9 +24,12 @@ export function PromotionListView() {
   return <Page className="mx-auto flex max-w-7xl flex-col gap-4 p-6">
     <PageHeader title="Promociones" description="Pruebas de productos, prospectos y envases prestados." />
     <Link to="/panel/configuracion" className="ui-link self-start">Configurar plazo de retiro de promociones</Link>
-    <div className="ui-toolbar flex flex-wrap items-end gap-3">
+    <div className="ui-toolbar grid grid-cols-1 items-end gap-3 sm:flex sm:flex-wrap [&>div]:min-w-0">
       <Select label="Vehículo" value={filters.vehicleId} onChange={(event) => filter('vehicleId', event.target.value)}>
         <option value="">Elegí un vehículo</option>{vehicles.data?.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.name} · {vehicle.licensePlate}</option>)}
+      </Select>
+      <Select label="Día" value={filters.day ?? ''} onChange={(event) => filter('day', event.target.value ? Number(event.target.value) : null)}>
+        <option value="">Todos</option>{WEEKDAYS.map((day) => <option key={day.value} value={day.value}>{day.label}</option>)}
       </Select>
       <Select label="Estado" value={filters.status} onChange={(event) => filter('status', event.target.value as PromotionFilters['status'])}>
         <option value="">Todos</option><option value="Pending">Pendientes (incluye vencidas)</option>
@@ -44,10 +47,11 @@ export function PromotionListView() {
       : <>
         <p className="text-sm text-muted">{promotions.data.totalCount} promociones · Fechas de registro en horario de Argentina</p>
         {!promotions.data.items.length ? <p>No se encontraron promociones con estos filtros.</p> : <DataTable label="Promociones" className="min-w-[65rem]">
-          <thead><tr><th scope="col">Fecha</th><th scope="col">Vehículo</th><th scope="col">Chofer</th><th scope="col">Prospecto</th><th scope="col">Productos / envases</th><th scope="col">Retiro</th><th scope="col">Estado</th><th scope="col">Detalle</th></tr></thead>
+          <thead><tr><th scope="col">Fecha</th><th scope="col">Día</th><th scope="col">Vehículo</th><th scope="col">Chofer</th><th scope="col">Prospecto</th><th scope="col">Productos / envases</th><th scope="col">Retiro</th><th scope="col">Estado</th><th scope="col">Detalle</th></tr></thead>
           <tbody>{promotions.data.items.map((promotion) => <tr key={promotion.id}>
             <td>{formatDateTime(promotion.registeredAt, BUSINESS_TIME_ZONE)} <OutsideWorkingHoursBadge marked={promotion.isOutsideWorkingHours} />
               {promotion.closedAt && promotion.closedOutsideWorkingHours && <span className="block">Cierre: <OutsideWorkingHoursBadge marked /></span>}</td>
+            <td>{weekdayLabels(promotion.routeDays)}</td>
             <td>{promotion.vehicleName}<span className="block text-xs text-muted">{promotion.vehicleLicensePlate}</span></td>
             <td>{promotion.driverName}</td>
             <td>{promotion.prospect.contactName}<span className="block text-xs text-muted">{promotion.prospect.businessName}</span></td>

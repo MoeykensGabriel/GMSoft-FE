@@ -29,6 +29,7 @@ export interface Promotion {
   driverId: string
   driverName: string
   deliverySessionId: string
+  routeDays: number[]
   zoneId: string
   registeredAt: string
   pickupDate: string
@@ -66,6 +67,7 @@ export interface ClosePromotion {
   containersReturned: { productId: string; quantity: number }[]
 }
 export interface PromotionFilters {
+  day?: number | null
   status: PromotionStatus | ''
   vehicleId: string
   from: string
@@ -77,7 +79,7 @@ export const promotionService = {
   close: (id: string, body: ClosePromotion) => api.post<PromotionResult>(`/api/promotions/${encodeURIComponent(id)}/close`, body),
   list: (filters: PromotionFilters, page: number) => {
     const params = new URLSearchParams({ page: String(page), pageSize: '20' })
-    Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value) })
+    Object.entries(filters).forEach(([key, value]) => { if (value != null && value !== '') params.set(key, String(value)) })
     return api.get<PagedResult<Promotion>>(`/api/promotions?${params}`)
   },
   getById: (id: string) => api.get<Promotion>(`/api/promotions/${encodeURIComponent(id)}`),

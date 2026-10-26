@@ -21,7 +21,9 @@ function load(path, imports = {}) {
 }
 
 test('fechas locales, validación de prospectos y prioridad de pendientes', () => {
-  const { pickupLabel, validProspect, sortPending } = load('utils/promotion.ts')
+  const { pickupLabel, validProspect, sortPending } = load('utils/promotion.ts', {
+    '../../core': load('../core/utils/weekdays.ts'),
+  })
   assert.equal(pickupLabel('2026-10-07'), '07/10/2026')
   const prospect = { contactName: 'Ana', phone: '112233', address: 'Calle 123', businessName: null, notes: null, visitDays: [2, 5] }
   assert.equal(validProspect(prospect), true)
@@ -36,6 +38,20 @@ test('fechas locales, validación de prospectos y prioridad de pendientes', () =
   ]
   assert.deepEqual(sortPending(pending).map(({ id }) => id), ['a', 'b', 'c'])
   assert.equal(pending[0].id, 'c', 'No muta la caché de consultas')
+})
+
+test('el título de pendientes muestra los días del recorrido en minúscula y la cantidad', () => {
+  const { pendingTitle, pendingDaysLabel } = load('utils/promotion.ts', {
+    '../../core': load('../core/utils/weekdays.ts'),
+  })
+  assert.equal(pendingTitle([1], 15), 'Promociones del lunes · 15')
+  assert.equal(pendingTitle([1, 2], 15), 'Promociones del lunes y martes · 15')
+  assert.equal(pendingTitle([3], 1), 'Promociones del miércoles · 1')
+  assert.equal(pendingTitle([6], 0), 'Promociones del sábado')
+  assert.equal(pendingTitle([7], 2), 'Promociones del domingo · 2')
+  assert.equal(pendingTitle([5, 1, 3], 4), 'Promociones del lunes, miércoles y viernes · 4')
+  assert.equal(`No hay promociones del ${pendingDaysLabel([1])}.`, 'No hay promociones del lunes.')
+  assert.equal(`No hay promociones del ${pendingDaysLabel([1, 2])}.`, 'No hay promociones del lunes y martes.')
 })
 
 test('endpoints, filtros y cuerpos respetan el contrato sin enviar precios ni cobros', async () => {
@@ -61,6 +77,11 @@ test('endpoints, filtros y cuerpos respetan el contrato sin enviar precios ni co
   await promotionService.list({ status: 'Overdue', vehicleId: 'truck', from: '2026-10-01', to: '2026-10-31' }, 2)
   const params = new URL(calls.at(-1).path, 'http://offline.invalid').searchParams
   assert.deepEqual(Object.fromEntries(params), { page: '2', pageSize: '20', status: 'Overdue', vehicleId: 'truck', from: '2026-10-01', to: '2026-10-31' })
+  for (const day of [1, 7, null, undefined]) {
+    await promotionService.list({ status: '', vehicleId: 'truck', from: '', to: '', day }, 1)
+    const dayParams = new URL(calls.at(-1).path, 'http://offline.invalid').searchParams
+    assert.equal(dayParams.get('day'), day == null ? null : String(day))
+  }
   await promotionService.saveSettings(10)
   assert.deepEqual(calls.at(-1), { method: 'put', path: '/api/promotions/settings', body: { pickupDays: 10 } })
 })

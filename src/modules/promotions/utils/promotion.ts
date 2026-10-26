@@ -1,4 +1,14 @@
+import { weekdayLabels } from '../../core'
 import type { Promotion, Prospect } from '../services/promotionService'
+
+export function pendingDaysLabel(days: number[]) {
+  return weekdayLabels(days).toLowerCase().replace(/, ([^,]+)$/, ' y $1')
+}
+
+/** El número solo cuando hay: sin promociones o cargando, el título no dice «· 0». */
+export function pendingTitle(days: number[], count: number) {
+  return `Promociones del ${pendingDaysLabel(days)}${count > 0 ? ` · ${count}` : ''}`
+}
 
 // Una fecha local no se convierte a UTC ni a la zona del dispositivo.
 export function pickupLabel(date: string) {
