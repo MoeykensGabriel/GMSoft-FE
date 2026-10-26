@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { Button } from '../../modules/core'
 
 interface Item { to: string; label: string; end?: boolean }
 interface Group { id: string; label: string; items: Item[] }
@@ -46,9 +47,11 @@ const linkClass = (isActive: boolean, nested = false) =>
  * entra desde la izquierda sobre la página, que se oscurece detrás; se cierra con la X,
  * tocando afuera, con Escape o al elegir una pantalla.
  */
-export function AdminSidebar({ expanded, onClose }: {
+export function AdminSidebar({ userName, expanded, onClose, onLogout }: {
+  userName: string
   expanded: boolean
   onClose: () => void
+  onLogout: () => void
 }) {
   const closeButton = useRef<HTMLButtonElement>(null)
   // Al abrirse, el foco pasa al menú para que el teclado y el lector de pantalla lo sigan.
@@ -65,9 +68,9 @@ export function AdminSidebar({ expanded, onClose }: {
     <div aria-hidden="true" onClick={onClose}
       className={`fixed inset-0 z-30 bg-ink/50 transition-opacity duration-200 motion-reduce:transition-none md:hidden ${expanded ? 'opacity-100' : 'pointer-events-none opacity-0'}`} />
     <aside id="admin-navigation" aria-label="Menú"
-      className={`fixed inset-y-0 left-0 z-40 flex w-72 max-w-[85vw] flex-col bg-surface shadow-2xl transition-[translate,visibility] duration-200 motion-reduce:transition-none ${expanded ? 'visible translate-x-0' : 'invisible -translate-x-full'}
+      className={`fixed inset-y-0 left-0 z-40 flex h-dvh w-72 max-w-[85vw] flex-col bg-surface shadow-2xl transition-[translate,visibility] duration-200 motion-reduce:transition-none ${expanded ? 'visible translate-x-0' : 'invisible -translate-x-full'}
         md:visible md:sticky md:top-14 md:bottom-auto md:z-auto md:h-[calc(100dvh-3.5rem)] md:w-auto md:max-w-none md:translate-x-0 md:border-r md:border-line md:shadow-none md:transition-none`}>
-    <div className="flex items-start gap-3 bg-brand px-4 py-4 text-white md:hidden">
+    <div className="flex shrink-0 items-start gap-3 bg-brand px-4 py-4 text-white md:hidden">
       <div className="min-w-0 flex-1">
         <p className="text-lg font-semibold">Menú principal</p>
       </div>
@@ -78,7 +81,7 @@ export function AdminSidebar({ expanded, onClose }: {
         </svg>
       </button>
     </div>
-    <div className="hidden border-b border-line p-5 md:block">
+    <div className="hidden shrink-0 border-b border-line p-5 md:block">
       <p className="text-xs font-semibold uppercase tracking-wider text-muted">Menú principal</p>
     </div>
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
@@ -104,6 +107,10 @@ export function AdminSidebar({ expanded, onClose }: {
           </div>
         })}
       </nav>
+    </div>
+    <div role="group" aria-label="Cuenta" className="flex shrink-0 flex-col gap-2 border-t border-line p-4">
+      {userName && <p className="text-sm text-muted wrap-anywhere">{userName}</p>}
+      <Button variant="secondary" onClick={onLogout}>Cerrar sesión</Button>
     </div>
   </aside>
   </>

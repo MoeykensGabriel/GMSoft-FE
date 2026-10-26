@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../modules/auth'
-import { Button, ScreenErrorBoundary } from '../../modules/core'
+import { ScreenErrorBoundary } from '../../modules/core'
 import { AdminSidebar } from './AdminSidebar'
 
 /** El ancho desde el que el menú queda fijo al costado, como en la computadora. */
@@ -58,13 +58,8 @@ export function AdminLayout() {
       </button>
       <span className="col-start-2 text-center text-lg font-semibold tracking-wide">Administración</span>
     </header>
-    <AdminSidebar expanded={expanded} onClose={() => setExpanded(false)} />
-    <div id="admin-content" tabIndex={-1} inert={expanded} className="flex min-h-[calc(100dvh-3.5rem)] min-w-0 flex-col print:min-h-0">
-      <div className="min-w-0 flex-1"><ScreenErrorBoundary resetKey={pathname}><Outlet /></ScreenErrorBoundary></div>
-      <footer aria-label="Cuenta" className="flex flex-col items-end gap-2 border-t border-line bg-surface p-4 text-right md:px-6 print:hidden">
-        {userName && <p className="max-w-full text-sm text-muted wrap-anywhere">{userName}</p>}
-        <Button variant="secondary" onClick={logout}>Cerrar sesión</Button>
-      </footer>
-    </div>
+    <AdminSidebar userName={userName} expanded={expanded}
+      onClose={() => setExpanded(false)} onLogout={logout} />
+    <div id="admin-content" tabIndex={-1} inert={expanded} className="min-w-0"><ScreenErrorBoundary resetKey={pathname}><Outlet /></ScreenErrorBoundary></div>
   </div>
 }
