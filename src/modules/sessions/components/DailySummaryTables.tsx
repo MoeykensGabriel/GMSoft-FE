@@ -47,7 +47,7 @@ export function DailySummaryStockTable({ products, totals, isClosed, label, prov
   const differenceTitle = isClosed ? 'Diferencia' : provisional ? 'Saldo provisional' : 'A bordo'
   return <>
     {outOfRouteCount > 0 && <div className="flex flex-wrap items-center gap-2 text-sm">
-      <span>Ventas</span><Badge tone="warning">{outOfRouteCount} fuera de su día</Badge>
+      <span>Ventas</span><Badge tone="pedido">{outOfRouteCount} fuera de su día</Badge>
     </div>}
     <DataTable label={label} className="min-w-[64rem]">
     <colgroup><col /></colgroup><colgroup span={4} /><colgroup span={4} />

@@ -278,7 +278,7 @@ export function RegisterDeliveryView() {
         {fueraDeDia && <BackButton onClick={volver} label="Volver a Pedidos" appearance="link" />}
         {directo && customerId && !fueraDeDia && <BackButton to={`/reparto/clientes/${encodeURIComponent(customerId)}`} label="Volver a la ficha" appearance="link" />}
         <PageHeader title={<>Registrar visita</>} />
-        {fueraDeDia && <Badge tone="warning">Fuera de su día</Badge>}
+        {fueraDeDia && <Badge tone="pedido">Fuera de su día</Badge>}
         <p className="mt-1 text-sm text-muted">{zonesLabel(sesion)}</p>
       </div>
 
@@ -287,7 +287,7 @@ export function RegisterDeliveryView() {
         Esperá a que se confirme antes de cargar otra.
       </p>}
       <fieldset disabled={registrar.isPending || Boolean(guardada) || confirmando} className="flex min-w-0 flex-col gap-5">
-      {directo ? <div className="flex flex-col gap-3 ui-card p-3">
+      {directo ? <div className={`flex flex-col gap-3 ui-card p-3${fueraDeDia ? ' border-2 border-warning rounded' : ''}`}>
         <h2 className="font-semibold">{cliente.data?.displayName ?? 'Cargando cliente…'}</h2>
         <p className="text-sm">{cliente.data?.address}</p>
         {cuenta.data && <CustomerAccountSummary account={cuenta.data} />}

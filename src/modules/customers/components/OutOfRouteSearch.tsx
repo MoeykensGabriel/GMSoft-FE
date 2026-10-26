@@ -21,7 +21,7 @@ export function OutOfRouteSearch({ sessionId, onConfirm }: { sessionId: string; 
     staleTime: 0,
   })
   return <section className="flex min-w-0 flex-col gap-3" aria-label="Pedidos">
-    <div className="ui-card border-warning/30 bg-warning-soft p-3">
+    <div className="ui-card border-2 border-warning bg-surface p-3">
       <Field label="Buscar clientes" name="out-of-route-search" type="search" placeholder="Nombre, dirección o teléfono" value={search} onChange={(event) => setSearch(event.target.value)} />
     </div>
     {ready && <>
@@ -33,7 +33,7 @@ export function OutOfRouteSearch({ sessionId, onConfirm }: { sessionId: string; 
           <button type="button" className="flex min-h-11 w-full min-w-0 flex-col items-start gap-1 p-3 text-left break-words hover:bg-warning-soft" onClick={() => setSelected(customer)}>
             <span className="max-w-full font-semibold">{customer.name}</span>
             <span className="max-w-full text-sm text-muted">{customer.address}</span>
-            <Badge tone="warning">{outOfRouteChip(customer.visitDays, customer.zoneName)}</Badge>
+            <Badge tone="pedido">{outOfRouteChip(customer.visitDays, customer.zoneName)}</Badge>
           </button>
         </li>)}
       </ul>}
@@ -43,7 +43,7 @@ export function OutOfRouteSearch({ sessionId, onConfirm }: { sessionId: string; 
       <Button className="min-h-11" onClick={() => onConfirm(selected.id)}>Atenderlo hoy</Button>
     </>}>
       <p className="break-words font-semibold">{selected.name}</p>
-      <div><Badge tone="warning">{outOfRouteChip(selected.visitDays, selected.zoneName)}</Badge></div>
+      <div><Badge tone="pedido">{outOfRouteChip(selected.visitDays, selected.zoneName)}</Badge></div>
     </Modal>}
   </section>
 }

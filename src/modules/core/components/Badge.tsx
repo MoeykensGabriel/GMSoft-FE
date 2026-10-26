@@ -6,6 +6,7 @@ const tones = {
   success: 'border-success/30 bg-success-soft text-success-dark',
   danger: 'border-danger/30 bg-danger-soft text-danger-dark',
   warning: 'border-warning/30 bg-warning-soft text-warning',
+  pedido: 'border-warning bg-warning text-white',
 }
 
 export function Badge({ children, tone = 'neutral' }: { children: ReactNode; tone?: keyof typeof tones }) {
