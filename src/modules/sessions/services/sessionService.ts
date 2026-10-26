@@ -119,6 +119,7 @@ export interface SessionDeliveryContainer {
 }
 
 export interface SessionDelivery {
+  isOutOfRoute: boolean
   isOutsideWorkingHours: boolean
   deliveryId: string
   customerId: string
@@ -202,6 +203,7 @@ export interface CustomerSettlementLine {
 
 /** Un cliente dentro de la liquidacion detallada de una salida. */
 export interface CustomerSettlement {
+  isOutOfRoute: boolean
   customerId: string
   customerName: string
   customerAddress: string

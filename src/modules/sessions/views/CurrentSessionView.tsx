@@ -3,7 +3,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { CustomerRouteList, RouteUpdateNotice, useRouteLater } from '../../customers'
+import { CustomerRouteList, OutOfRouteSearch, RouteUpdateNotice, useRouteLater } from '../../customers'
 import { useAuth } from '../../auth'
 import { RouteHeader } from '../components/RouteHeader'
 import { Button, formatDateTime, InstallAppButton, LinkButton, Page, useOutbox, BackButton } from '../../core'
@@ -14,7 +14,7 @@ import { RestockNotice } from '../components/RestockNotice'
 import { OutboxNotice } from '../components/OutboxNotice'
 import { SalesSoFarCard } from '../components/SalesSoFarCard'
 
-type Modo = 'ventas' | 'promociones'
+type Modo = 'ventas' | 'promociones' | 'pedidos'
 
 const MODO_KEY = 'gmsoft.reparto.modo'
 
@@ -23,7 +23,7 @@ const MODO_KEY = 'gmsoft.reparto.modo'
 function leerModo(): Modo | null {
   try {
     const guardado = window.sessionStorage.getItem(MODO_KEY)
-    return guardado === 'ventas' || guardado === 'promociones' ? guardado : null
+    return guardado === 'ventas' || guardado === 'promociones' || guardado === 'pedidos' ? guardado : null
   } catch {
     return null
   }
@@ -43,7 +43,10 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
-  const [modo, setModo] = useState<Modo | null>(leerModo)
+  const [modo, setModo] = useState<Modo | null>(() => {
+    if (location.state?.modo === 'pedidos') { guardarModo('pedidos'); return 'pedidos' }
+    return leerModo()
+  })
   const elegir = (nuevo: Modo | null) => { guardarModo(nuevo); setModo(nuevo) }
   // Las visitas ya hechas en esta salida: la lista de pendientes se acorta con cada una.
   const visitas = useQuery({
@@ -66,9 +69,10 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
       <RouteUpdateNotice key={sesion.id} vehicleId={sesion.vehicleId} zones={orderedZones(sesion)} routeDays={sesion.routeDays} />
       <RouteHeader zoneName={zonesLabel(sesion)} date={sesion.openedAt} userName={user?.userName ?? sesion.driverName} routeDays={sesion.routeDays} />
       {modo === null && (
-        <div className="grid grid-cols-2 gap-2">
-          <Button variant="navigation" className="min-h-14" onClick={() => elegir('ventas')}>Vender</Button>
-          <Button variant="primary" className="min-h-14" onClick={() => elegir('promociones')}>Promociones</Button>
+        <div className="grid grid-cols-3 gap-2">
+          <Button variant="navigation" className="min-h-14 px-2" onClick={() => elegir('ventas')}>Vender</Button>
+          <Button variant="primary" className="min-h-14 px-2" onClick={() => elegir('promociones')}>Promociones</Button>
+          <Button variant="warning" className="min-h-14 px-2" onClick={() => elegir('pedidos')}>Pedidos</Button>
         </div>
       )}
       {modo !== null && <BackButton onClick={() => elegir(null)} label="Volver al menú principal" />}
@@ -86,7 +90,8 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
         <LinkButton to="/reparto/promocion" variant="primary" className="min-h-14">+ Registrar promoción</LinkButton>
         {promotions}
       </>}
-      {modo === 'ventas' && <SalesSoFarCard key={sesion.id} sessionId={sesion.id} />}
+      {modo === 'pedidos' && <OutOfRouteSearch key={sesion.id} sessionId={sesion.id} onConfirm={(id) => navigate(`/reparto/visita?customerId=${encodeURIComponent(id)}&fueraDeDia=1`)} />}
+      {(modo === 'ventas' || modo === 'pedidos') && <SalesSoFarCard key={sesion.id} sessionId={sesion.id} />}
       <details className="ui-card p-3">
         <summary className="min-h-11 cursor-pointer py-3 text-sm font-medium">Vehículo y carga a bordo</summary>
       <div className="mt-3">

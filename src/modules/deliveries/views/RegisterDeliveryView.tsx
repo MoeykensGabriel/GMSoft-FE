@@ -5,7 +5,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useQueries } from '@tanstack/react-query'
 import { productService } from '../../products'
 import { customerService, CustomerAccountSummary } from '../../customers'
-import { ApiError, Button, Field, Select, formatMoney, currentBusinessWeekday, isDefiniteRejection, newRequestId, outbox, PageHeader, useOutbox, BackButton } from '../../core'
+import { ApiError, Badge, Button, Field, Select, formatMoney, currentBusinessWeekday, isDefiniteRejection, newRequestId, outbox, PageHeader, useOutbox, BackButton } from '../../core'
 import { useAuth } from '../../auth'
 import { useCurrentSession } from '../../sessions'
 import { CustomerPicker } from '../components/CustomerPicker'
@@ -38,7 +38,9 @@ export function RegisterDeliveryView() {
   const bandeja = useOutbox(userId)
   const registrar = useRegisterDelivery()
   const [customerId, setCustomerId] = useState<string | null>(params.get('customerId'))
-  const [esNuevo, setEsNuevo] = useState(params.get('new') === '1')
+  const fueraDeDia = params.get('fueraDeDia') === '1' && Boolean(params.get('customerId'))
+  const volver = () => navigate('/reparto', fueraDeDia ? { state: { modo: 'pedidos' } } : undefined)
+  const [esNuevo, setEsNuevo] = useState(!fueraDeDia && params.get('new') === '1')
   const specialPrices = useQuery({
     queryKey: ['customers', 'prices', customerId],
     queryFn: () => customerService.getPrices(customerId!),
@@ -135,7 +137,7 @@ export function RegisterDeliveryView() {
             {registrar.isPending ? 'Enviando…' : 'Reintentar ahora'}
           </Button>
         </>}
-        <Button variant="secondary" onClick={() => navigate('/reparto')}>Volver a la salida</Button>
+        <Button variant="secondary" onClick={volver}>Volver a la salida</Button>
       </div>
     )
   }
@@ -158,7 +160,7 @@ export function RegisterDeliveryView() {
             </span>
           </div>
         </div>
-        <Button variant="secondary" onClick={() => navigate('/reparto')}>Volver a la salida</Button>
+        <Button variant="secondary" onClick={volver}>Volver a la salida</Button>
       </div>
     )
   }
@@ -179,8 +181,8 @@ export function RegisterDeliveryView() {
   })
   const clienteValido = Boolean(cliente.data?.isActive && !cliente.data.removalPending
     && cliente.data.vehicleId === sesion.vehicleId
-    && orderedZones(sesion).some((zone) => zone.zoneId === cliente.data?.zoneId)
-    && cliente.data.visitDays?.some((day) => sesion.routeDays.includes(day)))
+    && (fueraDeDia || (orderedZones(sesion).some((zone) => zone.zoneId === cliente.data?.zoneId)
+    && cliente.data.visitDays?.some((day) => sesion.routeDays.includes(day)))))
   const datosListos = productsReady && (esNuevo || cuenta.isSuccess)
   // En el orden del camion y en centavos, igual que el editor: es lo que se muestra
   // para confirmar. El importe definitivo lo calcula el servidor.
@@ -226,6 +228,7 @@ export function RegisterDeliveryView() {
         notes: notas.trim() === '' ? null : notas.trim(),
         clientRequestId: requestId,
         expectedSessionId: sesion!.id,
+        ...(fueraDeDia ? { outOfRoute: true } : {}),
       }
     if (!pendiente.current) {
       // Otra pestaña pudo haber guardado una visita de este cliente recién: se vuelve a mirar.
@@ -272,8 +275,10 @@ export function RegisterDeliveryView() {
   return (
     <form onSubmit={onSubmit} className="ui-card mx-auto flex max-w-md flex-col gap-5 p-6">
       <div>
-        {directo && customerId && <BackButton to={`/reparto/clientes/${encodeURIComponent(customerId)}`} label="Volver a la ficha" appearance="link" />}
+        {fueraDeDia && <BackButton onClick={volver} label="Volver a Pedidos" appearance="link" />}
+        {directo && customerId && !fueraDeDia && <BackButton to={`/reparto/clientes/${encodeURIComponent(customerId)}`} label="Volver a la ficha" appearance="link" />}
         <PageHeader title={<>Registrar visita</>} />
+        {fueraDeDia && <Badge tone="warning">Fuera de su día</Badge>}
         <p className="mt-1 text-sm text-muted">{zonesLabel(sesion)}</p>
       </div>
 
@@ -338,11 +343,11 @@ export function RegisterDeliveryView() {
         </p>
       )}
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={(!esNuevo && !clienteValido) || registrar.isPending || !datosListos || !mueveAlgo || !prestamosValidos || (esNuevo && !vendeAlgo) || Boolean(guardada) || (vendeAlgo && !pricesReady) || (!esNuevo && !customerId) || (directo && (!cliente.data || !cuenta.data || cliente.isError || cuenta.isError || !clienteValido))}>
           {registrar.isPending ? 'Registrando...' : vendeAlgo ? 'Confirmar venta' : 'Registrar visita'}
         </Button>
-        <Button type="button" variant="danger" onClick={() => navigate(directo && customerId ? `/reparto/clientes/${encodeURIComponent(customerId)}` : '/reparto')}>
+        <Button type="button" variant="danger" onClick={() => fueraDeDia ? volver() : navigate(directo && customerId ? `/reparto/clientes/${encodeURIComponent(customerId)}` : '/reparto')}>
           Cancelar
         </Button>
       </div>

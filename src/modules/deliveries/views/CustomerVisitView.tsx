@@ -1,16 +1,17 @@
 import { orderedZones } from '../../zones'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Button, ErrorMessage, LinkButton, Page, useOutbox, BackButton } from '../../core'
 import { useAuth } from '../../auth'
-import { customerService, CustomerProfileCard, CustomerBalanceCard, CustomerAccountMovements, CustomerContainersSummary, routeLaterStorage } from '../../customers'
+import { canOfferNoPurchase, customerService, CustomerProfileCard, CustomerBalanceCard, CustomerAccountMovements, CustomerContainersSummary, routeLaterStorage } from '../../customers'
 import { useCurrentSession } from '../../sessions'
 import { NoPurchaseAction } from '../components/NoPurchaseAction'
 import { RemovalAction } from '../components/RemovalAction'
 
 export function CustomerVisitView() {
   const { id } = useParams()
+  const [params] = useSearchParams()
   const navigate = useNavigate()
   const { user } = useAuth()
   const bandeja = useOutbox(user?.userId ?? '')
@@ -47,7 +48,7 @@ export function CustomerVisitView() {
         </p>}
         {/* Los dos del mismo tamaño en la misma fila: no compró hoy (rojo) o no va a comprar más (negro). */}
         <div className="grid grid-cols-2 gap-2">
-          <NoPurchaseAction key={id} customerId={id!} customerName={customer.data!.displayName} blocked={Boolean(guardada)} />
+          {canOfferNoPurchase(params.get('fueraDeDia') === '1') && <NoPurchaseAction key={id} customerId={id!} customerName={customer.data!.displayName} blocked={Boolean(guardada)} />}
           <RemovalAction key={`baja-${id}`} customerId={id!} customerName={customer.data!.displayName} account={account.data!} />
         </div>
         {/* No lo saca del recorrido: lo manda al final de la hoja de hoy. */}

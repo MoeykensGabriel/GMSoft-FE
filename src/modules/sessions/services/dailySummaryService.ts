@@ -29,6 +29,7 @@ export interface SummaryMoney {
 }
 
 export interface SessionDailySummary extends SessionWorkingHours {
+  outOfRouteCount: number
   sessionId: string
   vehicleId: string
   vehicleName: string

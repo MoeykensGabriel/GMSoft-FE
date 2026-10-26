@@ -25,7 +25,7 @@ export function SessionDailySummaryCard({ session }: { session: SessionDailySumm
       <OutsideWorkingHoursEvents events={session.outsideWorkingHoursEvents} />
       <DailySummaryMoneyTable money={session.money} isClosed={session.isClosed} label="Dinero de la salida" />
       {!session.isClosed && <p className="text-sm text-muted">A bordo es lo que sigue en el camión. El cuadre se confirma al recibirlo.</p>}
-      <DailySummaryStockTable products={session.products} totals={session.totals} isClosed={session.isClosed} label="Productos de la salida" />
+      <DailySummaryStockTable outOfRouteCount={session.outOfRouteCount} products={session.products} totals={session.totals} isClosed={session.isClosed} label="Productos de la salida" />
     </div>
   </article>
 }

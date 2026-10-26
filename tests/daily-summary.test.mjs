@@ -91,7 +91,7 @@ test('diferencia conserva el número y texto accesible; el cero nunca usa rojo',
 
 const tables = load('sessions/components/DailySummaryTables.tsx', {
   'react/jsx-runtime': runtime,
-  '../../core': { DataTable: 'table', formatMoney: (n) => `$ ${n}` },
+  '../../core': { DataTable: 'table', Badge: 'badge', formatMoney: (n) => `$ ${n}` },
   './SummaryDifference': { SummaryDifference: 'difference' },
 })
 const stock = { fullLoaded: 15, fullSold: 6, fullReturned: 0, fullDifference: 9,
@@ -106,11 +106,26 @@ test('tabla agrupa llenos y vacíos, renombra ambas diferencias y usa totales ce
     const title = isClosed ? 'Diferencia' : 'A bordo'
     assert.equal(all.filter((node) => node.type === 'th' && node.props.children === title).length, 2)
     assert.ok(all.find((node) => node.type === 'tfoot').props.children.props.className.includes('bg-accent-soft'))
-    assert.ok(tree.props.className.includes('min-w-'))
+    assert.ok(all.find((node) => node.type === 'table').props.className.includes('min-w-'))
   }
   const pending = tables.DailySummaryMoneyTable({ money: { cashExpected: 100, cashDeclared: null,
     cashDifference: null, transfer: 20, card: 10 }, isClosed: false, label: 'Dinero' })
   assert.ok(JSON.stringify(pending).includes('Pendiente · Todavía no se rindió'))
+})
+
+test('el contador fuera de día aparece una sola vez y fuera del encabezado oculto en celular', () => {
+  for (const outOfRouteCount of [0, 2]) {
+    const tree = tables.DailySummaryStockTable({ products: [], totals: stock, isClosed: false,
+      label: 'Productos', outOfRouteCount })
+    const all = nodes(tree)
+    const badges = all.filter((node) => node.type === 'badge')
+    assert.equal(badges.length, outOfRouteCount > 0 ? 1 : 0)
+    if (outOfRouteCount > 0) {
+      assert.equal(badges[0].props.tone, 'warning')
+      assert.equal(badges[0].props.children.join(''), '2 fuera de su día')
+      assert.equal(nodes(all.find((node) => node.type === 'table')).filter((node) => node.type === 'badge').length, 0)
+    }
+  }
 })
 
 function viewHarness({ vehicleId = '', date = '2026-10-08', data, error = null, loading = false } = {}) {

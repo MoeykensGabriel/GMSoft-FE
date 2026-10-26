@@ -3,6 +3,15 @@ import { api } from '../../core'
 import type { PagedResult } from '../../core'
 import type { RemovalReason, RemovalStatus } from '../utils/removal'
 
+export interface OutOfRouteCustomer {
+  id: string
+  name: string
+  address: string
+  zoneId: string
+  zoneName: string
+  visitDays: number[]
+}
+
 export interface Customer {
   id: string
   businessName: string | null
@@ -140,6 +149,8 @@ export interface RemovalRequestInput {
 }
 
 export const customerService = {
+  searchOutOfRoute: (search: string) =>
+    api.get<OutOfRouteCustomer[]>(`/api/customers/out-of-route?search=${encodeURIComponent(search.trim())}`),
   listRoute: async (zones: { zoneId: string }[], routeDays: number[], vehicleId: string, search = ''): Promise<Customer[]> => {
     const blocks = await Promise.all(zones.map(async ({ zoneId }) => {
       const items: Customer[] = []

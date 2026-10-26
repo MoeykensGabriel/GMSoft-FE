@@ -18,6 +18,7 @@ export interface RegisterDeliveryRequest {
   customerId: string | null
   newCustomer: NewCustomerLine | null
   type: DeliveryType
+  outOfRoute?: boolean
   noPurchaseReason?: NoPurchaseReason
   items: { productId: string; quantity: number }[]
   containersOut: { productId: string; quantity: number }[]

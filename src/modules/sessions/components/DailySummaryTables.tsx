@@ -1,4 +1,4 @@
-import { DataTable, formatMoney } from '../../core'
+import { Badge, DataTable, formatMoney } from '../../core'
 import type { SummaryMoney, SummaryProduct, SummaryStock } from '../services/dailySummaryService'
 import { SummaryDifference } from './SummaryDifference'
 
@@ -36,15 +36,20 @@ function StockCells({ stock, isClosed }: { stock: SummaryStock; isClosed: boolea
   </>
 }
 
-export function DailySummaryStockTable({ products, totals, isClosed, label, provisional = false }: {
+export function DailySummaryStockTable({ products, totals, isClosed, label, provisional = false, outOfRouteCount = 0 }: {
   products: SummaryProduct[]
   totals: SummaryStock
   isClosed: boolean
   label: string
   provisional?: boolean
+  outOfRouteCount?: number
 }) {
   const differenceTitle = isClosed ? 'Diferencia' : provisional ? 'Saldo provisional' : 'A bordo'
-  return <DataTable label={label} className="min-w-[64rem]">
+  return <>
+    {outOfRouteCount > 0 && <div className="flex flex-wrap items-center gap-2 text-sm">
+      <span>Ventas</span><Badge tone="warning">{outOfRouteCount} fuera de su día</Badge>
+    </div>}
+    <DataTable label={label} className="min-w-[64rem]">
     <colgroup><col /></colgroup><colgroup span={4} /><colgroup span={4} />
     <thead>
       <tr>
@@ -73,5 +78,6 @@ export function DailySummaryStockTable({ products, totals, isClosed, label, prov
     <tfoot><tr className="bg-accent-soft font-semibold">
       <th scope="row">Totales</th><StockCells stock={totals} isClosed={isClosed} />
     </tr></tfoot>
-  </DataTable>
+    </DataTable>
+  </>
 }
