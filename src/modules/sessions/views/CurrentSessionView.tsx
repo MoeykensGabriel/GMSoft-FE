@@ -66,7 +66,7 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
       {location.state?.routeSaved && <p role="status" className="ui-card p-3">Recorrido guardado</p>}
       {user && <RestockNotice userId={user.userId} session={sesion} />}
       {user && <OutboxNotice userId={user.userId} items={bandeja.filter((item) => item.sessionId === sesion.id || item.status === 'failed')} />}
-      <RouteUpdateNotice key={sesion.id} vehicleId={sesion.vehicleId} zones={orderedZones(sesion)} routeDays={sesion.routeDays} />
+      <RouteUpdateNotice key={`ruta-${sesion.id}`} vehicleId={sesion.vehicleId} zones={orderedZones(sesion)} routeDays={sesion.routeDays} />
       <RouteHeader zoneName={zonesLabel(sesion)} date={sesion.openedAt} userName={user?.userName ?? sesion.driverName} routeDays={sesion.routeDays} />
       {modo === null && (
         <div className="grid grid-cols-3 gap-2">
@@ -90,8 +90,8 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
         <LinkButton to="/reparto/promocion" variant="primary" className="min-h-14">+ Registrar promoción</LinkButton>
         {promotions}
       </>}
-      {modo === 'pedidos' && <OutOfRouteSearch key={sesion.id} sessionId={sesion.id} onConfirm={(id) => navigate(`/reparto/visita?customerId=${encodeURIComponent(id)}&fueraDeDia=1`)} />}
-      {(modo === 'ventas' || modo === 'pedidos') && <SalesSoFarCard key={sesion.id} sessionId={sesion.id} />}
+      {modo === 'pedidos' && <OutOfRouteSearch key={`pedidos-${sesion.id}`} sessionId={sesion.id} onConfirm={(id) => navigate(`/reparto/visita?customerId=${encodeURIComponent(id)}&fueraDeDia=1`)} />}
+      {(modo === 'ventas' || modo === 'pedidos') && <SalesSoFarCard key={`vendido-${sesion.id}`} sessionId={sesion.id} />}
       <details className="ui-card p-3">
         <summary className="min-h-11 cursor-pointer py-3 text-sm font-medium">Vehículo y carga a bordo</summary>
       <div className="mt-3">
