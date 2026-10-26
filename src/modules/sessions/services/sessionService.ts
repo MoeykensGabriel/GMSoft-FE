@@ -7,6 +7,16 @@ import type { RouteOrderChange } from './routeOrderService'
 
 export type SessionStatus = 'Open' | 'Closed' | 'Cancelled'
 export type ContainerState = 'Full' | 'Empty'
+export interface SalesSummary {
+  total: number
+  cash: number
+  transfer: number
+  card: number
+  sales: number
+  visits: number
+  products: { productId: string; productDetail: string; quantity: number }[]
+}
+
 export interface RegisterRestockRequest {
   confirmOutsideWorkingHours?: boolean
   clientRequestId: string
@@ -208,6 +218,8 @@ export interface CustomerSettlement {
 }
 
 export const sessionService = {
+  getSalesSummary: (sessionId: string) =>
+    api.get<SalesSummary>(`/api/sessions/${sessionId}/sales-summary`),
   getUnvisitedCustomers: (sessionId: string) =>
     api.get<{ items: Customer[]; total: number }>(`/api/sessions/${sessionId}/unvisited-customers`),
   registerRestock: (sessionId: string, body: RegisterRestockRequest) =>

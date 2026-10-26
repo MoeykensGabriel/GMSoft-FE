@@ -12,6 +12,7 @@ import type { Session } from '../services/sessionService'
 import { RestocksPanel } from '../components/RestocksPanel'
 import { RestockNotice } from '../components/RestockNotice'
 import { OutboxNotice } from '../components/OutboxNotice'
+import { SalesSoFarCard } from '../components/SalesSoFarCard'
 
 type Modo = 'ventas' | 'promociones'
 
@@ -85,6 +86,7 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
         <LinkButton to="/reparto/promocion" variant="primary" className="min-h-14">+ Registrar promoción</LinkButton>
         {promotions}
       </>}
+      {modo === 'ventas' && <SalesSoFarCard key={sesion.id} sessionId={sesion.id} />}
       <details className="ui-card p-3">
         <summary className="min-h-11 cursor-pointer py-3 text-sm font-medium">Vehículo y carga a bordo</summary>
       <div className="mt-3">
