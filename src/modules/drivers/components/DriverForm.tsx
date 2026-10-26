@@ -51,9 +51,9 @@ export function DriverForm({ initial, vehicles, saving, error, onSubmit }: {
       <legend className="font-semibold">Usuario de acceso</legend>
       <Field label="Usuario" name="userName" autoComplete="off" required={!initial} readOnly={Boolean(initial)} maxLength={50}
         pattern="[a-zA-Z0-9._\-]+" title="Letras, números, punto, guion y guion bajo, sin espacios."
-        value={userName} onChange={(e) => setUserName(e.target.value)} />
+        value={initial ? initial.userName ?? '' : userName} onChange={(e) => setUserName(e.target.value)} />
       <Field label="Email (opcional)" name="email" type="email" readOnly={Boolean(initial)} maxLength={150} value={email} onChange={(e) => setEmail(e.target.value)} />
-      {initial ? <p className="text-sm text-muted">El usuario y el email se establecen al crear el chofer. Podés cambiar su contraseña más abajo.</p>
+      {initial ? <p className="text-sm text-muted">El email se establece al crear el chofer. El usuario y la contraseña se cambian más abajo.</p>
         : <><p className="text-sm text-muted">El chofer ingresará con este usuario. Su cuenta se crea junto con la ficha.</p>
           <PasswordFields password={password} onPasswordChange={setPassword} /></>}
     </fieldset>

@@ -7,6 +7,7 @@ import { AccessCard } from '../components/AccessCard'
 import { DriverForm } from '../components/DriverForm'
 import type { DriverFormValues } from '../components/DriverForm'
 import { DriverPasswordForm } from '../components/DriverPasswordForm'
+import { DriverUserNameForm } from '../components/DriverUserNameForm'
 import { driverService } from '../services/driverService'
 
 export function DriverFormView() {
@@ -45,6 +46,7 @@ export function DriverFormView() {
     <BackButton to="/panel/choferes" label="Volver a Choferes" appearance="link" />
     <PageHeader title={<>{id ? 'Editar chofer' : 'Nuevo chofer'}</>} />
     <DriverForm key={`profile-${id ?? 'new'}`} initial={id ? driver.data : undefined} vehicles={vehicles.data ?? []} saving={save.isPending} error={save.error} onSubmit={(values) => save.mutate(values)} />
+    {id && driver.data?.userName && <DriverUserNameForm key={`username-${id}`} driverId={id} userName={driver.data.userName} password={driver.data.password} phone={driver.data.phone} disabled={save.isPending} />}
     {id && driver.data?.userName && <DriverPasswordForm key={`password-${id}`} driverId={id} userName={driver.data.userName} phone={driver.data.phone} disabled={save.isPending} />}
   </Page>
 }

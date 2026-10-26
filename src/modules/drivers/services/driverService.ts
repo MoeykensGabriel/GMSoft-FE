@@ -29,6 +29,7 @@ export const driverService = {
   create: (input: NewDriverInput) => api.post<string>('/api/drivers', input),
   update: (id: string, input: DriverInput) => api.put<void>(`/api/drivers/${id}`, { id, ...input }),
   resetPassword: (id: string, newPassword: string) => api.put<void>(`/api/drivers/${id}/password`, { id, newPassword }),
+  changeUserName: (id: string, userName: string) => api.put<void>(`/api/drivers/${id}/username`, { id, userName }),
   listActive: async (): Promise<DriverProfile[]> => {
     const drivers: DriverProfile[] = []
     for (let page = 1; ; page += 1) {
