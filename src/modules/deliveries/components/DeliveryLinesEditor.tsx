@@ -1,4 +1,4 @@
-import { QuantityInput, formatMoney } from '../../core'
+import { QuantityInput, ProductQuantityCard, formatMoney } from '../../core'
 import type { SessionStockLine } from '../../sessions'
 import type { Product } from '../../products'
 import { loanLimits } from '../utils/loans'
@@ -48,15 +48,13 @@ export function DeliveryLinesEditor({ stock, prices, lineas, onChange, products,
       <h2 className="ui-section-heading rounded">Productos a vender</h2>
       {stock.map((product) => {
         const price = prices[product.productId]
-        return <div key={product.productId} className="flex flex-col gap-3 ui-card bg-surface p-3">
-          <div>
-            <h3 className="font-medium">{product.productDetail}</h3>
-            <p className="text-sm text-muted">{product.fullOnBoard} disponibles · {price === undefined ? 'Precio pendiente' : `${formatMoney(price)} por unidad`}</p>
-          </div>
-          <QuantityInput label={`Cantidad de ${product.productDetail}`} value={quantity(product.productId, 'vende')}
-            max={Math.min(1000, product.fullOnBoard - quantity(product.productId, 'presta'))} onChange={(value) => set(product, 'vende', value)} />
-          <p className="flex justify-between text-sm"><span>Subtotal</span><strong>{price === undefined ? '—' : formatMoney(subtotal(product.productId) / 100)}</strong></p>
-        </div>
+        return <QuantityInput key={product.productId} label={product.productDetail}
+          description={<>
+            <p>{product.fullOnBoard} disponibles · {price === undefined ? 'Precio pendiente' : `${formatMoney(price)} por unidad`}</p>
+            <p>Subtotal <strong>{price === undefined ? '—' : formatMoney(subtotal(product.productId) / 100)}</strong></p>
+          </>}
+          value={quantity(product.productId, 'vende')}
+          max={Math.min(1000, product.fullOnBoard - quantity(product.productId, 'presta'))} onChange={(value) => set(product, 'vende', value)} />
       })}
       <div aria-live="polite" className="flex justify-between rounded border border-accent bg-accent-soft p-4 text-brand-dark text-lg font-semibold">
         <span>Total de la venta</span><span>{ready ? formatMoney(total) : '—'}</span>
@@ -68,12 +66,12 @@ export function DeliveryLinesEditor({ stock, prices, lineas, onChange, products,
         onChange={(value) => set({ productId: product.id, productDetail: product.detail }, 'retiraEnvases', value)} />)}
       {loans.length > 0 && <>
         <h2 className="ui-section-heading rounded">Préstamos</h2>
-        {loans.map((product) => <div key={product.productId} className="ui-card flex flex-col gap-3 p-3">
-          <QuantityInput label={`Prestar ${product.productDetail}`} value={quantity(product.productId, 'presta')}
+        {loans.map((product) => <ProductQuantityCard key={product.productId} name={product.productDetail}>
+          <QuantityInput variant="inline" label={`Prestar ${product.productDetail}`} value={quantity(product.productId, 'presta')}
             max={product.maxOut} onChange={(value) => set(product, 'presta', value)} />
-          <QuantityInput label={`Retirar ${product.productDetail}`} value={quantity(product.productId, 'retiraPrestamo')}
+          <QuantityInput variant="inline" label={`Retirar ${product.productDetail}`} value={quantity(product.productId, 'retiraPrestamo')}
             max={product.maxIn} onChange={(value) => set(product, 'retiraPrestamo', value)} />
-        </div>)}
+        </ProductQuantityCard>)}
       </>}
     </div>
   )

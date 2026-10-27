@@ -76,11 +76,11 @@ export function RegisterPromotionView() {
           <Button type="button" variant="secondary" onClick={() => products.forEach((query) => { void query.refetch() })}>Reintentar productos</Button>
         </>}
         {ready && available.every((line) => line.fullOnBoard <= 0) && <p>No tenés llenos disponibles para promociones.</p>}
-        {available.filter((line) => line.fullOnBoard > 0 || quantities[line.productId] > 0).map((line) => <div key={line.productId} className="ui-card flex flex-col gap-2 p-3">
-          <p className="text-sm">{line.fullOnBoard} llenos disponibles · {line.tracking === 'ByBalance' ? 'Un envase prestado por unidad' : 'Sin envases prestados'}</p>
-          <QuantityInput label={line.productDetail} value={quantities[line.productId] ?? 0} max={line.fullOnBoard}
-            onChange={(quantity) => setQuantities({ ...quantities, [line.productId]: quantity })} />
-        </div>)}
+        {available.filter((line) => line.fullOnBoard > 0 || quantities[line.productId] > 0).map((line) =>
+          <QuantityInput key={line.productId} label={line.productDetail}
+            description={<>{line.fullOnBoard} llenos disponibles · {line.tracking === 'ByBalance' ? 'Un envase prestado por unidad' : 'Sin envases prestados'}</>}
+            value={quantities[line.productId] ?? 0} max={line.fullOnBoard}
+            onChange={(quantity) => setQuantities({ ...quantities, [line.productId]: quantity })} />)}
       </fieldset>
       {validation && <p role="alert" className="text-danger text-sm">{validation}</p>}
       {write.locked && <p className="text-sm">Hay un envío pendiente de confirmar. Conservamos sus datos para reintentarlo.</p>}

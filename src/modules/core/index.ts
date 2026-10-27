@@ -31,9 +31,11 @@ export { ErrorMessage } from './components/ErrorMessage'
 export { ScreenErrorBoundary } from './components/ScreenErrorBoundary'
 export { Select } from './components/Select'
 export { Textarea } from './components/Textarea'
-export { QuantityInput } from './components/QuantityInput'
+export { QuantityInput, QuantityControl } from './components/QuantityInput'
 export { WeekdaysField } from './components/WeekdaysField'
 export { WEEKDAYS, weekdayLabels, currentBusinessWeekday, weekdayOfDate } from './utils/weekdays'
 export type { PagedResult } from './types/paged'
 
 export { isDispenser, sortProducts } from './utils/productOrder'
+
+export { ProductQuantityCard } from './components/ProductQuantityCard'

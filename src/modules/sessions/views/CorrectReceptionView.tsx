@@ -3,7 +3,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Button, ErrorMessage, Field, Page, PageHeader, Textarea, formatMoney, BackButton } from '../../core'
+import { ProductQuantityCard, QuantityControl, Button, ErrorMessage, Field, Page, PageHeader, Textarea, formatMoney, BackButton } from '../../core'
 import { receptionQuery } from '../hooks/receptionQuery'
 import { sessionService } from '../services/sessionService'
 import type { ContainerState, CorrectReceptionRequest, Reception } from '../services/sessionService'
@@ -106,30 +106,32 @@ function CorrectionForm({ sessionId, reception, subtitle }: { sessionId: string;
       <div className="flex flex-col gap-3">
         <span className="text-sm font-medium text-muted">Qué volvió en el camión</span>
         {reception.products.map((p) => (
-          <div key={p.productId} className="ui-card bg-surface p-3">
-            <span className="text-sm font-medium text-ink">{p.productDetail}</span>
-            <div className="mt-2 grid grid-cols-2 gap-2">
+          <ProductQuantityCard key={p.productId} name={p.productDetail}>
+            <div className="grid min-w-0 gap-3 md:grid-cols-2">
               {([['Full', 'Llenos', p.fullMissing], ['Empty', 'Vacíos', p.emptyMissing]] as const).map(([state, etiqueta, faltaba]) => {
                 const valor = conteo[p.productId][state]
                 const antes = anotado(p.productId, state)
                 // Lo que falta después de la corrección: cada unidad más que volvió es una menos que falta.
                 const falta = faltaba - ((Number(valor) || 0) - antes)
                 return (
-                  <label key={state} className="flex flex-col gap-1">
-                    <span className="text-xs text-muted">{etiqueta} · anotado {antes}</span>
-                    <input type="number" min={0} inputMode="numeric" required value={valor}
+                  <div key={state} className="min-w-0 text-center">
+                    <QuantityControl label={`${etiqueta} · anotado ${antes}`}
+                      min={0} inputMode="numeric" required value={valor}
                       aria-label={`${p.productDetail}: ${etiqueta.toLowerCase()} que volvieron`}
-                      onChange={(e) => set(p.productId, state, e.target.value)} className="ui-input" />
+                      onChange={(e) => set(p.productId, state, e.target.value)}
+                      decreaseDisabled={Number(valor) <= 0}
+                      onDecrease={() => set(p.productId, state, String(Math.max(0, Number(valor) - 1)))}
+                      onIncrease={() => set(p.productId, state, String(Number(valor) + 1))} />
                     {falta !== 0 && (
                       <span className={falta > 0 ? 'text-xs text-danger' : 'text-xs text-warning'}>
                         {falta > 0 ? `faltan ${falta}` : `sobran ${-falta}`}
                       </span>
                     )}
-                  </label>
+                  </div>
                 )
               })}
             </div>
-          </div>
+          </ProductQuantityCard>
         ))}
       </div>
 

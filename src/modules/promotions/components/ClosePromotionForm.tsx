@@ -50,11 +50,10 @@ export function ClosePromotionForm({ promotion, convert, onBack }: { promotion: 
       </> : <>
         <p>Indicá cuántos envases retirás. Los que no recuperes quedarán registrados como perdidos.</p>
         {!loans.length && <p>Esta promoción no tiene envases prestados.</p>}
-        {loans.map((line) => <div key={line.productId} className="flex flex-col gap-2">
-          <QuantityInput label={`Retirar: ${line.productDetail}`} value={returned[line.productId]} max={line.containersLoaned}
-            onChange={(quantity) => setReturned({ ...returned, [line.productId]: quantity })} />
-          <p className="text-sm" role="status">Prestados: {line.containersLoaned} · Quedarán perdidos: {line.containersLoaned - returned[line.productId]}</p>
-        </div>)}
+        {loans.map((line) => <QuantityInput key={line.productId} label={`Retirar: ${line.productDetail}`}
+          description={<p role="status">Prestados: {line.containersLoaned} · Quedarán perdidos: {line.containersLoaned - returned[line.productId]}</p>}
+          value={returned[line.productId]} max={line.containersLoaned}
+          onChange={(quantity) => setReturned({ ...returned, [line.productId]: quantity })} />)}
       </>}
     </fieldset>
     {validation && <p role="alert" className="text-sm text-danger">{validation}</p>}

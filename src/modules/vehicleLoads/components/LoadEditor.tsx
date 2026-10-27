@@ -40,13 +40,11 @@ export function LoadEditor({ productos, valor, onChange }: Props) {
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-3">
       {sortProducts(productos, (p) => p.detail).map((p) => (
-        <div key={p.id} className="ui-card bg-surface p-4">
-        <QuantityInput
+        <QuantityInput key={p.id}
           label={p.detail}
           value={cantidadDe(p.id)}
           onChange={(quantity) => setCantidad(p.id, quantity)}
         />
-        </div>
       ))}
     </div>
   )

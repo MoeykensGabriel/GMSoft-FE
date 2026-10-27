@@ -1,3 +1,4 @@
+import { ProductQuantityCard, QuantityControl } from '../../core'
 import type { SessionStockLine } from '../services/sessionService'
 
 /** Nulo es «todavía no lo conté»; cero es «lo conté y no volvió ninguno». */
@@ -55,29 +56,28 @@ export function ReturnsEditor({ stock, lineas, onChange }: Props) {
         const difVacios = vacios === null ? 0 : vacios - s.emptyOnBoard
 
         return (
-          <div key={s.productId} className="ui-card bg-surface p-3">
-            <span className="text-sm font-medium text-ink">{s.productDetail}</span>
+          <ProductQuantityCard key={s.productId} name={s.productDetail}>
 
-            <div className="mt-2 grid grid-cols-2 gap-2">
+            <div className="grid min-w-0 gap-3 md:grid-cols-2">
               {(
                 [
                   ['llenos', 'Llenos', s.fullOnBoard, difLlenos],
                   ['vacios', 'Vacíos', s.emptyOnBoard, difVacios],
                 ] as const
               ).map(([campo, etiqueta, esperado, diferencia]) => (
-                <label key={campo} className="flex flex-col gap-1">
-                  <span className="text-xs text-muted">
-                    {etiqueta} · deberían ser {esperado}
-                  </span>
-                  <input
-                    type="number"
+                <div key={campo} className="min-w-0 text-center">
+                  <QuantityControl
+                    label={`${etiqueta} · deberían ser ${esperado}`}
+                    aria-label={`${s.productDetail}: ${etiqueta}`}
                     min={0}
                     inputMode="numeric"
                     placeholder="Contá y anotá"
                     value={valorDe(s.productId, campo) ?? ''}
                     onChange={(e) => set(s.productId, campo,
                       e.target.value === '' ? null : Math.max(0, Math.floor(Number(e.target.value)) || 0))}
-                    className="ui-input"
+                    decreaseDisabled={(valorDe(s.productId, campo) ?? 0) <= 0}
+                    onDecrease={() => set(s.productId, campo, Math.max(0, (valorDe(s.productId, campo) ?? 0) - 1))}
+                    onIncrease={() => set(s.productId, campo, (valorDe(s.productId, campo) ?? 0) + 1)}
                   />
                   {diferencia !== 0 && (
                     <span
@@ -86,10 +86,10 @@ export function ReturnsEditor({ stock, lineas, onChange }: Props) {
                       {diferencia < 0 ? `faltan ${-diferencia}` : `sobran ${diferencia}`}
                     </span>
                   )}
-                </label>
+                </div>
               ))}
             </div>
-          </div>
+          </ProductQuantityCard>
         )
       })}
     </div>

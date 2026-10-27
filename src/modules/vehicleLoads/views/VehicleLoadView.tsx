@@ -2,7 +2,7 @@ import { sortProducts } from '../../core'
 import { useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { ApiError, BUSINESS_TIME_ZONE, Button, DataTable, ErrorMessage, LinkButton, Modal, QuantityInput, Select, WeekdaysField, formatDateTime, currentBusinessWeekday, newRequestId, Page, PageHeader } from '../../core'
+import { ApiError, BUSINESS_TIME_ZONE, Button, ProductQuantityCard, ErrorMessage, LinkButton, Modal, QuantityInput, Select, WeekdaysField, formatDateTime, currentBusinessWeekday, newRequestId, Page, PageHeader } from '../../core'
 import { productService } from '../../products'
 import { driverService } from '../../drivers'
 import { VehicleAssignmentSummary } from '../components/VehicleAssignmentSummary'
@@ -13,9 +13,9 @@ import { vehicleService } from '../../vehicles'
 /**
  * Cargar el camion, de manana, antes de que salga el chofer.
  *
- * Una sola tabla con lo que hay arriba del camión, un renglón por producto. Con
+ * Una card por producto con lo que hay arriba del camión. Con
  * «Editar» (naranja) se cambian las cantidades con − y +; «Confirmar» (verde) abre el
- * resumen y guarda la carga tal como quedó en la tabla; «Vaciar carga» (rojo) baja todo.
+ * resumen y guarda la carga tal como quedó en las cards; «Vaciar carga» (rojo) baja todo.
  * Lo que se sube queda esperando hasta que el chofer abre la salida con ese camión.
  */
 export function VehicleLoadView() {
@@ -169,21 +169,19 @@ export function VehicleLoadView() {
             : !listaProductos.length ? <p className="text-sm text-muted">No hay productos publicados. Publicalos en el catálogo antes de cargar el camión.</p>
             : <>
               {vacio && <p className="text-sm text-muted">El camión está vacío. Poné cuánto lleva de cada producto y confirmá.</p>}
-              <DataTable stack={false} label="Carga del camión" className="w-full">
-                <thead><tr><th scope="col">Producto</th><th scope="col" className="w-56 text-center">Cantidad</th></tr></thead>
-                <tbody>{listaProductos.map((p) => {
+              <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {listaProductos.map((p) => {
                   const actual = arriba[p.id] ?? 0
                   const valor = tabla?.[p.id] ?? (editando ? 0 : actual)
-                  return <tr key={p.id}>
-                    <td className="font-medium">{p.detail}
-                      {editando && !vacio && valor !== actual && <span className="block text-xs text-muted">Antes: {actual}</span>}</td>
-                    <td className="text-center">{editando
-                      ? <QuantityInput hideLabel label={`Cantidad de ${p.detail}`} value={valor}
-                          onChange={(q) => { setDraft({ ...(tabla ?? {}), [p.id]: q }); setSuccess(false); setRequestId(newRequestId()) }} />
-                      : <span className={`text-lg font-semibold ${actual ? '' : 'text-muted'}`}>{actual || '—'}</span>}</td>
-                  </tr>
-                })}</tbody>
-              </DataTable>
+                  const description = editando && !vacio && valor !== actual ? <>Antes: {actual}</> : undefined
+                  return editando
+                    ? <QuantityInput key={p.id} label={p.detail} description={description} value={valor}
+                        onChange={(q) => { setDraft({ ...(tabla ?? {}), [p.id]: q }); setSuccess(false); setRequestId(newRequestId()) }} />
+                    : <ProductQuantityCard key={p.id} name={p.detail}>
+                        <span className={`text-center text-lg font-semibold ${actual ? '' : 'text-muted'}`}>{actual || '—'}</span>
+                      </ProductQuantityCard>
+                })}
+              </div>
               <p className="text-right font-medium">Total: {totalTabla} unidades</p>
             </>}
 
