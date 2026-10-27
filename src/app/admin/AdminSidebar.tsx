@@ -25,6 +25,7 @@ const groups: Group[] = [
     { to: '/panel/liquidacion', label: 'Liquidación' },
     { to: '/panel/resumen-diario', label: 'Resumen diario' },
     { to: '/panel/hoja-de-ruta', label: 'Hoja de ruta' },
+    { to: '/panel/ventas', label: 'Ventas' },
     { to: '/panel/estadisticas', label: 'Estadísticas' },
   ] },
   { id: 'empresa', label: 'Empresa', items: [
