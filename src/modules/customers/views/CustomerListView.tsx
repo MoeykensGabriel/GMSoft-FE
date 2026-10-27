@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
-import { Badge, Button, DataTable, Field, ErrorMessage, ManagementHeader, Pagination, Select, WEEKDAYS, LinkButton, Page } from '../../core'
+import { Badge, Button, DataTable, Field, ErrorMessage, ManagementHeader, Pagination, Select, WEEKDAYS, Page } from '../../core'
 import { vehicleService } from '../../vehicles'
 import { customerService } from '../services/customerService'
 import type { Customer } from '../services/customerService'
@@ -50,7 +50,7 @@ export function CustomerListView() {
         <p className="text-sm text-muted">{customers.data.totalCount} clientes</p>
         {customers.data.items.length === 0 && <p>No se encontraron clientes.</p>}
         {customers.data.items.length > 0 && <DataTable label="Clientes del camión seleccionado" className="min-w-[56rem] md:table-fixed md:[&_th]:px-2 md:[&_td]:px-2">
-          <thead><tr><th scope="col" className="md:w-[18%]">Cliente</th><th scope="col" className="md:w-[20%]">Dirección / teléfono</th><th scope="col" className="md:w-[16%]">Zona</th><th scope="col" className="md:w-[13%]">Camión</th><th scope="col" className="md:w-[12%]">Días de visita</th><th scope="col" className="md:w-[15%]">Compras</th><th scope="col" data-label="" className="md:w-[6%]"><span className="sr-only">Editar cliente</span></th></tr></thead>
+          <thead><tr><th scope="col" className="md:w-[18%]">Cliente</th><th scope="col" className="md:w-[20%]">Dirección / teléfono</th><th scope="col" className="md:w-[16%]">Zona</th><th scope="col" className="md:w-[13%]">Camión</th><th scope="col" className="md:w-[12%]">Días de visita</th><th scope="col" className="md:w-[21%]">Compras</th></tr></thead>
           <tbody>{customers.data.items.map((customer) => {
             const dark = customer.activityStatus === 'Black'
             const detail = `block text-xs ${dark ? '' : 'text-muted'}`
@@ -64,11 +64,6 @@ export function CustomerListView() {
               <td className="[overflow-wrap:normal] break-normal ui-stack-hide">{customer.vehicleId ? <>{customer.vehicleName}<span className={detail}>{customer.vehicleLicensePlate}</span></> : 'Sin camión asignado'}</td>
               <td className="ui-stack-hide">{visitDaysLabel(customer.visitDays)}</td>
               <td><span className="font-semibold">{customerListActivityLabel(customer.weeksWithoutPurchase)}</span></td>
-              <td><LinkButton to={`${customerPath}/editar`} variant="edit" className="min-h-11 min-w-11 px-0" aria-label={`Editar cliente ${customer.displayName}`} title="Editar">
-                <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-                </svg>
-              </LinkButton></td>
             </tr>
           })}</tbody>
         </DataTable>}
