@@ -15,7 +15,7 @@ export function CustomerDetailView() {
   return <Page className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
     <PageHeader title={customer.data?.displayName ?? 'Ficha del cliente'} actions={<>
       <BackButton to="/panel/clientes" label="Volver a Clientes" variant="navigation" />
-      {customer.data && <LinkButton to={`/panel/clientes/${encodeURIComponent(customer.data.id)}/editar`}>Editar</LinkButton>}
+      {customer.data && <LinkButton to={`/panel/clientes/${encodeURIComponent(customer.data.id)}/editar`} variant="edit">Editar</LinkButton>}
     </>} />
     {customer.isPending || account.isPending ? <p role="status">Cargando cliente…</p>
       : customer.isError || account.isError ? <div className="flex flex-col gap-3">

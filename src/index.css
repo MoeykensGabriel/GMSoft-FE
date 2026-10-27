@@ -103,6 +103,8 @@
   .ui-table-stack tbody tr > [data-label=""], .ui-table-stack tfoot tr > [data-label=""] { padding-left: 0; }
   .ui-table-stack tbody tr > [data-label=""]::before, .ui-table-stack tfoot tr > [data-label=""]::before { content: none; }
   .ui-table-stack td.text-right, .ui-table-stack th.text-right { text-align: left; }
+  /* Datos que en la card del celular sobran: se ven solo en la tabla de la PC. */
+  .ui-table-stack tbody tr > .ui-stack-hide { display: none; }
   /* Filas oscuras (clientes en negro): el título también tiene que leerse. */
   .ui-table-stack tr[class*="text-white"] > *::before { color: rgb(255 255 255 / 75%); }
 }

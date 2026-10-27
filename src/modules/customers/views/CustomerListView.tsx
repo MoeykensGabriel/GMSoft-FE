@@ -61,8 +61,8 @@ export function CustomerListView() {
             }}>
               <td><Link to={customerPath} className="inline-flex min-h-11 items-center font-semibold underline" aria-label={`Ver cliente ${customer.displayName}`}>{customer.displayName}</Link><span className={detail}>Orden {customer.routeOrder}</span>{!customer.isActive && <Badge>Inactivo</Badge>}{customer.removalPending && <Badge tone="warning">Baja pedida</Badge>}</td>
               <td>{customer.address}<span className={detail}>{customer.phone}</span></td><td className="[overflow-wrap:normal] break-normal md:min-w-36">{customer.zoneName}</td>
-              <td className="[overflow-wrap:normal] break-normal">{customer.vehicleId ? <>{customer.vehicleName}<span className={detail}>{customer.vehicleLicensePlate}</span></> : 'Sin camión asignado'}</td>
-              <td>{visitDaysLabel(customer.visitDays)}</td>
+              <td className="[overflow-wrap:normal] break-normal ui-stack-hide">{customer.vehicleId ? <>{customer.vehicleName}<span className={detail}>{customer.vehicleLicensePlate}</span></> : 'Sin camión asignado'}</td>
+              <td className="ui-stack-hide">{visitDaysLabel(customer.visitDays)}</td>
               <td><span className="font-semibold">{customerListActivityLabel(customer.weeksWithoutPurchase)}</span></td>
               <td><LinkButton to={`${customerPath}/editar`} variant="edit" className="min-h-11 min-w-11 px-0" aria-label={`Editar cliente ${customer.displayName}`} title="Editar">
                 <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
