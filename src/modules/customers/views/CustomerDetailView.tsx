@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
-import { Badge, Button, ErrorMessage, LinkButton, Page, PageHeader, Panel, BackButton } from '../../core'
+import { Badge, Button, ErrorMessage, Page, PageHeader, Panel, BackButton } from '../../core'
 import { CustomerAccountMovements } from '../components/CustomerAccountMovements'
 import { CustomerBalanceCard } from '../components/CustomerBalanceCard'
 import { CustomerContainersSummary } from '../components/CustomerContainersSummary'
@@ -13,10 +13,8 @@ export function CustomerDetailView() {
   const account = useQuery({ queryKey: ['customers', 'account', id], queryFn: () => customerService.getAccount(id!), enabled: Boolean(id), staleTime: 0 })
 
   return <Page className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
-    <PageHeader title={customer.data?.displayName ?? 'Ficha del cliente'} actions={<>
-      <BackButton to="/panel/clientes" label="Volver a Clientes" variant="navigation" />
-      {customer.data && <LinkButton to={`/panel/clientes/${encodeURIComponent(customer.data.id)}/editar`} variant="edit">Editar</LinkButton>}
-    </>} />
+    <BackButton to="/panel/clientes" label="Volver a Clientes" appearance="link" />
+    <PageHeader title="Datos del cliente" />
     {customer.isPending || account.isPending ? <p role="status">Cargando cliente…</p>
       : customer.isError || account.isError ? <div className="flex flex-col gap-3">
         <ErrorMessage error={customer.error ?? account.error} />
@@ -27,7 +25,7 @@ export function CustomerDetailView() {
         </p>}
         <div className="grid items-start gap-5 lg:grid-cols-2">
           <div className="flex min-w-0 flex-col gap-3">
-            <CustomerProfileCard customer={customer.data} headingLevel={2} />
+            <CustomerProfileCard customer={customer.data} headingLevel={2} editTo={`/panel/clientes/${encodeURIComponent(customer.data.id)}/editar`} />
             <p className="text-sm"><strong>Estado:</strong> <Badge>{customer.data.isActive ? 'Activo' : 'Inactivo'}</Badge></p>
           </div>
           <div className="flex min-w-0 flex-col gap-5">
