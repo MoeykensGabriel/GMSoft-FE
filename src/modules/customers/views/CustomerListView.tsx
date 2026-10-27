@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
-import { Badge, Button, DataTable, Field, ErrorMessage, ManagementHeader, Pagination, Select, WEEKDAYS, formatDate, Page } from '../../core'
+import { Badge, Button, DataTable, Field, ErrorMessage, ManagementHeader, Pagination, Select, WEEKDAYS, LinkButton, Page } from '../../core'
 import { vehicleService } from '../../vehicles'
 import { customerService } from '../services/customerService'
 import type { Customer } from '../services/customerService'
-import { purchaseActivityLabel } from '../utils/activity'
-import { noPurchaseLabel } from '../utils/noPurchase'
-import { BUSINESS_TIME_ZONE } from '../../core'
+import { customerListActivityLabel } from '../utils/activity'
 import { visitDaysLabel } from '../utils/visitDays'
 
 // El color acompaña al texto: rojo y negro son los mismos umbrales que ve el chofer.
@@ -31,7 +29,7 @@ export function CustomerListView() {
     queryFn: () => customerService.listByVehicle(vehicleId, visitDay, page, search),
     enabled: ready,
   })
-  return <Page className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
+  return <Page className="mx-auto flex max-w-6xl flex-col gap-5 p-4 md:p-5">
     <ManagementHeader title="Clientes" description="Consultá los clientes de cada camión y cómo vienen comprando." createTo="/panel/clientes/nuevo" createLabel="Nuevo cliente" />
     {vehicles.isError && <ErrorMessage error={vehicles.error} />}
     <form className="ui-toolbar grid items-end gap-3 sm:grid-cols-2 xl:grid-cols-[1fr_12rem_1.5fr_auto]" onSubmit={(event) => { event.preventDefault(); setPage(1); setSearch(draft.trim()) }}>
@@ -51,24 +49,26 @@ export function CustomerListView() {
       : <>
         <p className="text-sm text-muted">{customers.data.totalCount} clientes</p>
         {customers.data.items.length === 0 && <p>No se encontraron clientes.</p>}
-        {customers.data.items.length > 0 && <DataTable label="Clientes del camión seleccionado" className="min-w-[60rem]">
-          <thead><tr><th scope="col">Cliente</th><th scope="col">Dirección / teléfono</th><th scope="col">Zona</th><th scope="col">Camión</th><th scope="col">Días de visita</th><th scope="col">Compras</th><th scope="col">Acciones</th></tr></thead>
+        {customers.data.items.length > 0 && <DataTable label="Clientes del camión seleccionado" className="min-w-[56rem] md:table-fixed md:[&_th]:px-2 md:[&_td]:px-2">
+          <thead><tr><th scope="col" className="md:w-[18%]">Cliente</th><th scope="col" className="md:w-[20%]">Dirección / teléfono</th><th scope="col" className="md:w-[16%]">Zona</th><th scope="col" className="md:w-[13%]">Camión</th><th scope="col" className="md:w-[12%]">Días de visita</th><th scope="col" className="md:w-[15%]">Compras</th><th scope="col" data-label="" className="md:w-[6%]"><span className="sr-only">Editar cliente</span></th></tr></thead>
           <tbody>{customers.data.items.map((customer) => {
             const dark = customer.activityStatus === 'Black'
             const detail = `block text-xs ${dark ? '' : 'text-muted'}`
             const customerPath = `/panel/clientes/${encodeURIComponent(customer.id)}`
-            return <tr key={customer.id} className={`cursor-pointer ${ACTIVITY_ROW[customer.activityStatus]}`} onClick={(event) => {
+            return <tr key={customer.id} className={`cursor-pointer ${ACTIVITY_ROW[customer.activityStatus]}`} title="Doble clic para editar" onDoubleClick={(event) => {
               if (event.target instanceof Element && event.target.closest('a, button, input, select, textarea')) return
-              navigate(customerPath)
+              navigate(`${customerPath}/editar`)
             }}>
               <td><Link to={customerPath} className="inline-flex min-h-11 items-center font-semibold underline" aria-label={`Ver cliente ${customer.displayName}`}>{customer.displayName}</Link><span className={detail}>Orden {customer.routeOrder}</span>{!customer.isActive && <Badge>Inactivo</Badge>}{customer.removalPending && <Badge tone="warning">Baja pedida</Badge>}</td>
-              <td>{customer.address}<span className={detail}>{customer.phone}</span></td><td>{customer.zoneName}</td>
-              <td>{customer.vehicleId ? <>{customer.vehicleName}<span className={detail}>{customer.vehicleLicensePlate}</span></> : 'Sin camión asignado'}</td>
+              <td>{customer.address}<span className={detail}>{customer.phone}</span></td><td className="[overflow-wrap:normal] break-normal md:min-w-36">{customer.zoneName}</td>
+              <td className="[overflow-wrap:normal] break-normal">{customer.vehicleId ? <>{customer.vehicleName}<span className={detail}>{customer.vehicleLicensePlate}</span></> : 'Sin camión asignado'}</td>
               <td>{visitDaysLabel(customer.visitDays)}</td>
-              <td><span className="font-semibold">{purchaseActivityLabel(customer.weeksWithoutPurchase, customer.lastPurchaseAt === null)}</span>
-                {customer.lastNoPurchase && <span className={detail}>Última visita sin compra: {new Intl.DateTimeFormat('es-AR', { day: '2-digit', month: '2-digit', timeZone: BUSINESS_TIME_ZONE }).format(new Date(customer.lastNoPurchase.date))} · {noPurchaseLabel(customer.lastNoPurchase.reason)}</span>}
-                {customer.lastPurchaseAt && <span className={detail}>Última compra: {formatDate(customer.lastPurchaseAt)}</span>}</td>
-              <td><Link to={`${customerPath}/editar`} className={`inline-flex min-h-11 items-center ${dark ? 'underline' : 'ui-link'}`} aria-label={`Editar cliente ${customer.displayName}`}>Editar</Link></td>
+              <td><span className="font-semibold">{customerListActivityLabel(customer.weeksWithoutPurchase)}</span></td>
+              <td><LinkButton to={`${customerPath}/editar`} variant="edit" className="min-h-11 min-w-11 px-0" aria-label={`Editar cliente ${customer.displayName}`} title="Editar">
+                <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                </svg>
+              </LinkButton></td>
             </tr>
           })}</tbody>
         </DataTable>}

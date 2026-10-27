@@ -10,3 +10,8 @@ export function purchaseActivityLabel(weeksWithoutPurchase: number, neverPurchas
   if (neverPurchased) return turnos ? `Sin compras registradas · ${turnos}` : 'Sin compras registradas'
   return turnos ?? 'Compra al día'
 }
+
+/** Resumen del listado de oficina: solo los turnos sin comprar. */
+export function customerListActivityLabel(weeksWithoutPurchase: number): string {
+  return purchaseActivityLabel(weeksWithoutPurchase, false)
+}
