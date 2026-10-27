@@ -162,14 +162,20 @@ export function VehicleLoadView() {
       </p>}
 
       {!vehicleId || !selectedVehicle ? <p className="text-sm text-muted">Elegí un vehículo para cargarlo.</p> : <>
+        <WeekdaysField label="Días de reparto que cubrirá esta salida" value={routeDays}
+          disabled={ocupado || carga.isPending || carga.isError}
+          onChange={(days) => { setEditedDays(days); setSuccess(false); setRequestId(newRequestId()) }} />
+        <p className="text-sm text-muted">Podés combinar varios días para recuperar un reparto. Los clientes aparecerán una sola vez, en el orden habitual.</p>
+
         <section className="ui-card flex flex-col gap-4 p-4">
-          <h2 className="text-lg font-semibold">Carga actual del camión: {selectedVehicle.name} · {selectedVehicle.licensePlate}</h2>
+          <h2 className="text-lg font-semibold">Carga actual del vehículo: <span className="text-danger">{selectedVehicle.name} · {selectedVehicle.licensePlate}</span></h2>
           <ErrorMessage error={productos.error ?? carga.error ?? vaciar.error} />
           {carga.isPending || productos.isPending ? <p className="text-sm text-muted">Cargando...</p>
             : !listaProductos.length ? <p className="text-sm text-muted">No hay productos publicados. Publicalos en el catálogo antes de cargar el camión.</p>
             : <>
               {vacio && <p className="text-sm text-muted">El camión está vacío. Poné cuánto lleva de cada producto y confirmá.</p>}
-              <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {/* Una card por producto, una debajo de la otra, igual en celular y en escritorio. */}
+              <div className="mx-auto flex w-full max-w-xl flex-col gap-3">
                 {listaProductos.map((p) => {
                   const actual = arriba[p.id] ?? 0
                   const valor = tabla?.[p.id] ?? (editando ? 0 : actual)
@@ -181,8 +187,8 @@ export function VehicleLoadView() {
                         <span className={`text-center text-lg font-semibold ${actual ? '' : 'text-muted'}`}>{actual || '—'}</span>
                       </ProductQuantityCard>
                 })}
+                <p className="text-right font-medium">Total: {totalTabla} unidades</p>
               </div>
-              <p className="text-right font-medium">Total: {totalTabla} unidades</p>
             </>}
 
           <div className="flex flex-wrap justify-end gap-3">
@@ -196,11 +202,6 @@ export function VehicleLoadView() {
           </div>
           {!confirmandoDesde && <ErrorMessage error={cargar.error} />}
         </section>
-
-        <WeekdaysField label="Días de reparto que cubrirá esta salida" value={routeDays}
-          disabled={ocupado || carga.isPending || carga.isError}
-          onChange={(days) => { setEditedDays(days); setSuccess(false); setRequestId(newRequestId()) }} />
-        <p className="text-sm text-muted">Podés combinar varios días para recuperar un reparto. Los clientes aparecerán una sola vez, en el orden habitual.</p>
       </>}
 
       {confirmandoDesde && selectedVehicle && tabla && <LoadConfirmModal
