@@ -19,6 +19,31 @@ function load(path, imports = {}) {
 
 const { moveRow, dropRow, hasChanges, rowModified, toggleVisitDay, buildRouteSave } = load('utils/routeDraft.ts')
 const filters = { vehicleId: 'truck', zoneId: 'zone', day: 1 }
+const { formerZone, normalizeZoneName } = load('utils/formerZone.ts')
+
+test('extraer zona anterior respeta puntos, líneas, mayúsculas y guiones', () => {
+  assert.equal(formerZone('Código sistema anterior: 12345. En el sistema viejo figuraba en Centro.'), 'Centro')
+  assert.equal(formerZone('En el sistema viejo FIGURABA EN Villa Mariano Moreno - El Colmenar.'), 'Villa Mariano Moreno - El Colmenar')
+  assert.equal(formerZone('figuraba en Norte\nOtra nota'), 'Norte')
+  assert.equal(formerZone('figuraba en Sur'), 'Sur')
+  assert.equal(formerZone(null), null)
+  assert.equal(formerZone(undefined), null)
+  assert.equal(formerZone(''), null)
+  assert.equal(formerZone('Código sistema anterior: 12345.'), null)
+  assert.equal(normalizeZoneName('  TAFÍ Viejo '), normalizeZoneName('Tafi viejo'))
+})
+
+test('cambios de zona siguen el orden visible y conservan todos los IDs', () => {
+  const base = baseline()
+  const rows = [base.items[2], base.items[0], base.items[1]].map((row, index) =>
+    index < 2 ? { ...row, zoneId: 'destination' } : row)
+  const saved = buildRouteSave(filters, base, rows)
+  assert.deepEqual(saved.customerIds, ['customer-2', 'customer-0', 'customer-1'])
+  assert.deepEqual(saved.changes, [
+    { id: 'customer-2', zoneId: 'destination' }, { id: 'customer-0', zoneId: 'destination' },
+  ])
+  assert.equal(hasChanges(rows, base.items), true)
+})
 function baseline() {
   return { version: 'version-read', items: [2, 6, 10].map((routeOrder, index) => ({
     id: `customer-${index}`, routeOrder, visitDays: [1, 4], vehicleId: 'truck', zoneId: 'zone',

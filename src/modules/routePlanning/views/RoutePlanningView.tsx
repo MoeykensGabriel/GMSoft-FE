@@ -4,6 +4,7 @@ import { Button, ErrorMessage, Page, PageHeader, Select, WEEKDAYS } from '../../
 import { vehicleService } from '../../vehicles'
 import type { Vehicle } from '../../vehicles'
 import { zoneService } from '../../zones'
+import type { Zone } from '../../zones'
 import { UncoveredCustomers } from '../components/UncoveredCustomers'
 import { RouteEditor } from '../components/RouteEditor'
 import { routePlanningKey, routePlanningService } from '../services/routePlanningService'
@@ -50,13 +51,13 @@ export function RoutePlanningView() {
     </div>
     {!ready ? <p>Elegí camión, zona y día para ver el recorrido</p>
       : <RouteWorkspace key={`${filters.vehicleId}/${filters.zoneId}/${filters.day}`} filters={filters}
-        vehicles={vehicles.data ?? []} onDirty={setDirty} onBusy={setBusy} />}
+        vehicles={vehicles.data ?? []} zones={zones.data?.filter((zone) => zone.isActive) ?? []} onDirty={setDirty} onBusy={setBusy} />}
     <UncoveredCustomers />
   </Page>
 }
 
-function RouteWorkspace({ filters, vehicles, onDirty, onBusy }: {
-  filters: RouteFilters; vehicles: Vehicle[]; onDirty: (value: boolean) => void; onBusy: (value: boolean) => void
+function RouteWorkspace({ filters, vehicles, zones, onDirty, onBusy }: {
+  filters: RouteFilters; vehicles: Vehicle[]; zones: Zone[]; onDirty: (value: boolean) => void; onBusy: (value: boolean) => void
 }) {
   const client = useQueryClient()
   const query = useQuery({
@@ -69,7 +70,7 @@ function RouteWorkspace({ filters, vehicles, onDirty, onBusy }: {
       <Button variant="secondary" onClick={() => query.refetch()}>Reintentar</Button></div>
     return <p role="status">Cargando recorrido…</p>
   }
-  return <RouteEditor initial={query.data} filters={filters} vehicles={vehicles} onDirty={onDirty} onBusy={onBusy}
+  return <RouteEditor initial={query.data} filters={filters} vehicles={vehicles} zones={zones} onDirty={onDirty} onBusy={onBusy}
     onSaved={(snapshot) => {
       void client.invalidateQueries({ queryKey: ['route-planning', 'uncovered'] })
       client.setQueryData(routePlanningKey(filters), snapshot)

@@ -3,6 +3,8 @@ import type { CoverageWarningItem } from '../../schedule'
 import { useEffect, useRef, useState } from 'react'
 import { ApiError, Badge, Button, DataTable, ErrorMessage, Select, WEEKDAYS, formatDateTime, BUSINESS_TIME_ZONE } from '../../core'
 import type { Vehicle } from '../../vehicles'
+import type { Zone } from '../../zones'
+import { formerZone, normalizeZoneName } from '../utils/formerZone'
 import type { RouteCustomer, RouteFilters, RouteSnapshot } from '../types'
 import { routePlanningService } from '../services/routePlanningService'
 import { buildRouteSave, dropRow, hasChanges, moveRow, rowModified, toggleVisitDay } from '../utils/routeDraft'
@@ -17,8 +19,8 @@ function Arrow({ up = false }: { up?: boolean }) {
   )
 }
 
-export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSaved, reload }: {
-  initial: RouteSnapshot; filters: RouteFilters; vehicles: Vehicle[]
+export function RouteEditor({ initial, filters, vehicles, zones, onDirty, onBusy, onSaved, reload }: {
+  initial: RouteSnapshot; filters: RouteFilters; vehicles: Vehicle[]; zones: Zone[]
   onDirty: (value: boolean) => void; onBusy: (value: boolean) => void
   onSaved: (snapshot: RouteSnapshot) => void; reload: () => Promise<RouteSnapshot>
 }) {
@@ -164,11 +166,15 @@ export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSav
             <th scope="col">Dirección</th>
             {WEEKDAYS.map((day) => <th key={day.value} scope="col" className="whitespace-nowrap text-center"><abbr className="no-underline" title={day.label}>{day.label.slice(0, 3)}</abbr></th>)}
             <th scope="col">Camión</th>
+            <th scope="col">Zona</th>
           </tr></thead>
           <tbody onDragLeave={(event) => {
             if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDropAt(null)
           }}>{rows.map((row, index) => {
             const modified = rowModified(row, index, baseline.items)
+            const former = formerZone(row.notes)
+            const showFormer = former && normalizeZoneName(former) !== normalizeZoneName(row.zoneName ?? '')
+            const formerMatch = showFormer ? zones.find((zone) => normalizeZoneName(zone.name) === normalizeZoneName(former)) : undefined
             const leaves = row.zoneId !== filters.zoneId || row.vehicleId !== filters.vehicleId || !row.visitDays.includes(filters.day)
             const dropClass = dropAt === index ? 'inset 0 3px 0 var(--color-accent)'
               : dropAt === rows.length && index === rows.length - 1 ? 'inset 0 -3px 0 var(--color-accent)' : undefined
@@ -205,6 +211,12 @@ export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSav
               <td>{index + 1}</td>
               <td><div className="flex flex-col items-start gap-1"><span className="font-semibold">{row.displayName}</span>
                 {modified && <Badge tone="warning">Modificado</Badge>}
+                {showFormer && <div className="flex items-center gap-1">
+                  <Badge tone="warning">Era de {former}</Badge>
+                  {formerMatch && <Button variant="secondary" className="px-2 py-1 text-xs" disabled={pending}
+                    aria-label={`Pasar a ${row.displayName} a ${formerMatch.name}`}
+                    onClick={() => update(row.id, { zoneId: formerMatch.id, zoneName: formerMatch.name })}>Pasar</Button>}
+                </div>}
                 {leaves && <span className="text-warning">Sale de esta lista al guardar</span>}
               </div></td>
               <td>{row.address}<span className="block text-muted">{row.zoneName}</span><span className="block text-muted">{row.phone}</span></td>
@@ -216,6 +228,14 @@ export function RouteEditor({ initial, filters, vehicles, onDirty, onBusy, onSav
                 className="min-w-40" onChange={(event) => update(row.id, { vehicleId: event.target.value })}>
                 {!vehicles.some((vehicle) => vehicle.id === row.vehicleId) && <option value={row.vehicleId}>{row.vehicleName} · {row.vehicleLicensePlate}</option>}
                 {vehicles.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.name} · {vehicle.licensePlate}</option>)}
+              </Select></td>
+              <td><Select hideLabel label={`Zona de ${row.displayName}`} value={row.zoneId} disabled={pending || zones.length === 0}
+                className="min-w-40" onChange={(event) => {
+                  const zone = zones.find((item) => item.id === event.target.value)
+                  if (zone) void update(row.id, { zoneId: zone.id, zoneName: zone.name })
+                }}>
+                {!zones.some((zone) => zone.id === row.zoneId) && <option value={row.zoneId} disabled>{row.zoneName}</option>}
+                {zones.map((zone) => <option key={zone.id} value={zone.id}>{zone.name}</option>)}
               </Select></td>
             </tr>
           })}</tbody>

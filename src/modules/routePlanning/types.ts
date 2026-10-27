@@ -9,6 +9,7 @@ export interface RouteCustomer {
   displayName: string
   address: string
   phone: string
+  notes?: string | null
   zoneId: string
   zoneName: string | null
   routeOrder: number
