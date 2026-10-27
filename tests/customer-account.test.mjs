@@ -1,4 +1,5 @@
-﻿import assert from 'node:assert/strict'
+import { sortProducts } from './product-order-helper.mjs'
+import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { createRequire } from 'node:module'
@@ -20,6 +21,7 @@ function load(path, imports = {}) {
   return module.exports
 }
 const detail = load('customers/utils/accountStatement.ts', {
+  '../../core': { sortProducts },
   './noPurchase': load('customers/utils/noPurchase.ts'),
   './removal': load('customers/utils/removal.ts'),
 })
@@ -44,7 +46,7 @@ test('detalle de venta agrupa productos y separa envases por producto', () => {
     containersDelivered: [product('20', 4), product('12', 2)],
     containersReturned: [product('20', 3)],
   }), { title: '4 × Bidón 20 lts + 2 × Bidón 12 lts', details: [
-    'Bidón 20 lts: dejó 4 · devolvió 3', 'Bidón 12 lts: dejó 2 · devolvió 0',
+    'Bidón 12 lts: dejó 2 · devolvió 0', 'Bidón 20 lts: dejó 4 · devolvió 3',
   ] })
   assert.deepEqual(detail.statementDetail({ ...base, kind: 'ContainerOnly', containersReturned: [product('20', 2)] }),
     { title: 'Movimiento de envases', details: ['dejó 0 · devolvió 2'] })
@@ -70,6 +72,20 @@ const { CustomerAccountMovements } = load('customers/components/CustomerAccountM
   '../../core': core, '../utils/accountStatement': detail,
 })
 const render = (account) => renderToStaticMarkup(CustomerAccountMovements({ account }))
+
+test('resumen de envases combina saldos y unidades con dispenser al final', () => {
+  const { CustomerContainersSummary } = load('customers/components/CustomerContainersSummary.tsx', {
+    '../../core': { sortProducts },
+  })
+  const account = { containers: [{ productId: 'd', productDetail: 'Dispenser', quantity: 1 }],
+    units: [{ productId: 's', productDetail: 'Sifon', serialNumber: '123' }] }
+  for (const vertical of [true, false]) {
+    const html = renderToStaticMarkup(CustomerContainersSummary({ account, vertical }))
+    assert.ok(html.indexOf('Sifon') < html.indexOf('Dispenser'))
+    assert.ok(html.includes('1 × Dispenser'))
+    assert.ok(html.includes('Sifon (123)'))
+  }
+})
 
 test('cuenta limitada conserva saldo del servidor, pagos separados y fecha argentina en ambas vistas', () => {
   const html = render({ balance: 12000, statementTotalCount: 9, statement: [{ ...base,

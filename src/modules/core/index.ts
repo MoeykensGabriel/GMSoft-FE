@@ -4,6 +4,7 @@
  *
  * core es puramente tecnico. Si algo de aca empieza a saber de envases, choferes o
  * saldos, no pertenece a core y hay que moverlo a su modulo de negocio.
+ * Excepción compartida: productOrder concentra el orden universal de productos.
  */
 export { api, ApiError, tokenStorage, setOnUnauthorized } from './lib/api'
 export { queryClient } from './lib/queryClient'
@@ -34,3 +35,5 @@ export { QuantityInput } from './components/QuantityInput'
 export { WeekdaysField } from './components/WeekdaysField'
 export { WEEKDAYS, weekdayLabels, currentBusinessWeekday, weekdayOfDate } from './utils/weekdays'
 export type { PagedResult } from './types/paged'
+
+export { isDispenser, sortProducts } from './utils/productOrder'

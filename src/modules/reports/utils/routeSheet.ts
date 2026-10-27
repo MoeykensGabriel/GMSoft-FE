@@ -1,15 +1,15 @@
+import { sortProducts } from '../../core'
 import type { RouteSheet, RouteSheetCustomer } from '../services/routeSheetService'
 
 const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 
-/** Una columna por envase que tenga algún cliente de la hoja, en orden alfabético. */
+/** Una columna por envase que tenga algún cliente de la hoja, con los dispenser al final. */
 export function containerColumns(sheet: RouteSheet) {
   const columnas = new Map<string, string>()
   for (const zona of sheet.zones)
     for (const cliente of zona.customers)
       for (const envase of cliente.containers) columnas.set(envase.productId, envase.productDetail)
-  return [...columnas].map(([productId, productDetail]) => ({ productId, productDetail }))
-    .sort((a, b) => a.productDetail.localeCompare(b.productDetail, 'es'))
+  return sortProducts([...columnas].map(([productId, productDetail]) => ({ productId, productDetail })), (p) => p.productDetail)
 }
 
 /** Cuántos envases de ese producto tiene el cliente; cero si no tiene. */

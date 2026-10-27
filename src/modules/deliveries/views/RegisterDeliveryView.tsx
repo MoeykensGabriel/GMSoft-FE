@@ -1,3 +1,4 @@
+import { sortProducts } from '../../core'
 import { orderedZones, zonesLabel } from '../../zones'
 import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
@@ -63,7 +64,7 @@ export function RegisterDeliveryView() {
   const products = useQueries({ queries: productIds.map((id) => ({
     queryKey: ['products', 'sale', id], queryFn: () => productService.getById(id), staleTime: 0,
   })) })
-  const catalog = products.flatMap((query) => query.data ? [query.data] : [])
+  const catalog = sortProducts(products.flatMap((query) => query.data ? [query.data] : []), (p) => p.detail)
   const prices = Object.fromEntries(catalog.map((p) => [p.id, p.salePrice]))
   for (const price of (!esNuevo && customerId ? specialPrices.data ?? [] : [])) prices[price.productId] = price.price
   const productsReady = products.every((query) => query.isSuccess)
@@ -92,7 +93,7 @@ export function RegisterDeliveryView() {
   // Conservamos el resumen al enviar: el refresco de saldos ya incluye esta visita.
   const resumenCambios = cambiosEnviados ?? exchangeSummary(lineas, catalog, balances)
   const mostrarCambios = <ul className="flex flex-col gap-1 text-sm">{resumenCambios.map((text) => <li key={text}>{text}</li>)}</ul>
-  const resumenPrestamos = loanSummary(lineas)
+  const resumenPrestamos = loanSummary(sortProducts(lineas, (p) => p.productDetail))
   const mostrarPrestamos = <ul className="flex flex-col gap-1 text-sm">{resumenPrestamos.map((text) => <li key={text}>{text}</li>)}</ul>
 
   if (isLoading) return <p className="p-6 text-muted">Cargando...</p>
@@ -357,7 +358,7 @@ export function RegisterDeliveryView() {
           lines={vendidas.map((linea) => ({ ...linea, subtotal: linea.centavos / 100 }))}
           total={totalVenta}
           loanSummary={resumenPrestamos}
-          containersSummary={[...lineas.filter((l) => l.retiraEnvases > 0).map((l) => `Retira ${l.retiraEnvases} envases de ${l.productDetail}`), ...resumenCambios]}
+          containersSummary={[...sortProducts(lineas, (p) => p.productDetail).filter((l) => l.retiraEnvases > 0).map((l) => `Retira ${l.retiraEnvases} envases de ${l.productDetail}`), ...resumenCambios]}
           cobro={cobro}
           metodo={metodo}
           onCobro={setCobro}

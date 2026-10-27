@@ -1,3 +1,4 @@
+import { sortProducts } from '../../core'
 import { QuantityInput } from '../../core'
 import type { Product } from '../../products'
 
@@ -38,7 +39,7 @@ export function LoadEditor({ productos, valor, onChange }: Props) {
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-3">
-      {productos.map((p) => (
+      {sortProducts(productos, (p) => p.detail).map((p) => (
         <div key={p.id} className="ui-card bg-surface p-4">
         <QuantityInput
           label={p.detail}

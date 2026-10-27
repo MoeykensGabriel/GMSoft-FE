@@ -1,3 +1,4 @@
+import { sortProducts } from './product-order-helper.mjs'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { randomUUID } from 'node:crypto'
@@ -53,7 +54,7 @@ function hookHarness(write) {
   }
   const { useRestockWrite } = load('vehicleLoads/hooks/useRestockWrite.ts', {
     react, '@tanstack/react-query': query,
-    '../../core': { ApiError, newRequestId: randomUUID },
+    '../../core': { sortProducts, ApiError, newRequestId: randomUUID },
     '../../sessions': { sessionService: { registerRestock: write }, SESION_ACTUAL: ['session', 'current'] },
   })
   // eslint-disable-next-line react-hooks/rules-of-hooks -- Simulador de renders offline.
@@ -66,7 +67,7 @@ test('recarga usa el contrato nuevo; current 204 se transforma en null', async (
     post: async (path, body) => { calls.push({ path, body }); return { id: 'recarga', occurredAt: '2026-10-08T15:30:00Z' } },
     get: async () => undefined,
   }
-  const { sessionService } = load('sessions/services/sessionService.ts', { '../../core': { api } })
+  const { sessionService } = load('sessions/services/sessionService.ts', { '../../core': { sortProducts, api } })
   const body = { clientRequestId: randomUUID(), items: [{ productId: 'p', quantity: 3 }], notes: 'En ruta' }
   const response = await sessionService.registerRestock('salida', body)
   assert.deepEqual(calls, [{ path: '/api/sessions/salida/restocks', body }])
@@ -176,7 +177,7 @@ test('almacenamiento bloqueado o corrupto conserva Entendido en memoria', () => 
 
 test('el aviso usa hora argentina', () => {
   const { restockTime } = load('sessions/utils/restocks.ts', {
-    '../../core': { ApiError, BUSINESS_TIME_ZONE: 'America/Argentina/Buenos_Aires' },
+    '../../core': { sortProducts, ApiError, BUSINESS_TIME_ZONE: 'America/Argentina/Buenos_Aires' },
   })
   assert.equal(restockTime('2026-10-08T15:30:00Z'), '12:30')
   assert.equal(restockTime('2026-10-09T02:10:00Z'), '23:10')
@@ -210,7 +211,7 @@ function nodes(tree) {
 test('el modal compartido revisa sin enviar; bloquea edición incierta y usa fecha de referencia', () => {
   const { LoadConfirmModal } = load('vehicleLoads/components/LoadConfirmModal.tsx', {
     'react/jsx-runtime': jsxRuntime,
-    '../../core': { ApiError, BUSINESS_TIME_ZONE: 'America/Argentina/Buenos_Aires', Button: 'button', Modal: 'modal',
+    '../../core': { sortProducts, ApiError, BUSINESS_TIME_ZONE: 'America/Argentina/Buenos_Aires', Button: 'button', Modal: 'modal',
       ErrorMessage: 'error', DataTable: 'table', weekdayLabels: () => 'Jueves', formatDateTime: () => '8/10/26, 12:30' },
   })
   let sent = 0
@@ -243,7 +244,7 @@ test('aviso accesible: descartar una recarga mantiene las demás y las nuevas', 
   const { RestockNotice } = load('sessions/components/RestockNotice.tsx', {
     'react/jsx-runtime': jsxRuntime,
     react: { useSyncExternalStore: (_, snapshot) => snapshot() },
-    '../../core': { Button: 'button' },
+    '../../core': { sortProducts, Button: 'button' },
     '../states/restockSeenStorage': { restockSeenStorage: seen },
     '../utils/restocks': { restockTime: () => '12:30' },
   })
@@ -308,7 +309,7 @@ test('cancelar permite editar; otros conflictos nunca habilitan override', async
 test('modal de excepción muestra detalle ámbar y solo confirma mediante Registrar igual', () => {
   const { LoadConfirmModal } = load('vehicleLoads/components/LoadConfirmModal.tsx', {
     'react/jsx-runtime': jsxRuntime,
-    '../../core': { ApiError, BUSINESS_TIME_ZONE: 'America/Argentina/Buenos_Aires', Button: 'button', Modal: 'modal',
+    '../../core': { sortProducts, ApiError, BUSINESS_TIME_ZONE: 'America/Argentina/Buenos_Aires', Button: 'button', Modal: 'modal',
       ErrorMessage: 'error', DataTable: 'table', weekdayLabels: () => 'Lunes', formatDateTime: () => '12:00' },
   })
   let sent = 0

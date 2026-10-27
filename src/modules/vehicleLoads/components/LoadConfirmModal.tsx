@@ -1,3 +1,4 @@
+import { sortProducts } from '../../core'
 import { ApiError, BUSINESS_TIME_ZONE, Button, ErrorMessage, Modal, formatDateTime, weekdayLabels, DataTable } from '../../core'
 
 export interface LoadConfirmLine {
@@ -76,7 +77,7 @@ export function LoadConfirmModal({
           </tr>
         </thead>
         <tbody>
-          {lines.map((line) => (
+          {sortProducts(lines, (p) => p.productDetail).map((line) => (
             <tr key={line.productId} className="border-b border-line">
               <td className="py-1">{line.productDetail}</td>
               {reemplazo && <td className="py-1 text-right text-muted">{line.before ?? 0}</td>}

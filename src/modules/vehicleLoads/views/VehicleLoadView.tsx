@@ -1,3 +1,4 @@
+import { sortProducts } from '../../core'
 import { useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
@@ -46,7 +47,7 @@ export function VehicleLoadView() {
 
   const lineas = carga.data ?? []
   const arriba = totalsByProduct(lineas)
-  const listaProductos = productos.data?.items ?? []
+  const listaProductos = sortProducts(productos.data?.items ?? [], (p) => p.detail)
   // Un camión vacío no tiene nada que mirar: arranca directamente en edición.
   const vacio = carga.isSuccess && lineas.length === 0
   const tabla = draft ?? (vacio ? {} : null)

@@ -1,3 +1,4 @@
+import { sortProducts } from './product-order-helper.mjs'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
@@ -9,7 +10,7 @@ function load(path) {
     module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022,
   } })
   const module = { exports: {} }
-  new Function('require', 'module', 'exports', outputText)(() => ({}), module, module.exports)
+  new Function('require', 'module', 'exports', outputText)(() => ({ sortProducts }), module, module.exports)
   return module.exports
 }
 
@@ -30,6 +31,14 @@ const hoja = {
 test('una columna por envase de toda la hoja, sin repetir y en orden alfabético', () => {
   assert.deepEqual(containerColumns(hoja).map((c) => c.productDetail), ['Bidon 20 lts', 'Soda'])
   assert.deepEqual(containerColumns({ ...hoja, zones: [] }), [])
+})
+
+test('las columnas del PDF ponen todos los dispenser después de soda', () => {
+  const sheet = { ...hoja, zones: [...hoja.zones, { customers: [cliente('d', [
+    { productId: 'd2', productDetail: 'Dispenser Z', quantity: 1 },
+    { productId: 'd1', productDetail: 'DÍSPÉNSER A', quantity: 2 },
+  ])] }] }
+  assert.deepEqual(containerColumns(sheet).map((c) => c.productId), ['b20', 's', 'd1', 'd2'])
 })
 
 test('cantidad por envase, cero si el cliente no tiene', () => {

@@ -1,9 +1,10 @@
+import { sortProducts } from '../../core'
 import { DataTable, formatMoney } from '../../core'
 import type { CustomerSettlement } from '../services/sessionService'
 
 interface Total { detail: string; quantity: number; amount: number }
 
-/** Suma por producto conservando el orden en que aparece cada uno. */
+/** Suma por producto con los dispenser al final. */
 function sumar(filas: Total[]): Total[] {
   const porProducto = new Map<string, Total>()
   for (const fila of filas) {
@@ -11,7 +12,7 @@ function sumar(filas: Total[]): Total[] {
     if (actual) { actual.quantity += fila.quantity; actual.amount += fila.amount }
     else porProducto.set(fila.detail, { ...fila })
   }
-  return [...porProducto.values()].sort((a, b) => a.detail.localeCompare(b.detail))
+  return sortProducts([...porProducto.values()], (p) => p.detail)
 }
 
 /**

@@ -1,3 +1,4 @@
+import { sortProducts } from '../../core'
 import { zonesLabel } from '../../zones'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -35,7 +36,7 @@ function envasesPorProducto(visita: SessionDelivery) {
     else fila.retiro += -envase.quantity
     porProducto.set(envase.productId, fila)
   }
-  return [...porProducto.values()]
+  return sortProducts([...porProducto.values()], (p) => p.detalle)
 }
 
 /**

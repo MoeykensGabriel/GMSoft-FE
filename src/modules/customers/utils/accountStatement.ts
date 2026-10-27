@@ -1,3 +1,4 @@
+import { sortProducts } from '../../core'
 import type { CustomerStatementEntry } from '../services/customerService'
 import { noPurchaseLabel } from './noPurchase'
 import { removalLabel } from './removal'
@@ -24,7 +25,7 @@ export function statementDetail(entry: CustomerStatementEntry) {
   }
   for (const line of entry.containersDelivered) containers.get(line.productId)!.delivered += line.quantity
   for (const line of entry.containersReturned) containers.get(line.productId)!.returned += line.quantity
-  const details = [...containers.values()].map((line) =>
+  const details = sortProducts([...containers.values()], (p) => p.name).map((line) =>
     `${containers.size > 1 ? `${line.name}: ` : ''}dejó ${line.delivered} · devolvió ${line.returned}`,
   )
   for (const exchange of entry.containerExchanges ?? []) {

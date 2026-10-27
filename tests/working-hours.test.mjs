@@ -1,3 +1,4 @@
+import { sortProducts } from './product-order-helper.mjs'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
@@ -140,7 +141,7 @@ function loadViewHarness(registerLoad) {
   const { VehicleLoadView } = load('vehicleLoads/views/VehicleLoadView.tsx', {
     react, 'react/jsx-runtime': { jsx, jsxs: jsx, Fragment: 'fragment' }, '@tanstack/react-query': query,
     'react-router-dom': { Link: 'link', useNavigate: () => () => {}, useSearchParams: () => [new URLSearchParams()] },
-    '../../core': { ApiError, Button: 'button', ErrorMessage: 'error', Select: 'select', WeekdaysField: 'weekdays', Page: 'page', PageHeader: 'header',
+    '../../core': { sortProducts, ApiError, Button: 'button', ErrorMessage: 'error', Select: 'select', WeekdaysField: 'weekdays', Page: 'page', PageHeader: 'header',
       DataTable: 'table', Modal: 'modal', QuantityInput: 'quantity', LinkButton: 'linkbutton',
       newRequestId: () => `id-${++nextId}`, currentBusinessWeekday: () => 1, formatDateTime: () => 'Ahora' },
     '../utils/loadTable': load('vehicleLoads/utils/loadTable.ts'),
