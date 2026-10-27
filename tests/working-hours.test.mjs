@@ -145,6 +145,8 @@ function loadViewHarness(registerLoad) {
       DataTable: 'table', Modal: 'modal', QuantityInput: 'quantity', LinkButton: 'linkbutton',
       newRequestId: () => `id-${++nextId}`, currentBusinessWeekday: () => 1, formatDateTime: () => 'Ahora' },
     '../utils/loadTable': load('vehicleLoads/utils/loadTable.ts'),
+    '../utils/loadRange': load('vehicleLoads/utils/loadRange.ts'),
+    '../loadRangesQuery': load('vehicleLoads/loadRangesQuery.ts', { '../vehicles': { vehicleService: {} } }),
     '../../products': { productService: {} }, '../../drivers': { driverService: {} },
     '../../vehicles': { vehicleService: { registerLoad } },
     '../components/VehicleAssignmentSummary': { VehicleAssignmentSummary: 'assignment' },

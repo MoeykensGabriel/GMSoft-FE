@@ -1,5 +1,6 @@
 export { vehicleService } from './services/vehicleService'
 export type {
+  LoadRange,
   Vehicle,
   VehicleType,
   VehicleInput,

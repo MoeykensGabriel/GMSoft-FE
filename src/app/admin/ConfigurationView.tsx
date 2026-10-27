@@ -2,6 +2,7 @@ import { Page, PageHeader } from '../../modules/core'
 import { ActivitySettingsPanel } from '../../modules/customers/admin'
 import { PromotionSettings } from '../../modules/promotions/admin'
 import { WorkingHoursPanel } from '../../modules/workingHours/admin'
+import { LoadRangesPanel } from '../../modules/vehicleLoads/admin'
 
 export function ConfigurationView() {
   return <Page className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
@@ -9,5 +10,6 @@ export function ConfigurationView() {
     <WorkingHoursPanel />
     <ActivitySettingsPanel />
     <PromotionSettings />
+    <LoadRangesPanel />
   </Page>
 }

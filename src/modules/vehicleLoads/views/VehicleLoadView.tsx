@@ -9,6 +9,8 @@ import { VehicleAssignmentSummary } from '../components/VehicleAssignmentSummary
 import { LoadConfirmModal } from '../components/LoadConfirmModal'
 import { draftItems, sameLoad, totalsByProduct } from '../utils/loadTable'
 import { vehicleService } from '../../vehicles'
+import { loadRangesQuery } from '../loadRangesQuery'
+import { rangeLabel, rangeStatus } from '../utils/loadRange'
 
 /**
  * Cargar el camion, de manana, antes de que salga el chofer.
@@ -39,6 +41,8 @@ export function VehicleLoadView() {
   const drivers = useQuery({ queryKey: ['drivers', 'active'], queryFn: driverService.listActive })
   const vehiculos = useQuery({ queryKey: ['vehicles', 'load-status'], queryFn: vehicleService.getLoadStatus })
   const productos = useQuery({ queryKey: ['products', 'published'], queryFn: () => productService.listPublished() })
+  const rangos = useQuery({ ...loadRangesQuery(vehicleId), retry: false })
+  const rangosPorProducto = new Map((rangos.isError ? [] : rangos.data ?? []).map((range) => [range.productId, range]))
   const carga = useQuery({
     queryKey: ['vehicles', 'load', vehicleId],
     queryFn: () => vehicleService.getPendingLoad(vehicleId),
@@ -179,11 +183,17 @@ export function VehicleLoadView() {
                 {listaProductos.map((p) => {
                   const actual = arriba[p.id] ?? 0
                   const valor = tabla?.[p.id] ?? (editando ? 0 : actual)
-                  const description = editando && !vacio && valor !== actual ? <>Antes: {actual}</> : undefined
+                  const range = rangosPorProducto.get(p.id)
+                  const fueraDeRango = valor > 0 && rangeStatus(valor, range) !== 'ok'
+                  const tone = fueraDeRango ? 'danger' : undefined
+                  const description = (fueraDeRango || (editando && !vacio && valor !== actual)) ? <>
+                    {editando && !vacio && valor !== actual && <div>Antes: {actual}</div>}
+                    {fueraDeRango && <div className="text-danger">Esperado {rangeLabel(range)}</div>}
+                  </> : undefined
                   return editando
-                    ? <QuantityInput key={p.id} label={p.detail} description={description} value={valor}
+                    ? <QuantityInput key={p.id} label={p.detail} description={description} tone={tone} value={valor}
                         onChange={(q) => { setDraft({ ...(tabla ?? {}), [p.id]: q }); setSuccess(false); setRequestId(newRequestId()) }} />
-                    : <ProductQuantityCard key={p.id} name={p.detail}>
+                    : <ProductQuantityCard key={p.id} name={p.detail} description={fueraDeRango ? description : undefined} tone={tone}>
                         <span className={`text-center text-lg font-semibold ${actual ? '' : 'text-muted'}`}>{actual || '—'}</span>
                       </ProductQuantityCard>
                 })}
@@ -212,8 +222,11 @@ export function VehicleLoadView() {
         lines={listaProductos.flatMap((p) => {
           const queda = tabla[p.id] ?? 0
           const antes = arriba[p.id] ?? 0
-          if (!queda && !antes) return []
-          return [{ productId: p.id, productDetail: p.detail, quantity: queda, totalOnBoard: queda, ...(lineas.length ? { before: antes } : {}) }]
+          const range = rangosPorProducto.get(p.id)
+          const outOfRange = rangeStatus(queda, range) !== 'ok'
+          if (!queda && !antes && !outOfRange) return []
+          return [{ productId: p.id, productDetail: p.detail, quantity: queda, totalOnBoard: queda,
+            expected: rangeLabel(range), outOfRange, ...(lineas.length ? { before: antes } : {}) }]
         })}
         openedAt={confirmandoDesde}
         sending={cargar.isPending}

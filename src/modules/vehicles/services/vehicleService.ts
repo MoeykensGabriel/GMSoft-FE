@@ -3,6 +3,8 @@ import type { PagedResult } from '../../core'
 
 export type VehicleType = 'Motorcycle' | 'Car' | 'Pickup' | 'Van' | 'Truck'
 
+export type LoadRange = { productId: string; min: number | null; max: number | null }
+
 export interface Vehicle {
   id: string
   name: string
@@ -67,6 +69,11 @@ export interface RemovedVehicleLoad {
 }
 
 export const vehicleService = {
+  getLoadRanges: (vehicleId: string) => api.get<LoadRange[]>(`/api/vehicles/${vehicleId}/load-ranges`),
+  saveLoadRanges: (vehicleId: string, ranges: LoadRange[]) =>
+    api.put<void>(`/api/vehicles/${vehicleId}/load-ranges`, {
+      ranges: ranges.filter((range) => range.min !== null || range.max !== null),
+    }),
   getKilometersCorrections: (id: string) => api.get<VehicleKilometersCorrection[]>(`/api/vehicles/${id}/kilometers-corrections`),
   listPage: (page: number, search: string) => api.get<PagedResult<Vehicle>>(
     `/api/vehicles?page=${page}&pageSize=20&search=${encodeURIComponent(search)}`),

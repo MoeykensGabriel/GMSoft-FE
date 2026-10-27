@@ -10,6 +10,8 @@ export interface LoadConfirmLine {
   totalOnBoard: number
   /** Al reemplazar la carga: lo que había antes. Con esto se muestra Antes → Queda arriba. */
   before?: number
+  expected?: string
+  outOfRange?: boolean
 }
 
 interface Props {
@@ -41,6 +43,7 @@ export function LoadConfirmModal({
   const outside = error instanceof ApiError && error.status === 409 && error.type === 'outside-working-hours'
   const yaTeniaCarga = lines.some((line) => line.totalOnBoard !== line.quantity)
   const reemplazo = lines.some((line) => line.before !== undefined)
+  const hasOutOfRange = lines.some((line) => line.outOfRange)
 
   return (
     <Modal
@@ -74,15 +77,17 @@ export function LoadConfirmModal({
             {reemplazo && <th scope="col" className="py-1 text-right font-semibold">Antes</th>}
             <th scope="col" className="py-1 text-right font-semibold">{reemplazo ? 'Queda arriba' : 'Se carga'}</th>
             {yaTeniaCarga && !reemplazo && <th scope="col" className="py-1 text-right font-semibold">Queda arriba</th>}
+            {hasOutOfRange && <th scope="col" className="py-1 text-right font-semibold whitespace-nowrap">Esperado</th>}
           </tr>
         </thead>
         <tbody>
           {sortProducts(lines, (p) => p.productDetail).map((line) => (
-            <tr key={line.productId} className="border-b border-line">
+            <tr key={line.productId} className={`border-b border-line ${line.outOfRange ? 'text-danger bg-danger-soft font-semibold' : ''}`}>
               <td className="py-1">{line.productDetail}</td>
-              {reemplazo && <td className="py-1 text-right text-muted">{line.before ?? 0}</td>}
+              {reemplazo && <td className={`py-1 text-right ${line.outOfRange ? '' : 'text-muted'}`}>{line.before ?? 0}</td>}
               <td className="py-1 text-right font-semibold">{line.quantity}</td>
               {yaTeniaCarga && !reemplazo && <td className="py-1 text-right">{line.totalOnBoard}</td>}
+              {hasOutOfRange && <td className="py-1 text-right whitespace-nowrap">{line.outOfRange ? line.expected : ''}</td>}
             </tr>
           ))}
         </tbody>

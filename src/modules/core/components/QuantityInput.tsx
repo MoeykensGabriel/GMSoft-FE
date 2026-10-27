@@ -36,10 +36,11 @@ interface Props {
   hideLabel?: boolean
   variant?: 'card' | 'inline'
   description?: ReactNode
+  tone?: 'danger'
 }
 
 export function QuantityInput({ label, value, onChange, max = 2147483647, hideLabel = false,
-  variant = 'card', description }: Props) {
+  variant = 'card', description, tone }: Props) {
   const limit = Math.max(0, Math.floor(max))
   function change(next: number) {
     onChange(Number.isFinite(next) ? Math.min(limit, Math.max(0, Math.floor(next))) : 0)
@@ -50,6 +51,6 @@ export function QuantityInput({ label, value, onChange, max = 2147483647, hideLa
     decreaseDisabled={value <= 0} increaseDisabled={value >= limit}
     onDecrease={() => change(value - 1)} onIncrease={() => change(value + 1)} />
   return variant === 'card'
-    ? <ProductQuantityCard name={label} description={description}>{control}</ProductQuantityCard>
+    ? <ProductQuantityCard name={label} description={description} tone={tone}>{control}</ProductQuantityCard>
     : control
 }
