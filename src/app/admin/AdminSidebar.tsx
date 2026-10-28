@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { Button } from '../../modules/core'
 
-interface Item { to: string; label: string; end?: boolean }
+interface Item { to: string; label: string; end?: boolean; children?: Item[] }
 interface Group { id: string; label: string; items: Item[] }
 
 const home: Item = { to: '/panel', label: 'Home', end: true }
@@ -29,7 +29,12 @@ const groups: Group[] = [
     { to: '/panel/estadisticas', label: 'Estadísticas' },
   ] },
   { id: 'empresa', label: 'Empresa', items: [
-    { to: '/panel/configuracion', label: 'Configuración' },
+    { to: '/panel/configuracion', label: 'Configuración', children: [
+      { to: '/panel/configuracion/horario-laboral', label: 'Horario laboral' },
+      { to: '/panel/configuracion/actividad-clientes', label: 'Actividad de clientes' },
+      { to: '/panel/configuracion/promociones', label: 'Promociones' },
+      { to: '/panel/configuracion/capacidad-vehiculo', label: 'Capacidad por vehículo' },
+    ] },
     { to: '/panel/vehiculos', label: 'Vehículos' },
     { to: '/panel/choferes', label: 'Choferes' },
     { to: '/panel/catalogo', label: 'Productos' },
@@ -40,8 +45,8 @@ const groups: Group[] = [
 const groupOf = (pathname: string) =>
   groups.find((group) => group.items.some((item) => pathname === item.to || pathname.startsWith(`${item.to}/`)))?.id
 
-const linkClass = (isActive: boolean, nested = false) =>
-  `flex min-h-11 items-center rounded border-l-3 py-2 text-sm font-medium ${nested ? 'pl-7 pr-3' : 'px-3'} ${isActive ? 'border-accent bg-accent-soft text-brand-dark' : 'border-transparent text-muted hover:bg-canvas hover:text-brand'}`
+const linkClass = (isActive: boolean, depth = 0) =>
+  `flex min-h-11 items-center rounded border-l-3 py-2 text-sm font-medium ${depth === 2 ? 'pl-11 pr-3' : depth === 1 ? 'pl-7 pr-3' : 'px-3'} ${isActive ? 'border-accent bg-accent-soft text-brand-dark' : 'border-transparent text-muted hover:bg-canvas hover:text-brand'}`
 
 /**
  * El menú de ADMIN. En la computadora queda fijo al costado. En el celular es un panel que
@@ -64,6 +69,8 @@ export function AdminSidebar({ userName, expanded, onClose, onLogout }: {
   const [open, setOpen] = useState<string[]>([])
   const isOpen = (id: string) => id === current || open.includes(id)
   const toggle = (id: string) => setOpen((ids) => ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id])
+  // Un ítem con subpáginas se abre solo cuando la página actual es una de ellas.
+  const isSubOpen = (item: Item) => pathname.startsWith(`${item.to}/`) || open.includes(item.to)
 
   return <>
     <div aria-hidden="true" onClick={onClose}
@@ -102,8 +109,27 @@ export function AdminSidebar({ userName, expanded, onClose, onLogout }: {
               </svg>
             </button>
             <div id={`admin-menu-${group.id}`} hidden={!shown} className="flex flex-col gap-1">
-              {group.items.map((item) => <NavLink key={item.to} to={item.to} onClick={onNavigate}
-                className={({ isActive }) => linkClass(isActive, true)}>{item.label}</NavLink>)}
+              {group.items.map((item) => {
+                if (!item.children) return <NavLink key={item.to} to={item.to} onClick={onNavigate}
+                  className={({ isActive }) => linkClass(isActive, 1)}>{item.label}</NavLink>
+                const subShown = isSubOpen(item)
+                const inside = pathname.startsWith(`${item.to}/`)
+                return <div key={item.to} className="flex flex-col gap-1">
+                  <button type="button" aria-expanded={subShown} aria-controls={`admin-menu-${group.id}-${item.label}`}
+                    onClick={() => { if (!inside) toggle(item.to) }}
+                    className={`flex min-h-11 w-full items-center justify-between rounded border-l-3 border-transparent py-2 pl-7 pr-3 text-left text-sm font-medium hover:bg-canvas ${inside ? 'text-brand-dark' : 'text-muted hover:text-brand'}`}>
+                    {item.label}
+                    <svg aria-hidden="true" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.75"
+                      strokeLinecap="round" strokeLinejoin="round" className={`shrink-0 transition-transform ${subShown ? 'rotate-90' : ''}`}>
+                      <path d="M8 5l5 5-5 5" />
+                    </svg>
+                  </button>
+                  <div id={`admin-menu-${group.id}-${item.label}`} hidden={!subShown} className="flex flex-col gap-1">
+                    {item.children.map((child) => <NavLink key={child.to} to={child.to} onClick={onNavigate}
+                      className={({ isActive }) => linkClass(isActive, 2)}>{child.label}</NavLink>)}
+                  </div>
+                </div>
+              })}
             </div>
           </div>
         })}

@@ -18,7 +18,7 @@ import { ZoneFormView, ZoneListView } from '../../modules/zones/admin'
 import { CustomerDetailView, CustomerFormView, CustomerListView, RemovalRequestsView } from '../../modules/customers/admin'
 import { RoutePlanningView } from '../../modules/routePlanning'
 import { PromotionDetailView, PromotionListView } from '../../modules/promotions/admin'
-import { ConfigurationView } from './ConfigurationView'
+import { CustomerActivityView, ExpectedLoadView, PromotionSettingsView, WorkingHoursView } from './ConfigurationView'
 import { AdminLayout } from './AdminLayout'
 import { AdminHomeView } from './AdminHomeView'
 
@@ -36,7 +36,11 @@ export function AdminRoutes() {
     <Routes>
       <Route element={<AdminLayout />}>
         <Route index element={<AdminHomeView />} />
-        <Route path="configuracion" element={<ConfigurationView />} />
+        <Route path="configuracion" element={<Navigate to="horario-laboral" replace />} />
+        <Route path="configuracion/horario-laboral" element={<WorkingHoursView />} />
+        <Route path="configuracion/actividad-clientes" element={<CustomerActivityView />} />
+        <Route path="configuracion/promociones" element={<PromotionSettingsView />} />
+        <Route path="configuracion/capacidad-vehiculo" element={<ExpectedLoadView />} />
         <Route path="promociones" element={<PromotionListView />} />
         <Route path="promociones/:id" element={<PromotionDetailView />} />
         <Route path="vehiculos" element={<VehicleListView />} />

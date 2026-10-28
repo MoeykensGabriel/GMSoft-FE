@@ -60,7 +60,7 @@ function RangesForm({ vehicleId, products, initial }: { vehicleId: string; produ
       </div>
     </fieldset>
     <ErrorMessage error={save.error} />
-    {saved && <p role="status" className="text-sm">Carga esperada guardada.</p>}
+    {saved && <p role="status" className="text-sm">Capacidad por vehículo guardada.</p>}
     <Button type="submit" variant="primary" className="self-end" disabled={!valid || !changed || save.isPending}>
       {save.isPending ? 'Guardando...' : 'Guardar rangos'}
     </Button>
@@ -73,7 +73,7 @@ export function LoadRangesPanel() {
   const products = useQuery({ queryKey: ['products', 'published'], queryFn: () => productService.listPublished() })
   const ranges = useQuery(loadRangesQuery(vehicleId))
   const error = vehicles.error ?? products.error ?? (vehicleId ? ranges.error : null)
-  return <Panel title="Carga esperada">
+  return <Panel title="Capacidad por vehículo">
     <Select label="Vehículo" value={vehicleId} onChange={(event) => setVehicleId(event.target.value)}>
       <option value="">Elegí un vehículo</option>
       {(vehicles.data ?? []).map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.name} ({vehicle.licensePlate})</option>)}

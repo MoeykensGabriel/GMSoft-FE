@@ -23,7 +23,7 @@ export function PromotionListView() {
   }
   return <Page className="mx-auto flex max-w-7xl flex-col gap-4 p-6">
     <PageHeader title="Promociones" description="Pruebas de productos, prospectos y envases prestados." />
-    <Link to="/panel/configuracion" className="ui-link self-start">Configurar plazo de retiro de promociones</Link>
+    <Link to="/panel/configuracion/promociones" className="ui-link self-start">Configurar plazo de retiro de promociones</Link>
     <div className="ui-toolbar grid grid-cols-1 items-end gap-3 sm:flex sm:flex-wrap [&>div]:min-w-0">
       <Select label="Vehículo" value={filters.vehicleId} onChange={(event) => filter('vehicleId', event.target.value)}>
         <option value="">Elegí un vehículo</option>{vehicles.data?.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.name} · {vehicle.licensePlate}</option>)}
