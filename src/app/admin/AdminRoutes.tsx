@@ -10,6 +10,7 @@ import {
   SessionListView,
   ReceptionView,
   AdminOpenSessionView,
+  PendingSettlementsView,
 } from '../../modules/sessions/admin'
 import { VehicleLoadView, RemovedLoadsView, RestockView, RestockListView } from '../../modules/vehicleLoads'
 import { VehicleListView, VehicleFormView, ScheduleView } from '../../modules/vehicles/admin'
@@ -60,6 +61,7 @@ export function AdminRoutes() {
 
         <Route path="agenda" element={<ScheduleView />} />
         <Route path="liquidacion" element={<RouteSettlementView />} />
+        <Route path="rendiciones" element={<PendingSettlementsView />} />
         <Route path="resumen-diario" element={<DailySummaryView />} />
         <Route path="hoja-de-ruta" element={<Suspense fallback={<p className="p-6 text-muted">Cargando la hoja de ruta...</p>}><RouteSheetView /></Suspense>} />
         <Route path="ventas" element={<Suspense fallback={<p role="status" className="p-6 text-muted">Cargando…</p>}><SalesByPeriodView /></Suspense>} />

@@ -23,6 +23,7 @@ const groups: Group[] = [
     { to: '/panel/recargas', label: 'Recargar' },
     { to: '/panel/recepcion', label: 'Recibir' },
     { to: '/panel/liquidacion', label: 'Liquidación' },
+    { to: '/panel/rendiciones', label: 'Rendiciones' },
     { to: '/panel/resumen-diario', label: 'Resumen diario' },
     { to: '/panel/hoja-de-ruta', label: 'Hoja de ruta' },
     { to: '/panel/ventas', label: 'Ventas' },
