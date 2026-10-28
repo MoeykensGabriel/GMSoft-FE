@@ -93,7 +93,7 @@ export function ReceiveSessionView() {
 
         {resultado.cashDifference === null ? (
           <p role="alert" className="rounded border border-warning/40 bg-warning-soft p-3 text-sm font-medium text-warning">
-            Falta rendir la plata de esta salida. Cargala en la liquidación cuando llegue.
+            Falta rendir la plata de esta salida. Queda avisado en el Home hasta que la cargues en la liquidación.
           </p>
         ) : (
           <p className={`rounded border p-3 text-sm ${resultado.cashDifference === 0

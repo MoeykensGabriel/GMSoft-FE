@@ -1,8 +1,8 @@
 import { sortProducts } from '../../core'
 import { zonesLabel } from '../../zones'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useParams } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import { BUSINESS_TIME_ZONE, Badge, formatDateTime, formatMoney, LinkButton, Page, PageHeader, Panel, BackButton } from '../../core'
 import { OutsideWorkingHoursBadge, OutsideWorkingHoursEvents } from '../../workingHours'
 import { noPurchaseLabel } from '../../customers'
@@ -65,6 +65,15 @@ export function SessionDetailView() {
     queryFn: () => sessionService.getUnvisitedCustomers(id),
     staleTime: 0, refetchInterval: 30_000,
   })
+
+  // Desde el aviso del Home se llega directo a la liquidación. La página se arma después
+  // de navegar y el navegador no encuentra el ancla solo: se baja cuando ya cargó lo que
+  // va arriba de ella.
+  const { hash } = useLocation()
+  const armada = Boolean(sesion.data) && !recorrido.isPending && !cobros.isPending && !sinVisitar.isPending
+  useEffect(() => {
+    if (armada && hash) document.getElementById(decodeURIComponent(hash.slice(1)))?.scrollIntoView()
+  }, [armada, hash])
 
   if (sesion.isLoading) return <p className="p-6 text-muted">Cargando...</p>
   if (!sesion.data) return <p className="p-6 text-danger">No se encontró la salida.</p>

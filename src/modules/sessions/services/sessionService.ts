@@ -55,6 +55,18 @@ export interface ActiveDeparture {
   stock?: { productId: string; productDetail: string; initial: number; restocked: number; delivered: number; fullOnBoard: number; emptyOnBoard: number }[]
 }
 
+/** Una salida recibida a la que todavía no se le cargó la plata, de cualquier día. */
+export interface PendingSettlement {
+  sessionId: string
+  driverName: string
+  vehicleName: string
+  vehicleLicensePlate: string
+  zoneName: string
+  closedAt: string
+  /** El efectivo que cobró el chofer: lo que tiene que entregar. */
+  cashToDeliver: number
+}
+
 export interface Session extends SessionWorkingHours {
   zones: OrderedZone[]
   driverRouteOrderChange: RouteOrderChange | null
@@ -229,6 +241,7 @@ export const sessionService = {
   keepAlive: (sessionId: string) => api.post<{ status: SessionStatus; token: string | null }>(`/api/sessions/${sessionId}/keep-alive`),
   getStatus: (sessionId: string) => api.get<DepartureStatus>(`/api/sessions/${sessionId}/status`),
   getActiveDepartures: () => api.get<ActiveDeparture[]>('/api/sessions/active-departures'),
+  getPendingSettlements: () => api.get<PendingSettlement[]>('/api/sessions/pending-settlements'),
   /**
    * La sesion abierta del chofer, o null si no tiene ninguna. El backend devuelve
    * 204 sin cuerpo cuando no hay, y el cliente lo traduce a undefined.
