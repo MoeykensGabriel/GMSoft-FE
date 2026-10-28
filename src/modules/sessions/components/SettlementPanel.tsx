@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ApiError, Button, Field, Panel, formatMoney } from '../../core'
+import { Button, Field, Panel, formatMoney } from '../../core'
 import { OutsideWorkingHoursBadge } from '../../workingHours'
 import { sessionService } from '../services/sessionService'
 import { StatTile } from '../../core'
+import { cashGapDetail } from '../utils/receptionSummary'
+import { SettlementConfirmModal } from './SettlementConfirmModal'
 
 export interface CollectedByMethod { cash: number; transfer: number; card: number }
 
@@ -14,8 +16,9 @@ export interface CollectedByMethod { cash: number; transfer: number; card: numbe
  * entregado es plata que se cobro y no llego. Mezclarlas haria ver un problema de
  * caja donde solo hay una venta a cuenta.
  */
-export function SettlementPanel({ sessionId, cerrada, byMethod }: {
+export function SettlementPanel({ sessionId, driverName, cerrada, byMethod }: {
   sessionId: string
+  driverName: string
   cerrada: boolean
   /** Cobrado por forma de pago, si quien lo usa ya lo tiene calculado. */
   byMethod?: CollectedByMethod
@@ -34,7 +37,9 @@ export function SettlementPanel({ sessionId, cerrada, byMethod }: {
   })
 
   const [monto, setMonto] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  // Enviar el formulario solo abre el resumen: registra recién el botón verde del modal.
+  const [review, setReview] = useState(false)
+  const closeReview = () => { if (!rendir.isPending) { setReview(false); rendir.reset() } }
 
   if (liquidacion.isLoading) return <p className="text-sm text-muted">Cargando liquidación...</p>
   if (!liquidacion.data) return null
@@ -42,14 +47,9 @@ export function SettlementPanel({ sessionId, cerrada, byMethod }: {
   const l = liquidacion.data
   const diferencia = l.cashDifference ?? 0
 
-  async function onSubmit(e: FormEvent) {
+  function onSubmit(e: FormEvent) {
     e.preventDefault()
-    setError(null)
-    try {
-      await rendir.mutateAsync(Number(monto))
-    } catch (err) {
-      setError(err instanceof ApiError ? (err.detail ?? err.title) : 'No se pudo registrar.')
-    }
+    setReview(true)
   }
 
   return (
@@ -77,7 +77,7 @@ export function SettlementPanel({ sessionId, cerrada, byMethod }: {
           <StatTile label="Entregó" value={formatMoney(l.amountReceived)} />
           <StatTile label="Diferencia de caja" value={formatMoney(Math.abs(diferencia))}
             tone={diferencia === 0 ? 'success' : 'danger'}
-            detail={diferencia === 0 ? 'La caja cuadra' : diferencia > 0 ? 'Falta plata: cobró más de lo que entregó' : 'Sobra plata: entregó más de lo que cobró'} />
+            detail={cashGapDetail(diferencia)} />
         </div>
       )}
 
@@ -95,15 +95,14 @@ export function SettlementPanel({ sessionId, cerrada, byMethod }: {
             value={monto}
             onChange={(e) => setMonto(e.target.value)}
           />
-          {error && (
-            <p role="alert" className="text-sm text-danger">
-              {error}
-            </p>
-          )}
-          <Button type="submit" className="self-start" disabled={rendir.isPending}>
-            {rendir.isPending ? 'Registrando...' : 'Registrar rendición'}
-          </Button>
+          <Button type="submit" className="self-start" disabled={review}>Registrar rendición</Button>
         </form>
+      )}
+
+      {review && (
+        <SettlementConfirmModal driverName={driverName} cashCollected={byMethod?.cash} amount={Number(monto)}
+          sending={rendir.isPending} error={rendir.error} onBack={closeReview}
+          onConfirm={() => rendir.mutate(Number(monto), { onSuccess: () => setReview(false) })} />
       )}
 
       {l.amountReceived === null && !cerrada && (

@@ -43,3 +43,9 @@ export function cashGap(expected: number, received: number): number {
   // `+ 0` convierte -0 en 0: una diferencia de centavos redondeada no es un faltante.
   return Math.round((expected - received) * 100) / 100 + 0
 }
+
+/** Cómo se lee la diferencia de caja de la liquidación. */
+export function cashGapDetail(gap: number): string {
+  return gap === 0 ? 'La caja cuadra'
+    : gap > 0 ? 'Falta plata: cobró más de lo que entregó' : 'Sobra plata: entregó más de lo que cobró'
+}

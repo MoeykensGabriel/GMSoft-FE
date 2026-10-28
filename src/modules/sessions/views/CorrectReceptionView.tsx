@@ -3,9 +3,10 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ProductQuantityCard, QuantityControl, Button, ErrorMessage, Field, Page, PageHeader, Textarea, formatMoney, BackButton } from '../../core'
+import { ProductQuantityCard, QuantityControl, Button, ErrorMessage, Field, Modal, Page, PageHeader, Textarea, formatMoney, BackButton } from '../../core'
 import { receptionQuery } from '../hooks/receptionQuery'
 import { sessionService } from '../services/sessionService'
+import { pendingCorrectionChanges } from '../utils/receptionChanges'
 import type { ContainerState, CorrectReceptionRequest, Reception } from '../services/sessionService'
 
 type Conteo = Record<string, { Full: string; Empty: string }>
@@ -50,6 +51,8 @@ function CorrectionForm({ sessionId, reception, subtitle }: { sessionId: string;
     [p.productId, { Full: String(p.fullReturned), Empty: String(p.emptyReturned) }])))
   const [motivo, setMotivo] = useState('')
   const [aviso, setAviso] = useState<string | null>(null)
+  // Guardar solo abre el resumen con lo que cambia: la corrección se envía recién al confirmar.
+  const [review, setReview] = useState<CorrectReceptionRequest | null>(null)
 
   const corregir = useMutation({
     mutationFn: (body: CorrectReceptionRequest) => sessionService.correctReception(sessionId, body),
@@ -82,13 +85,15 @@ function CorrectionForm({ sessionId, reception, subtitle }: { sessionId: string;
       setAviso('No cambiaste ningún dato: los números son iguales a los que ya estaban.')
       return
     }
-    corregir.mutate(body)
+    setReview(body)
   }
+
+  const closeReview = () => { if (!corregir.isPending) { setReview(null); corregir.reset() } }
 
   const set = (productId: string, state: ContainerState, valor: string) =>
     setConteo((c) => ({ ...c, [productId]: { ...c[productId], [state]: valor } }))
 
-  return (
+  return <>
     <form onSubmit={onSubmit} className="ui-card mx-auto flex max-w-3xl flex-col gap-5 p-6">
       <div>
         <BackButton to={`/panel/salidas/${sessionId}`} label="Volver a la salida" appearance="link" />
@@ -148,11 +153,26 @@ function CorrectionForm({ sessionId, reception, subtitle }: { sessionId: string;
         value={motivo} onChange={(e) => setMotivo(e.target.value)} />
 
       {aviso && <p role="alert" className="text-sm text-danger">{aviso}</p>}
-      <ErrorMessage error={corregir.error} />
 
-      <Button type="submit" disabled={corregir.isPending}>
-        {corregir.isPending ? 'Guardando...' : 'Guardar corrección'}
-      </Button>
+      <Button type="submit" disabled={Boolean(review)}>Guardar corrección</Button>
     </form>
-  )
+
+    {review && <Modal title="Confirmar corrección" busy={corregir.isPending} onClose={closeReview} footer={<>
+      <Button type="button" variant="danger" disabled={corregir.isPending} onClick={closeReview}>Volver a editar</Button>
+      <Button type="button" disabled={corregir.isPending} onClick={() => corregir.mutate(review)}>
+        {corregir.isPending ? 'Guardando...' : 'Confirmar corrección'}
+      </Button>
+    </>}>
+      <p className="text-muted">{subtitle}</p>
+      <div>
+        <p className="font-semibold text-ink">Qué cambia</p>
+        <ul className="list-disc pl-5">
+          {pendingCorrectionChanges(reception, review).map((cambio) => <li key={cambio}>{cambio}</li>)}
+        </ul>
+      </div>
+      <p className="whitespace-pre-wrap break-words"><span className="text-muted">Motivo:</span> {review.reason}</p>
+      <p>La corrección queda en el historial de la salida con este motivo. Para deshacerla hay que hacer otra corrección.</p>
+      <ErrorMessage error={corregir.error} />
+    </Modal>}
+  </>
 }

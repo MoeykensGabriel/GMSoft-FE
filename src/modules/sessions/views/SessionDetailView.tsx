@@ -232,7 +232,7 @@ export function SessionDetailView() {
       {cerrada && <ReceptionCorrectionsPanel sessionId={id} />}
       <RestocksPanel restocks={s.restocks} />
       <div id="liquidacion" className="scroll-mt-4">
-        <SettlementPanel sessionId={id} cerrada={cerrada} byMethod={cobros.data ? cobrado : undefined} />
+        <SettlementPanel sessionId={id} driverName={s.driverName} cerrada={cerrada} byMethod={cobros.data ? cobrado : undefined} />
       </div>
     </Page>
   )
