@@ -1,4 +1,7 @@
-import { formatDateTime, DataTable, LinkButton } from '../../core'
+import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
+import { Badge, formatDateTime, DataTable, LinkButton } from '../../core'
+import { sessionService } from '../services/sessionService'
 import type { ActiveDeparture } from '../services/sessionService'
 import { departureRows, stockTone } from '../utils/departureStock'
 
@@ -10,11 +13,17 @@ const toneClass = { empty: 'bg-danger-soft text-danger', low: 'bg-warning-soft t
  */
 export function ActiveDepartureSummary({ departure }: { departure: ActiveDeparture }) {
   const filas = departureRows(departure)
+  // Misma consulta que el detalle de la salida: al entrar ya está en caché.
+  const visitas = useQuery({ queryKey: ['sessions', 'deliveries', departure.sessionId], queryFn: () => sessionService.getDeliveries(departure.sessionId), refetchInterval: 60_000 })
+  const fueraRecorrido = (visitas.data ?? []).filter((v) => v.isOutOfRoute).length
   const total = (campo: keyof (typeof filas)[number]) => filas.reduce((sum, f) => sum + Number(f[campo] ?? 0), 0)
   return <article className="flex min-w-0 flex-col gap-4 ui-card p-4">
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="min-w-0">
         <h3 className="break-words text-lg font-semibold">{departure.vehicleName} · {departure.vehicleLicensePlate}</h3>
+        {fueraRecorrido > 0 && <Link to={`/panel/salidas/${departure.sessionId}?filtro=fuera-del-recorrido`} className="inline-block">
+          <Badge tone="pedido">{fueraRecorrido} fuera del recorrido</Badge>
+        </Link>}
         <p className="break-words text-sm">
           Chofer: <strong>{departure.driverName || 'Sin nombre registrado'}</strong>
           {' · '}{departure.zoneName.includes(' → ') ? 'Zonas' : 'Zona'}: <strong>{departure.zoneName || 'Sin nombre registrado'}</strong>

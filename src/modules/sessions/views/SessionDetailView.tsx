@@ -17,7 +17,7 @@ import { detailedSettlementQuery } from '../hooks/detailedSettlementQuery'
 import { sessionService } from '../services/sessionService'
 import type { SessionDelivery } from '../services/sessionService'
 
-type Filtro = 'todas' | 'ventas' | 'transferencia' | 'cuenta' | 'sinCompra'
+type Filtro = 'todas' | 'ventas' | 'transferencia' | 'cuenta' | 'sinCompra' | 'fueraRecorrido'
 
 const FILTROS: { id: Filtro; label: string }[] = [
   { id: 'todas', label: 'Todas' },
@@ -45,7 +45,10 @@ function envasesPorProducto(visita: SessionDelivery) {
  */
 export function SessionDetailView() {
   const { id = '' } = useParams()
-  const [filtro, setFiltro] = useState<Filtro>('todas')
+  // Desde la lista de Salidas se llega con ?filtro=fuera-del-recorrido.
+  const { hash, search } = useLocation()
+  const [filtro, setFiltro] = useState<Filtro>(() =>
+    new URLSearchParams(search).get('filtro') === 'fuera-del-recorrido' ? 'fueraRecorrido' : 'todas')
 
   const sesion = useQuery({
     queryKey: ['sessions', 'detail', id],
@@ -69,7 +72,6 @@ export function SessionDetailView() {
   // Desde el aviso del Home se llega directo a la liquidación. La página se arma después
   // de navegar y el navegador no encuentra el ancla solo: se baja cuando ya cargó lo que
   // va arriba de ella.
-  const { hash } = useLocation()
   const armada = Boolean(sesion.data) && !recorrido.isPending && !cobros.isPending && !sinVisitar.isPending
   useEffect(() => {
     if (armada && hash) document.getElementById(decodeURIComponent(hash.slice(1)))?.scrollIntoView()
@@ -84,6 +86,7 @@ export function SessionDetailView() {
   const pagoDe = new Map((cobros.data ?? []).map((c) => [c.customerId, c]))
   const ventas = visitas.filter((v) => v.type !== 'NoPurchase' && v.items.length > 0)
   const sinCompra = visitas.filter((v) => v.type === 'NoPurchase')
+  const fueraRecorrido = visitas.filter((v) => v.isOutOfRoute)
   const cobrado = (cobros.data ?? []).reduce(
     (suma, c) => ({ cash: suma.cash + c.cash, transfer: suma.transfer + c.transfer, card: suma.card + c.card }),
     { cash: 0, transfer: 0, card: 0 })
@@ -97,6 +100,7 @@ export function SessionDetailView() {
 
   const mostradas = visitas.filter((v) => {
     if (filtro === 'todas') return true
+    if (filtro === 'fueraRecorrido') return v.isOutOfRoute
     if (filtro === 'sinCompra') return v.type === 'NoPurchase'
     if (v.type === 'NoPurchase' || v.items.length === 0) return false
     if (filtro === 'ventas') return true
@@ -164,6 +168,11 @@ export function SessionDetailView() {
                   {f.label}
                 </button>
               ))}
+              {fueraRecorrido.length > 0 && <button type="button" aria-pressed={filtro === 'fueraRecorrido'} onClick={() => setFiltro('fueraRecorrido')}
+                className={`rounded border border-warning px-3 py-1.5 text-sm font-semibold ${filtro === 'fueraRecorrido'
+                  ? 'bg-warning text-white' : 'bg-warning-soft text-warning hover:bg-warning/10'}`}>
+                Fuera del recorrido ({fueraRecorrido.length})
+              </button>}
             </div>
 
             {mostradas.length === 0 && <p className="text-muted">Ninguna visita con ese filtro.</p>}
