@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { Button } from '../../modules/core'
+import { AlertsButton } from './AlertsButton'
 
 interface Item { to: string; label: string; end?: boolean; children?: Item[] }
 interface Group { id: string; label: string; items: Item[] }
@@ -95,6 +96,7 @@ export function AdminSidebar({ userName, expanded, onClose, onLogout }: {
     </div>
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
       <nav aria-label="Administración" className="flex flex-col gap-1 p-3">
+        <AlertsButton onClick={onNavigate} />
         <NavLink to={home.to} end={home.end} onClick={onNavigate} className={({ isActive }) => linkClass(isActive)}>{home.label}</NavLink>
         {groups.map((group) => {
           const shown = isOpen(group.id)

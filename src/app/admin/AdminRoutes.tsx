@@ -22,6 +22,7 @@ import { PromotionDetailView, PromotionListView } from '../../modules/promotions
 import { CustomerActivityView, ExpectedLoadView, PromotionSettingsView, WorkingHoursView } from './ConfigurationView'
 import { AdminLayout } from './AdminLayout'
 import { AdminHomeView } from './AdminHomeView'
+import { AlertsView } from './AlertsView'
 
 // Estadísticas carga la librería de gráficos: se baja recién al entrar.
 const VehiclePerformanceView = lazy(() => import('../../modules/reports').then((module) => ({ default: module.VehiclePerformanceView })))
@@ -37,6 +38,7 @@ export function AdminRoutes() {
     <Routes>
       <Route element={<AdminLayout />}>
         <Route index element={<AdminHomeView />} />
+        <Route path="alertas" element={<AlertsView />} />
         <Route path="configuracion" element={<Navigate to="horario-laboral" replace />} />
         <Route path="configuracion/horario-laboral" element={<WorkingHoursView />} />
         <Route path="configuracion/actividad-clientes" element={<CustomerActivityView />} />

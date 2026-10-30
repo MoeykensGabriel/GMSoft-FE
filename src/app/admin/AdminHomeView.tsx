@@ -1,16 +1,12 @@
-import { RemovalRequestsNotice } from '../../modules/customers/admin'
-import { UncoveredCustomers } from '../../modules/routePlanning'
 import { ActiveDeparturesCard } from '../../modules/sessions'
-import { PendingSettlementsCard } from '../../modules/sessions/admin'
 import { LoadedVehiclesCard } from '../../modules/vehicleLoads'
 import { Page, PageHeader } from '../../modules/core'
+import { AlertsButton } from './AlertsButton'
 
 export function AdminHomeView() {
   return <Page className="mx-auto flex max-w-7xl flex-col gap-5 p-4 md:p-6">
     <PageHeader title="Home" description="Estado del reparto" />
-    <PendingSettlementsCard />
-    <RemovalRequestsNotice />
-    <UncoveredCustomers summary />
+    <AlertsButton className="self-start" />
     <LoadedVehiclesCard />
     <div className="grid min-w-0 gap-5"><ActiveDeparturesCard /></div>
   </Page>
