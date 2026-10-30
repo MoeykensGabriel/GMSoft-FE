@@ -152,7 +152,7 @@ export function RouteEditor({ initial, filters, vehicles, zones, onDirty, onBusy
     {warnings.length > 0 && <CoverageWarning items={warnings} busy={pending} onClose={() => setWarnings([])}
       onContinue={() => void save(true)} onZone={(id, zoneId, zoneName) => {
         update(id, { zoneId, zoneName }); setWarnings([])
-        setNotice('Zona actualizada. Revis? los cambios y guard? el recorrido; se volver? a consultar la cobertura.')
+        setNotice('Zona actualizada. Revisá los cambios y guardá el recorrido; se volverá a consultar la cobertura.')
       }} />}
     <ErrorMessage error={error} />
     {conflict && <p role="alert" className="text-sm text-warning">El recorrido cambió en el servidor. Tus cambios siguen visibles. Usá «Recargar recorrido» para ver la lista actual; al recargar se descartan los cambios locales.</p>}
@@ -160,11 +160,11 @@ export function RouteEditor({ initial, filters, vehicles, zones, onDirty, onBusy
     {rows.length === 0 ? <p>No hay clientes de este camión en esa zona para ese día</p>
       : <>
         <p className="text-sm text-muted">Arrastrá desde el agarre o usá las flechas para subir y bajar. El orden es compartido con los otros días de visita.</p>
-        <DataTable stack={false} label="Clientes del recorrido" className="min-w-[62rem]">
+        <DataTable stack={false} label="Clientes del recorrido" className="min-w-[72rem]">
           <thead><tr>
-            <th scope="col">Ordenar</th><th scope="col" className="whitespace-nowrap">Pos</th><th scope="col">Cliente</th>
-            <th scope="col">Dirección</th>
-            {WEEKDAYS.map((day) => <th key={day.value} scope="col" className="whitespace-nowrap text-center"><abbr className="no-underline" title={day.label}>{day.label.slice(0, 3)}</abbr></th>)}
+            <th scope="col">Ordenar</th><th scope="col" className="whitespace-nowrap">Pos</th><th scope="col" className="min-w-44">Cliente</th>
+            <th scope="col" className="min-w-48">Dirección</th>
+            {WEEKDAYS.map((day) => <th key={day.value} scope="col" className="whitespace-nowrap px-1! text-center"><abbr className="no-underline" title={day.label}>{day.label.slice(0, 3)}</abbr></th>)}
             <th scope="col">Camión</th>
             <th scope="col">Zona</th>
           </tr></thead>
@@ -209,9 +209,10 @@ export function RouteEditor({ initial, filters, vehicles, zones, onDirty, onBusy
                 </div>
               </div></td>
               <td>{index + 1}</td>
-              <td><div className="flex flex-col items-start gap-1"><span className="font-semibold">{row.displayName}</span>
+              {/* Sin cortar palabras: con tantas columnas fijas, la regla general de la tabla dejaba nombre y dirección de una letra de ancho. */}
+              <td className="[overflow-wrap:normal]"><div className="flex flex-col items-start gap-1"><span className="font-semibold">{row.displayName}</span>
                 {modified && <Badge tone="warning">Modificado</Badge>}
-                {showFormer && <div className="flex items-center gap-1">
+                {showFormer && <div className="flex items-center gap-1 whitespace-nowrap">
                   <Badge tone="warning">Era de {former}</Badge>
                   {formerMatch && <Button variant="secondary" className="px-2 py-1 text-xs" disabled={pending}
                     aria-label={`Pasar a ${row.displayName} a ${formerMatch.name}`}
@@ -219,8 +220,8 @@ export function RouteEditor({ initial, filters, vehicles, zones, onDirty, onBusy
                 </div>}
                 {leaves && <span className="text-warning">Sale de esta lista al guardar</span>}
               </div></td>
-              <td>{row.address}<span className="block text-muted">{row.zoneName}</span><span className="block text-muted">{row.phone}</span></td>
-              {WEEKDAYS.map((day) => <td key={day.value} className="text-center">
+              <td className="[overflow-wrap:normal]">{row.address}<span className="block text-muted">{row.zoneName}</span><span className="block text-muted">{row.phone}</span></td>
+              {WEEKDAYS.map((day) => <td key={day.value} className="px-1! text-center">
                 <input type="checkbox" checked={row.visitDays.includes(day.value)} disabled={pending}
                   aria-label={`${day.label} para ${row.displayName}`} onChange={() => changeDay(row, day.value)} />
               </td>)}
