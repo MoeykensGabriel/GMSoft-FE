@@ -38,7 +38,7 @@ export function OutOfRouteSearch({ sessionId, onConfirm }: { sessionId: string; 
         </li>)}
       </ul>}
     </>}
-    {selected && <Modal title="Venta fuera de su día" onClose={() => setSelected(null)} footer={<>
+    {selected && <Modal title="Venta fuera del recorrido" onClose={() => setSelected(null)} footer={<>
       <Button variant="secondary" className="min-h-11" onClick={() => setSelected(null)}>Cancelar</Button>
       <Button className="min-h-11" onClick={() => onConfirm(selected.id)}>Atenderlo hoy</Button>
     </>}>

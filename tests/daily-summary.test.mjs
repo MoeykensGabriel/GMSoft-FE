@@ -122,7 +122,7 @@ test('el contador fuera de día aparece una sola vez y fuera del encabezado ocul
     assert.equal(badges.length, outOfRouteCount > 0 ? 1 : 0)
     if (outOfRouteCount > 0) {
       assert.equal(badges[0].props.tone, 'pedido')
-      assert.equal(badges[0].props.children.join(''), '2 fuera de su día')
+      assert.equal(badges[0].props.children.join(''), '2 fuera del recorrido')
       assert.equal(nodes(all.find((node) => node.type === 'table')).filter((node) => node.type === 'badge').length, 0)
     }
   }

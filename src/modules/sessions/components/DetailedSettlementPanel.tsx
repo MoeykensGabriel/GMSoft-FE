@@ -19,7 +19,7 @@ function CustomerCard({ customer: c }: { customer: SettlementCustomer }) {
   return <article className="rounded border-2 border-muted bg-surface text-sm shadow-sm md:text-base">
     {/* En el celular el nombre queda fijo arriba mientras se baja por su card. */}
     <header className="sticky top-[60px] z-10 grid gap-x-6 gap-y-1 border-b border-line bg-accent-soft px-3 py-2 text-ink md:static md:grid-cols-[1fr_2fr_auto] md:items-baseline md:px-4 md:py-3">
-      <span className="text-base font-bold md:text-lg">{c.customerName} {c.isOutOfRoute && <Badge tone="pedido">Fuera de su día</Badge>}</span>
+      <span className="text-base font-bold md:text-lg">{c.customerName} {c.isOutOfRoute && <Badge tone="pedido">Fuera del recorrido</Badge>}</span>
       <span>{c.customerAddress}</span>
       <span>{c.customerPhone}</span>
     </header>

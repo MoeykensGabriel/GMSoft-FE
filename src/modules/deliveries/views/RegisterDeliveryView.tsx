@@ -279,7 +279,7 @@ export function RegisterDeliveryView() {
         {fueraDeDia && <BackButton onClick={volver} label="Volver a Pedidos" appearance="link" />}
         {directo && customerId && !fueraDeDia && <BackButton to={`/reparto/clientes/${encodeURIComponent(customerId)}`} label="Volver a la ficha" appearance="link" />}
         <PageHeader title={<>Registrar visita</>} />
-        {fueraDeDia && <Badge tone="pedido">Fuera de su día</Badge>}
+        {fueraDeDia && <Badge tone="pedido">Fuera del recorrido</Badge>}
         <p className="mt-1 text-sm text-muted">{zonesLabel(sesion)}</p>
       </div>
 

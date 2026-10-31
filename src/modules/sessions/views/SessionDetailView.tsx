@@ -192,7 +192,7 @@ export function SessionDetailView() {
                         </p>
                         <p className="text-sm text-muted">{v.customerAddress} · {formatDateTime(v.deliveredAt, BUSINESS_TIME_ZONE)}</p>
                         <OutsideWorkingHoursBadge marked={v.isOutsideWorkingHours} />
-                        {v.isOutOfRoute && <Badge tone="pedido">Fuera de su día</Badge>}
+                        {v.isOutOfRoute && <Badge tone="pedido">Fuera del recorrido</Badge>}
                       </div>
                       {!noCompro && v.items.length > 0 && <p className="text-xl font-semibold text-ink">{formatMoney(v.total)}</p>}
                     </div>
