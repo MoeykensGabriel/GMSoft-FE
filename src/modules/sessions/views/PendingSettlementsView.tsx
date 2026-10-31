@@ -1,16 +1,12 @@
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
-import { BUSINESS_TIME_ZONE, Button, DataTable, ErrorMessage, Page, PageHeader, Select, formatDateTime, formatMoney } from '../../core'
+import { BUSINESS_TIME_ZONE, Button, DataTable, ErrorMessage, LinkButton, Page, PageHeader, Select, formatDateTime, formatMoney } from '../../core'
 import { vehicleService } from '../../vehicles'
-import { PendingSettlementModal } from '../components/PendingSettlementModal'
-import type { PendingSettlement } from '../services/sessionService'
 import { sessionService } from '../services/sessionService'
 import { countPendingByPlate, filterPendingByPlate, totalPendingCash } from '../utils/pendingSettlements'
 
 export function PendingSettlementsView() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [rendir, setRendir] = useState<PendingSettlement | null>(null)
   const vehicleId = searchParams.get('camion') ?? ''
   const pending = useQuery({
     queryKey: ['sessions', 'pending-settlements'], queryFn: sessionService.getPendingSettlements,
@@ -60,7 +56,7 @@ export function PendingSettlementsView() {
             <td>{item.driverName}</td>
             <td>{item.zoneName}</td>
             <td className="text-right tabular-nums">{formatMoney(item.cashToDeliver)}</td>
-            <td><Button variant="primary" onClick={() => setRendir(item)}>Cargar la plata</Button></td>
+            <td><LinkButton variant="primary" to={`/panel/salidas/${item.sessionId}#liquidacion`}>Rendir</LinkButton></td>
           </tr>)}</tbody>
           <tfoot><tr className="bg-warning-soft font-semibold">
             <th scope="row" colSpan={showVehicle ? 4 : 3} className="max-md:pl-0! before:hidden">Total</th>
@@ -68,7 +64,6 @@ export function PendingSettlementsView() {
             <td className="max-md:hidden!" />
           </tr></tfoot>
         </DataTable>}
-      {rendir && <PendingSettlementModal item={rendir} onClose={() => setRendir(null)} />}
     </>}
   </Page>
 }
