@@ -44,6 +44,7 @@ export function ReceiveSessionView() {
   // Vacio a proposito, como los envases: si viniera con el numero puesto no se contaria.
   const [efectivo, setEfectivo] = useState('')
   const [rindeDespues, setRindeDespues] = useState(false)
+  const [avisoRinde, setAvisoRinde] = useState(false)
   const [confirmando, setConfirmando] = useState(false)
   const [resultado, setResultado] = useState<CloseSessionResult | null>(null)
 
@@ -209,15 +210,33 @@ export function ReceiveSessionView() {
           </span>
         )}
         <label className="flex min-h-11 items-center gap-2 text-sm text-ink">
-          <input type="checkbox" checked={rindeDespues} onChange={(e) => setRindeDespues(e.target.checked)}
+          {/* Se tilda solo desde el aviso: si se marca sin saber, la plata queda sin anotar. */}
+          <input type="checkbox" checked={rindeDespues} onChange={(e) => { if (e.target.checked) setAvisoRinde(true); else setRindeDespues(false) }}
             className="h-5 w-5 accent-brand" />
-          La plata llega después (queda marcada «Falta rendir»)
+          La plata llega después
         </label>
       </div>
 
       <UnvisitedCustomersPanel sessionId={id} notice />
 
       <Button type="submit">Recibir el camión</Button>
+
+      {avisoRinde && (
+        <Modal
+          title="¿La plata llega después?"
+          onClose={() => setAvisoRinde(false)}
+          footer={<>
+            <Button type="button" variant="danger" onClick={() => setAvisoRinde(false)}>No, la entrega ahora</Button>
+            <Button type="button" onClick={() => { setRindeDespues(true); setAvisoRinde(false) }}>Sí, llega después</Button>
+          </>}
+        >
+          {esperado !== undefined && <p className="rounded border border-warning/40 bg-warning-soft p-3 font-semibold text-warning">
+            Efectivo a entregar: {formatMoney(esperado)}
+          </p>}
+          <p>El camión se recibe <strong>sin anotar la plata</strong>.</p>
+          <p>La salida queda <strong>Falta rendir</strong> y aparece en <strong>Alertas</strong> hasta que cargues cuánto entregó.</p>
+        </Modal>
+      )}
 
       {confirmando && (
         <Modal
