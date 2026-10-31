@@ -191,6 +191,7 @@ export function ReceiveSessionView() {
         </p>
         {!rindeDespues && (
           <Field
+            id="efectivo-entregado"
             label="Efectivo entregado"
             name="amountReceived"
             type="number"
@@ -223,18 +224,21 @@ export function ReceiveSessionView() {
 
       {avisoRinde && (
         <Modal
-          title="¿La plata llega después?"
+          title="¿Ya tenés la plata en la mano?"
           onClose={() => setAvisoRinde(false)}
           footer={<>
-            <Button type="button" variant="danger" onClick={() => setAvisoRinde(false)}>No, la entrega ahora</Button>
-            <Button type="button" onClick={() => { setRindeDespues(true); setAvisoRinde(false) }}>Sí, llega después</Button>
+            <Button type="button" variant="danger" onClick={() => { setRindeDespues(true); setAvisoRinde(false) }}>No, todavía no</Button>
+            <Button type="button" onClick={() => {
+              setAvisoRinde(false)
+              // Al cerrarse, el modal le devuelve el foco a la casilla: se pasa al monto después.
+              requestAnimationFrame(() => document.getElementById('efectivo-entregado')?.focus())
+            }}>Sí, ya la tengo</Button>
           </>}
         >
           {esperado !== undefined && <p className="rounded border border-warning/40 bg-warning-soft p-3 font-semibold text-warning">
-            Efectivo a entregar: {formatMoney(esperado)}
+            Tiene que entregar: {formatMoney(esperado)}
           </p>}
-          <p>El camión se recibe <strong>sin anotar la plata</strong>.</p>
-          <p>La salida queda <strong>Falta rendir</strong> y aparece en <strong>Alertas</strong> hasta que cargues cuánto entregó.</p>
+          <p>Si todavía no la tenés, cuando llegue vas a tener que cargarla en <strong>Alertas → Rendiciones</strong>.</p>
         </Modal>
       )}
 
