@@ -22,6 +22,7 @@ const groups: Group[] = [
     { to: '/panel/carga', label: 'Cargar' },
     { to: '/panel/salidas', label: 'Salidas' },
     { to: '/panel/recargas', label: 'Recargar' },
+    { to: '/panel/pases', label: 'Pase entre camiones' },
     { to: '/panel/recepcion', label: 'Recibir' },
     { to: '/panel/liquidacion', label: 'Liquidación' },
     { to: '/panel/rendiciones', label: 'Rendiciones' },

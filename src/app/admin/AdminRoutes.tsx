@@ -11,6 +11,7 @@ import {
   ReceptionView,
   AdminOpenSessionView,
   PendingSettlementsView,
+  TransferView,
 } from '../../modules/sessions/admin'
 import { VehicleLoadView, RemovedLoadsView, RestockView, RestockListView } from '../../modules/vehicleLoads'
 import { VehicleListView, VehicleFormView, ScheduleView } from '../../modules/vehicles/admin'
@@ -77,6 +78,7 @@ export function AdminRoutes() {
         <Route path="salidas/:id/correccion" element={<CorrectReceptionView />} />
         <Route path="salidas/:id/recarga" element={<RestockView />} />
         <Route path="recargas" element={<RestockListView />} />
+        <Route path="pases" element={<TransferView />} />
 
         {/* El segmento fijo le gana al dinamico en el router, asi que "nuevo" nunca
             se toma por un id. */}

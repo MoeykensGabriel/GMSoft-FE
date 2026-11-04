@@ -10,6 +10,7 @@ import { Button, formatDateTime, InstallAppButton, LinkButton, Page, useOutbox, 
 import { sessionService } from '../services/sessionService'
 import type { Session } from '../services/sessionService'
 import { RestocksPanel } from '../components/RestocksPanel'
+import { TransfersPanel } from '../components/TransfersPanel'
 import { RestockNotice } from '../components/RestockNotice'
 import { OutboxNotice } from '../components/OutboxNotice'
 import { SalesSoFarCard } from '../components/SalesSoFarCard'
@@ -126,6 +127,7 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
         )}
       </div>
       <RestocksPanel restocks={sesion.restocks} />
+      <TransfersPanel transfers={sesion.transfers} />
       </details>
 
       <InstallAppButton />

@@ -24,6 +24,13 @@ export interface RegisterRestockRequest {
   notes: string | null
 }
 
+export interface SessionTransfer {
+  occurredAt: string
+  incoming: boolean
+  notes: string
+  items: { productId: string; productDetail: string; quantity: number }[]
+}
+
 export interface SessionRestock extends Omit<RegisterRestockRequest, 'confirmOutsideWorkingHours'> {
   isOutsideWorkingHours: boolean
   id: string
@@ -52,7 +59,14 @@ export interface ActiveDeparture {
   openedAt: string
   initialLoad: { productId: string; productDetail: string; quantity: number }[]
   /** Por producto: con qué salió, recargas, entregados y lo que lleva a bordo ahora. */
-  stock?: { productId: string; productDetail: string; initial: number; restocked: number; delivered: number; fullOnBoard: number; emptyOnBoard: number }[]
+  stock?: { productId: string; productDetail: string; initial: number; restocked: number; transferred?: number; delivered: number; fullOnBoard: number; emptyOnBoard: number }[]
+}
+
+/** Lo que se pasó de un camión a otro, tal como lo registró el backend. */
+export interface TransferResult {
+  fromVehicle: string
+  toVehicle: string
+  lines: { productId: string; productDetail: string; quantity: number }[]
 }
 
 /** Desde qué día se usa el sistema (la primera salida) y cuántos días van. Null sin salidas. */
@@ -89,6 +103,8 @@ export interface Session extends SessionWorkingHours {
   status: SessionStatus
   stock: SessionStockLine[]
   restocks: SessionRestock[]
+  /** Pases con otros camiones: «Pase de Toyota» si recibió, «Pase a Toyota» si dio. */
+  transfers?: SessionTransfer[]
   /** Si ya se cargó la plata que entregó el chofer. */
   isSettled: boolean
 }
@@ -245,6 +261,8 @@ export const sessionService = {
   getStatus: (sessionId: string) => api.get<DepartureStatus>(`/api/sessions/${sessionId}/status`),
   getActiveDepartures: () => api.get<ActiveDeparture[]>('/api/sessions/active-departures'),
   getUsageSince: () => api.get<UsageSince>('/api/sessions/usage-since'),
+  transferStock: (fromSessionId: string, toSessionId: string, items: { productId: string; quantity: number }[]) =>
+    api.post<TransferResult>('/api/sessions/transfers', { fromSessionId, toSessionId, items }),
   getPendingSettlements: () => api.get<PendingSettlement[]>('/api/sessions/pending-settlements'),
   /**
    * La sesion abierta del chofer, o null si no tiene ninguna. El backend devuelve

@@ -9,6 +9,7 @@ import { noPurchaseLabel } from '../../customers'
 import { CancelSessionAction } from '../components/CancelSessionAction'
 import { ReceptionCorrectionsPanel } from '../components/ReceptionCorrectionsPanel'
 import { RestocksPanel } from '../components/RestocksPanel'
+import { TransfersPanel } from '../components/TransfersPanel'
 import { SettlementPanel } from '../components/SettlementPanel'
 import { StatTile } from '../../core'
 import { StockOnBoardPanel } from '../components/StockOnBoardPanel'
@@ -249,6 +250,7 @@ export function SessionDetailView() {
       <StockOnBoardPanel stock={s.stock} cerrada={cerrada} />
       {cerrada && <ReceptionCorrectionsPanel sessionId={id} />}
       <RestocksPanel restocks={s.restocks} />
+      <TransfersPanel transfers={s.transfers} />
       <div id="liquidacion" className="scroll-mt-4">
         <SettlementPanel sessionId={id} driverName={s.driverName} cerrada={cerrada} byMethod={cobros.data ? cobrado : undefined} />
       </div>

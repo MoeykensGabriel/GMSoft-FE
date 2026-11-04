@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Badge, formatDateTime, DataTable, LinkButton } from '../../core'
 import { sessionService } from '../services/sessionService'
 import type { ActiveDeparture } from '../services/sessionService'
-import { departureRows, stockTone } from '../utils/departureStock'
+import { departureRows, stockTone, transferLabel } from '../utils/departureStock'
 
 const toneClass = { empty: 'bg-danger-soft text-danger', low: 'bg-warning-soft text-warning', ok: '' } as const
 
@@ -16,6 +16,7 @@ export function ActiveDepartureSummary({ departure }: { departure: ActiveDepartu
   // Misma consulta que el detalle de la salida: al entrar ya está en caché.
   const visitas = useQuery({ queryKey: ['sessions', 'deliveries', departure.sessionId], queryFn: () => sessionService.getDeliveries(departure.sessionId), refetchInterval: 60_000 })
   const fueraRecorrido = (visitas.data ?? []).filter((v) => v.isOutOfRoute).length
+  const conPases = filas.some((f) => (f.transferred ?? 0) !== 0)
   const total = (campo: keyof (typeof filas)[number]) => filas.reduce((sum, f) => sum + Number(f[campo] ?? 0), 0)
   return <article className="flex min-w-0 flex-col gap-4 ui-card p-4">
     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -43,6 +44,7 @@ export function ActiveDepartureSummary({ departure }: { departure: ActiveDepartu
             <th scope="col" className="py-2 font-medium">Producto</th>
             <th scope="col" className="py-2 text-right font-medium">Salió</th>
             <th scope="col" className="py-2 text-right font-medium">Recargas</th>
+            {conPases && <th scope="col" className="py-2 text-right font-medium">Pases</th>}
             <th scope="col" className="py-2 text-right font-medium">Entregados</th>
             <th scope="col" className="py-2 text-right font-semibold">Llenos a bordo</th>
             <th scope="col" className="py-2 text-right font-medium">Vacíos a bordo</th>
@@ -51,6 +53,7 @@ export function ActiveDepartureSummary({ departure }: { departure: ActiveDepartu
             <th scope="row" className="break-words py-2 pr-2 text-left font-normal">{f.productDetail}</th>
             <td className="py-2 text-right tabular-nums">{f.initial}</td>
             <td className="py-2 text-right tabular-nums">{f.restocked || '—'}</td>
+            {conPases && <td className="py-2 text-right tabular-nums">{transferLabel(f.transferred)}</td>}
             <td className="py-2 text-right tabular-nums">{f.delivered}</td>
             <td className={`py-2 text-right text-base font-bold tabular-nums ${toneClass[stockTone(f)]}`}>{f.fullOnBoard}</td>
             <td className="py-2 text-right tabular-nums">{f.emptyOnBoard}</td>
@@ -59,6 +62,7 @@ export function ActiveDepartureSummary({ departure }: { departure: ActiveDepartu
             <th scope="row" className="py-2 text-left">Total</th>
             <td className="py-2 text-right tabular-nums">{total('initial')}</td>
             <td className="py-2 text-right tabular-nums">{total('restocked') || '—'}</td>
+            {conPases && <td className="py-2 text-right tabular-nums">{transferLabel(total('transferred'))}</td>}
             <td className="py-2 text-right tabular-nums">{total('delivered')}</td>
             <td className="py-2 text-right text-base tabular-nums">{total('fullOnBoard')}</td>
             <td className="py-2 text-right tabular-nums">{total('emptyOnBoard')}</td>

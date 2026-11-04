@@ -7,7 +7,7 @@ const source = readFileSync(new URL('../src/modules/sessions/utils/departureStoc
 const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } })
 const module = { exports: {} }
 new Function('require', 'module', 'exports', outputText)(() => ({}), module, module.exports)
-const { departureRows, stockTone } = module.exports
+const { departureRows, stockTone, transferLabel } = module.exports
 
 const fila = (initial, restocked, fullOnBoard) => ({ productId: 'p', productDetail: 'Bidón', initial, restocked, delivered: initial + restocked - fullOnBoard, fullOnBoard, emptyOnBoard: 0 })
 
@@ -22,4 +22,13 @@ test('marca sin stock y poco stock según lo que llevó, recargas incluidas', ()
   assert.equal(stockTone(fila(10, 5, 2)), 'low')
   assert.equal(stockTone(fila(10, 0, 2)), 'ok')
   assert.equal(stockTone(fila(0, 0, 0)), 'ok')
+})
+
+test('los pases se muestran con signo y lo recibido cuenta como lo que llevó', () => {
+  assert.equal(transferLabel(3), '+3')
+  assert.equal(transferLabel(-3), '−3')
+  assert.equal(transferLabel(0), '—')
+  assert.equal(transferLabel(undefined), '—')
+  assert.equal(stockTone({ ...fila(0, 0, 1), transferred: 10 }), 'low')
+  assert.equal(stockTone({ ...fila(0, 0, 0), transferred: 3 }), 'empty')
 })
