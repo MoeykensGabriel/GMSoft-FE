@@ -7,3 +7,4 @@ export { sessionService } from './services/sessionService'
 export { StockOnBoardPanel } from './components/StockOnBoardPanel'
 
 export { ActiveDeparturesCard } from './components/ActiveDeparturesCard'
+export { UsageSinceBadge } from './components/UsageSinceBadge'

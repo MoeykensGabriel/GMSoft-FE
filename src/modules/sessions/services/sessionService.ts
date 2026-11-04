@@ -55,6 +55,9 @@ export interface ActiveDeparture {
   stock?: { productId: string; productDetail: string; initial: number; restocked: number; delivered: number; fullOnBoard: number; emptyOnBoard: number }[]
 }
 
+/** Desde qué día se usa el sistema (la primera salida) y cuántos días van. Null sin salidas. */
+export interface UsageSince { since: string | null; days: number | null }
+
 /** Una salida recibida a la que todavía no se le cargó la plata, de cualquier día. */
 export interface PendingSettlement {
   sessionId: string
@@ -241,6 +244,7 @@ export const sessionService = {
   keepAlive: (sessionId: string) => api.post<{ status: SessionStatus; token: string | null }>(`/api/sessions/${sessionId}/keep-alive`),
   getStatus: (sessionId: string) => api.get<DepartureStatus>(`/api/sessions/${sessionId}/status`),
   getActiveDepartures: () => api.get<ActiveDeparture[]>('/api/sessions/active-departures'),
+  getUsageSince: () => api.get<UsageSince>('/api/sessions/usage-since'),
   getPendingSettlements: () => api.get<PendingSettlement[]>('/api/sessions/pending-settlements'),
   /**
    * La sesion abierta del chofer, o null si no tiene ninguna. El backend devuelve
