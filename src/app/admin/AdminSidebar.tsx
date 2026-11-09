@@ -39,6 +39,7 @@ const groups: Group[] = [
       { to: '/panel/configuracion/capacidad-vehiculo', label: 'Capacidad por vehículo' },
     ] },
     { to: '/panel/vehiculos', label: 'Vehículos' },
+    { to: '/panel/control-vehiculos', label: 'Control de vehículos' },
     { to: '/panel/choferes', label: 'Choferes' },
     { to: '/panel/catalogo', label: 'Productos' },
     { to: '/panel/zonas', label: 'Zonas de reparto' },

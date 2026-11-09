@@ -3,5 +3,6 @@
 export { VehicleListView } from './views/VehicleListView'
 export { VehicleFormView } from './views/VehicleFormView'
 export { ScheduleView } from './views/ScheduleView'
+export { VehicleControlView } from './views/VehicleControlView'
 export { KilometersReadingsCard } from './components/KilometersReadingsCard'
 export { kilometersReadingsKey } from './utils/kilometersReadings'

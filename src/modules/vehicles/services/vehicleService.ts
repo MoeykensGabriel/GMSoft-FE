@@ -11,9 +11,31 @@ export interface Vehicle {
   licensePlate: string
   type: VehicleType
   currentKilometers: number
+  /** La próxima salida lee el km del tablero. */
+  kilometersCheckPending?: boolean
+  /** Desde cuándo el km es confiable; nulo si nunca se aceptó una lectura. */
+  kilometersCheckedAt?: string | null
 }
 
-export type VehicleInput = Omit<Vehicle, 'id'> & { kilometersReason?: string }
+/** Km de un camión en un período, solo desde que se revisó su km (GET /api/reports/vehicle-kilometers). */
+export interface VehicleKilometersLine {
+  vehicleId: string
+  vehicleName: string
+  licensePlate: string
+  sessions: number
+  totalKilometers: number
+  averagePerSession: number | null
+  medianPerSession: number | null
+  minPerSession: number | null
+  maxPerSession: number | null
+  daysWorked: number
+  averagePerDay: number | null
+  zeroKilometerSessions: number
+  kilometersBetweenSessions: number
+  routes: { route: string; sessions: number; averagePerSession: number | null; medianPerSession: number | null; minPerSession: number | null; maxPerSession: number | null }[]
+}
+
+export type VehicleInput = Omit<Vehicle, 'id' | 'kilometersCheckPending' | 'kilometersCheckedAt'> & { kilometersReason?: string }
 
 /** Lo que leyó el chofer en el tablero, para que la oficina lo acepte o lo rechace. */
 export interface KilometersReading {
@@ -111,6 +133,8 @@ export const vehicleService = {
   getLoadStatus: () => api.get<VehicleLoadStatus[]>('/api/vehicles/load-status'),
 
   getById: (id: string) => api.get<Vehicle>(`/api/vehicles/${id}`),
+  getKilometersReport: (from: string, to: string) => api.get<{ from: string; to: string; vehicles: VehicleKilometersLine[] }>(
+    `/api/reports/vehicle-kilometers?${new URLSearchParams({ from, to })}`),
 
   /** Lo que el camion tiene cargado esperando salir. Tambien lo lee el chofer. */
   getPendingLoad: (vehicleId: string) =>
