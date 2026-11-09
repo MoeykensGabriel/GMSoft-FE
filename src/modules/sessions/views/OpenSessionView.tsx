@@ -89,7 +89,7 @@ export function OpenSessionView() {
   const totalCarga = lineas.reduce((s, l) => s + l.quantity, 0)
 
   function siguiente() {
-    const km = checkKilometers(kilometros, chofer.vehicleKilometers)
+    const km = checkKilometers(kilometros, chofer.vehicleKilometers, chofer.vehicleKilometersCheckPending)
     if (!km.ok && 'error' in km) { setErrorKm(km.error); return }
     if (!km.ok && !saltoConfirmado) { setSaltoKm(km.salto); return }
     const sinElegir = agenda.filter((z) => !zoneIds.includes(z.zoneId))
@@ -163,10 +163,13 @@ export function OpenSessionView() {
     </section>
 
     <section className="ui-card p-4">
-      <Field label="Kilometraje del vehículo" name="kilometersAtOpen" type="number" min={0} inputMode="numeric" required
+      {chofer.vehicleKilometersCheckPending && <p role="note" className="mb-3 rounded border border-warning/40 bg-warning-soft p-3 text-sm font-semibold text-warning">
+        Mirá el tablero y anotá los km exactos que marca. La oficina los revisa.
+      </p>}
+      <Field label={chofer.vehicleKilometersCheckPending ? 'Km del tablero' : 'Kilometraje del vehículo'} name="kilometersAtOpen" type="number" min={0} inputMode="numeric" required
         value={kilometros} onChange={(e) => { setKilometros(e.target.value); setErrorKm(null); setSaltoKm(null); setSaltoConfirmado(false) }}
         error={errorKm ?? undefined} />
-      {chofer.vehicleKilometers != null && <p className="mt-2 text-sm text-muted">Último registrado: <strong>{chofer.vehicleKilometers.toLocaleString('es-AR')} km</strong></p>}
+      {chofer.vehicleKilometers != null && !chofer.vehicleKilometersCheckPending && <p className="mt-2 text-sm text-muted">Último registrado: <strong>{chofer.vehicleKilometers.toLocaleString('es-AR')} km</strong></p>}
       {saltoKm != null && <div role="alert" className="mt-3 flex flex-col gap-2 rounded border border-warning/40 bg-warning-soft p-3 text-sm text-warning">
         <p>Son <strong>{saltoKm.toLocaleString('es-AR')} km</strong> más que la última vez. ¿Está bien?</p>
         <Button type="button" variant="secondary" className="self-start" onClick={() => { setSaltoConfirmado(true); setSaltoKm(null) }}>Sí, es correcto</Button>

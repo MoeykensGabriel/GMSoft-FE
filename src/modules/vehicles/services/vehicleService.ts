@@ -15,6 +15,19 @@ export interface Vehicle {
 
 export type VehicleInput = Omit<Vehicle, 'id'> & { kilometersReason?: string }
 
+/** Lo que leyó el chofer en el tablero, para que la oficina lo acepte o lo rechace. */
+export interface KilometersReading {
+  id: string
+  vehicleId: string
+  vehicleName: string
+  licensePlate: string
+  driverName: string
+  sessionId: string
+  kilometers: number
+  previousKilometers: number
+  readAt: string
+}
+
 export interface VehicleKilometersCorrection {
   correctedAt: string
   previousKilometers: number
@@ -69,6 +82,9 @@ export interface RemovedVehicleLoad {
 }
 
 export const vehicleService = {
+  getPendingKilometersReadings: () => api.get<KilometersReading[]>('/api/vehicles/kilometers-readings/pending'),
+  acceptKilometersReading: (id: string) => api.post<void>(`/api/vehicles/kilometers-readings/${id}/accept`),
+  rejectKilometersReading: (id: string) => api.post<void>(`/api/vehicles/kilometers-readings/${id}/reject`),
   getLoadRanges: (vehicleId: string) => api.get<LoadRange[]>(`/api/vehicles/${vehicleId}/load-ranges`),
   saveLoadRanges: (vehicleId: string, ranges: LoadRange[]) =>
     api.put<void>(`/api/vehicles/${vehicleId}/load-ranges`, {
