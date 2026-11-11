@@ -7,6 +7,7 @@ import { BUSINESS_TIME_ZONE, Badge, formatDateTime, formatMoney, LinkButton, Pag
 import { OutsideWorkingHoursBadge, OutsideWorkingHoursEvents } from '../../workingHours'
 import { noPurchaseLabel } from '../../customers'
 import { CancelSessionAction } from '../components/CancelSessionAction'
+import { OpeningTime } from '../components/OpeningTime'
 import { ReceptionCorrectionsPanel } from '../components/ReceptionCorrectionsPanel'
 import { RestocksPanel } from '../components/RestocksPanel'
 import { TransfersPanel } from '../components/TransfersPanel'
@@ -118,7 +119,8 @@ export function SessionDetailView() {
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-base text-ink">
           <Badge tone={cerrada ? 'neutral' : 'warning'}>{cerrada ? 'Camión recibido' : 'En la calle'}</Badge>
           <span className="font-medium">{s.vehicleName} · {s.vehicleLicensePlate}</span>
-          <span className="text-muted">Salió {formatDateTime(s.openedAt, BUSINESS_TIME_ZONE)} con {s.kilometersAtOpen} km <OutsideWorkingHoursBadge marked={s.openedOutsideWorkingHours} /></span>
+          <OpeningTime openedAt={s.openedAt} />
+          <span className="text-muted">con {s.kilometersAtOpen} km <OutsideWorkingHoursBadge marked={s.openedOutsideWorkingHours} /></span>
           {s.closedAt && <span className="text-muted">Volvió {formatDateTime(s.closedAt, BUSINESS_TIME_ZONE)} con {s.kilometersAtClose} km <OutsideWorkingHoursBadge marked={s.closedOutsideWorkingHours} /></span>}
         </div>
       </div>
@@ -193,6 +195,8 @@ export function SessionDetailView() {
                         </p>
                         <p className="text-sm text-muted">{v.customerAddress} · {formatDateTime(v.deliveredAt, BUSINESS_TIME_ZONE)}</p>
                         <OutsideWorkingHoursBadge marked={v.isOutsideWorkingHours} />
+                        {v.sentOffline && v.markedAt && <Badge tone="warning">Sin señal · marcada {formatDateTime(v.markedAt, BUSINESS_TIME_ZONE)}</Badge>}
+                        {v.markedAtDoubtful && <Badge tone="danger">Hora del celular dudosa</Badge>}
                         {v.isOutOfRoute && <Badge tone="pedido">Fuera del recorrido</Badge>}
                       </div>
                       {!noCompro && v.items.length > 0 && <p className="text-xl font-semibold text-ink">{formatMoney(v.total)}</p>}

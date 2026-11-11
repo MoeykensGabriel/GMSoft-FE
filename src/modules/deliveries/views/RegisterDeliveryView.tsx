@@ -229,6 +229,7 @@ export function RegisterDeliveryView() {
         notes: notas.trim() === '' ? null : notas.trim(),
         clientRequestId: requestId,
         expectedSessionId: sesion!.id,
+        markedAt: new Date().toISOString(),
         ...(fueraDeDia ? { outOfRoute: true } : {}),
       }
     if (!pendiente.current) {

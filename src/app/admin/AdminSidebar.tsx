@@ -40,6 +40,7 @@ const groups: Group[] = [
     ] },
     { to: '/panel/vehiculos', label: 'Vehículos' },
     { to: '/panel/choferes', label: 'Choferes' },
+    { to: '/panel/control-choferes', label: 'Control de choferes' },
     { to: '/panel/catalogo', label: 'Productos' },
     { to: '/panel/zonas', label: 'Zonas de reparto' },
   ] },
