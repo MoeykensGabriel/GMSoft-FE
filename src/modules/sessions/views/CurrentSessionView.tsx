@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { CustomerRouteList, OutOfRouteSearch, RouteUpdateNotice, useRouteLater } from '../../customers'
+import type { NoPurchaseReason } from '../../customers'
 import { useAuth } from '../../auth'
 import { RouteHeader } from '../components/RouteHeader'
 import { Button, formatDateTime, InstallAppButton, LinkButton, Page, useOutbox, BackButton } from '../../core'
@@ -85,7 +86,7 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
           <p>No se pudieron leer las visitas de hoy. La lista puede mostrar como pendientes a clientes ya visitados.</p>
           <Button variant="secondary" onClick={() => void visitas.refetch()}>Reintentar</Button>
         </div>}
-        <CustomerRouteList vehicleId={sesion.vehicleId} zones={orderedZones(sesion)} routeDays={sesion.routeDays} noPurchaseReasons={Object.fromEntries((visitas.data ?? []).flatMap((v) => v.type === 'NoPurchase' && v.noPurchaseReason ? [[v.customerId, v.noPurchaseReason]] : []))} visitedCustomerIds={visitados} laterCustomerIds={masTarde} onSelect={(id) => navigate(`/reparto/clientes/${encodeURIComponent(id)}`)} />
+        <CustomerRouteList vehicleId={sesion.vehicleId} zones={orderedZones(sesion)} routeDays={sesion.routeDays} noPurchaseReasons={soloNoCompro(visitas.data ?? [])} visitedCustomerIds={visitados} laterCustomerIds={masTarde} onSelect={(id) => navigate(`/reparto/clientes/${encodeURIComponent(id)}`)} />
       </>}
       {modo === 'promociones' && <>
         <LinkButton to="/reparto/promocion" variant="primary" className="min-h-14">+ Registrar promoción</LinkButton>
@@ -137,4 +138,10 @@ export function CurrentSessionView({ sesion, promotions }: { sesion: Session; pr
       </p>
     </Page>
   )
+}
+
+/** "No compró" de cada cliente que no tuvo otra visita: si después volvió y compró, cuenta como atendido. */
+function soloNoCompro(visitas: { customerId: string; type: string; noPurchaseReason?: NoPurchaseReason | null }[]): Record<string, NoPurchaseReason> {
+  const atendidos = new Set(visitas.filter((v) => v.type !== 'NoPurchase').map((v) => v.customerId))
+  return Object.fromEntries(visitas.flatMap((v) => v.type === 'NoPurchase' && v.noPurchaseReason && !atendidos.has(v.customerId) ? [[v.customerId, v.noPurchaseReason]] : []))
 }

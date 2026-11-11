@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { Badge, formatDateTime, DataTable, LinkButton } from '../../core'
+import { RouteProgressBar } from '../../customers'
 import { sessionService } from '../services/sessionService'
 import type { ActiveDeparture } from '../services/sessionService'
 import { departureRows, stockTone, transferLabel } from '../utils/departureStock'
@@ -37,6 +38,9 @@ export function ActiveDepartureSummary({ departure }: { departure: ActiveDepartu
         <LinkButton to={`/panel/salidas/${departure.sessionId}/recepcion`} variant="primary" aria-label={`Recibir ${departure.vehicleName} ${departure.vehicleLicensePlate}`}>Recibir</LinkButton>
       </div>
     </div>
+    {departure.routeProgress && departure.routeProgress.total > 0 && <Link to={`/panel/salidas/${departure.sessionId}`} className="block rounded-full" aria-label={`Ver salida de ${departure.vehicleName}`}>
+      <RouteProgressBar progress={departure.routeProgress} className="" />
+    </Link>}
     {filas.length === 0 ? <p className="text-sm text-muted">Sin carga inicial registrada.</p>
       : <div className="overflow-x-auto">
         <DataTable stack={false} label={`Carga de ${departure.vehicleName}`} className="w-full min-w-[36rem] text-sm">

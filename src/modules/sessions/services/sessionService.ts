@@ -60,6 +60,8 @@ export interface ActiveDeparture {
   initialLoad: { productId: string; productDetail: string; quantity: number }[]
   /** Por producto: con qué salió, recargas, entregados y lo que lleva a bordo ahora. */
   stock?: { productId: string; productDetail: string; initial: number; restocked: number; transferred?: number; delivered: number; fullOnBoard: number; emptyOnBoard: number }[]
+  /** Avance sobre la hoja del chofer: clientes del recorrido, atendidos y solo "no compró". */
+  routeProgress?: { total: number; sold: number; noPurchase: number }
 }
 
 /** Lo que se pasó de un camión a otro, tal como lo registró el backend. */

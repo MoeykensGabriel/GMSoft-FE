@@ -2,13 +2,16 @@ import type { RouteProgress } from '../utils/routeProgress'
 import { share } from '../utils/routeProgress'
 
 /** Barra del recorrido: verde compraron, ámbar visitados sin compra, gris pendientes. */
-export function RouteProgressBar({ progress }: { progress: RouteProgress }) {
+export function RouteProgressBar({ progress, className = 'ui-card bg-surface p-3' }: {
+  progress: Pick<RouteProgress, 'total' | 'sold' | 'noPurchase'>
+  className?: string
+}) {
   const { total, sold, noPurchase } = progress
   if (total === 0) return null
   const done = sold + noPurchase
   const complete = done === total
   return (
-    <div className="ui-card flex items-center gap-3 bg-surface p-3">
+    <div className={`flex items-center gap-3 ${className}`}>
       <div
         role="progressbar" aria-label="Avance del recorrido" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done}
         aria-valuetext={`${done} de ${total} visitados, ${sold} compraron`}
