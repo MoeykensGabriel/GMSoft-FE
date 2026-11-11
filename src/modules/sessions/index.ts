@@ -8,3 +8,4 @@ export { StockOnBoardPanel } from './components/StockOnBoardPanel'
 
 export { ActiveDeparturesCard } from './components/ActiveDeparturesCard'
 export { UsageSinceBadge } from './components/UsageSinceBadge'
+export { OpeningTime } from './components/OpeningTime'

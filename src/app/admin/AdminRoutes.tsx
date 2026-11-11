@@ -28,7 +28,7 @@ import { AlertsView } from './AlertsView'
 // Estadísticas carga la librería de gráficos: se baja recién al entrar.
 const VehiclePerformanceView = lazy(() => import('../../modules/reports').then((module) => ({ default: module.VehiclePerformanceView })))
 const SalesByPeriodView = lazy(() => import('../../modules/reports').then((module) => ({ default: module.SalesByPeriodView })))
-const DriverControlView = lazy(() => import('../../modules/driverControl').then((module) => ({ default: module.DriverControlView })))
+const DriverControlView = lazy(() => import('../../modules/driverControl/admin').then((module) => ({ default: module.DriverControlView })))
 const RouteSheetView = lazy(() => import('../../modules/reports').then((module) => ({ default: module.RouteSheetView })))
 
 /**
