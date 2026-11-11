@@ -161,6 +161,11 @@ export interface SessionDelivery {
   type: 'Sale' | 'ContainerOnly' | 'Promotion' | 'NoPurchase'
   noPurchaseReason: NoPurchaseReason | null
   deliveredAt: string
+  /** Hora del celular al marcar; null en visitas de apps viejas. */
+  markedAt?: string | null
+  markedAtDoubtful?: boolean
+  /** Llegó al servidor más de 5 minutos después de marcarse. */
+  sentOffline?: boolean
   total: number
   notes: string | null
   items: SessionDeliveryItem[]

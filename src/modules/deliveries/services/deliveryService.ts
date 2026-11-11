@@ -32,6 +32,8 @@ export interface RegisterDeliveryRequest {
   clientRequestId: string
   /** La salida en que se cargó: un reenvío no cae en otra salida si esta ya se cerró. */
   expectedSessionId?: string | null
+  /** Hora del celular al tocar Confirmar. Viaja igual en cada reenvío de la bandeja. */
+  markedAt?: string
 }
 
 export interface RegisterDeliveryResult {

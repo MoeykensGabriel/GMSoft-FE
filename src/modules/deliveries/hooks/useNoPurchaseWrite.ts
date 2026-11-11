@@ -39,7 +39,7 @@ export function useNoPurchaseWrite(customerId: string, customerName = 'Cliente')
     if (!attempt.current) {
       attempt.current = { customerId, newCustomer: null, type: 'NoPurchase', noPurchaseReason: reason,
         notes: notes.trim() || null, items: [], containersOut: [], containersIn: [], payment: null,
-        clientRequestId: newRequestId(), expectedSessionId: session.data?.id ?? null }
+        clientRequestId: newRequestId(), expectedSessionId: session.data?.id ?? null, markedAt: new Date().toISOString() }
       if (userId && session.data) outbox.put(visitOutboxItem({ userId, sessionId: session.data.id, body: attempt.current,
         label: `${customerName}: no compró (${NO_PURCHASE_REASONS[reason]})` }))
     }
