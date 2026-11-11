@@ -17,6 +17,8 @@ export interface DriverProfile {
   isActive: boolean
   /** Último kilometraje registrado del camión asignado. */
   vehicleKilometers?: number | null
+  /** El km del camión está sin revisar: al salir se lee del tablero y puede ser menor. */
+  vehicleKilometersCheckPending?: boolean
 }
 
 export type DriverInput = Pick<DriverProfile, 'firstName' | 'lastName' | 'documentNumber' | 'phone' | 'vehicleId' | 'isActive'>

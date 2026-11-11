@@ -14,7 +14,7 @@ import {
   TransferView,
 } from '../../modules/sessions/admin'
 import { VehicleLoadView, RemovedLoadsView, RestockView, RestockListView } from '../../modules/vehicleLoads'
-import { VehicleListView, VehicleFormView, ScheduleView } from '../../modules/vehicles/admin'
+import { VehicleListView, VehicleFormView, ScheduleView, VehicleControlView } from '../../modules/vehicles/admin'
 import { DriverListView, DriverFormView } from '../../modules/drivers/admin'
 import { ZoneFormView, ZoneListView } from '../../modules/zones/admin'
 import { CustomerDetailView, CustomerFormView, CustomerListView, RemovalRequestsView } from '../../modules/customers/admin'
@@ -49,6 +49,7 @@ export function AdminRoutes() {
         <Route path="promociones" element={<PromotionListView />} />
         <Route path="promociones/:id" element={<PromotionDetailView />} />
         <Route path="vehiculos" element={<VehicleListView />} />
+        <Route path="control-vehiculos" element={<VehicleControlView />} />
         <Route path="vehiculos/nuevo" element={<VehicleFormView />} />
         <Route path="vehiculos/:id" element={<VehicleFormView />} />
         <Route path="choferes" element={<DriverListView />} />
