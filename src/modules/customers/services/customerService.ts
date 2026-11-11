@@ -201,4 +201,8 @@ export const customerService = {
   getAccount: (customerId: string) =>
     api.get<CustomerAccount>(`/api/customers/${customerId}/account`),
   getById: (customerId: string) => api.get<Customer>(`/api/customers/${customerId}`),
+  /** Admin: corrige el saldo de envases contra lo que el cliente tiene de verdad. */
+  adjustContainers: (customerId: string, productId: string, realQuantity: number, reason: string) =>
+    api.post<{ previousQuantity: number; newQuantity: number; delta: number }>(
+      `/api/customers/${customerId}/containers/adjust`, { productId, realQuantity, reason }),
 }

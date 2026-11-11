@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Badge, Button, ErrorMessage, Page, PageHeader, Panel, BackButton } from '../../core'
+import { AdjustContainersDialog } from '../components/AdjustContainersDialog'
 import { CustomerAccountMovements } from '../components/CustomerAccountMovements'
 import { CustomerBalanceCard } from '../components/CustomerBalanceCard'
 import { CustomerContainersSummary } from '../components/CustomerContainersSummary'
@@ -10,6 +12,7 @@ import { customerService } from '../services/customerService'
 export function CustomerDetailView() {
   const { id } = useParams()
   const customer = useQuery({ queryKey: ['customers', 'detail', id], queryFn: () => customerService.getById(id!), enabled: Boolean(id) })
+  const [adjusting, setAdjusting] = useState(false)
   const account = useQuery({ queryKey: ['customers', 'account', id], queryFn: () => customerService.getAccount(id!), enabled: Boolean(id), staleTime: 0 })
 
   return <Page className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
@@ -30,9 +33,10 @@ export function CustomerDetailView() {
           </div>
           <div className="flex min-w-0 flex-col gap-5">
             <CustomerBalanceCard balance={account.data.balance} />
-            <Panel title="Envases en poder del cliente">
+            <Panel title="Envases en poder del cliente" actions={<Button variant="edit" onClick={() => setAdjusting(true)}>Corregir</Button>}>
               <p className="text-sm"><CustomerContainersSummary account={account.data} /></p>
             </Panel>
+            {adjusting && <AdjustContainersDialog account={account.data} onClose={() => setAdjusting(false)} />}
           </div>
         </div>
         <Panel aria-label="Movimientos de la cuenta">
