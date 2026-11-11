@@ -6,7 +6,9 @@ import { Button, Field } from '../../core'
 import { customerService } from '../services/customerService'
 import type { NoPurchaseReason } from '../utils/noPurchase'
 import { splitRoute } from '../utils/routeLater'
+import { routeProgress } from '../utils/routeProgress'
 import { CustomerCard } from './CustomerCard'
+import { RouteProgressBar } from './RouteProgressBar'
 
 export function CustomerRouteList({ vehicleId, zones, routeDays, onSelect, noPurchaseReasons = {}, visitedCustomerIds = [], laterCustomerIds = [] }: {
   vehicleId: string
@@ -30,11 +32,19 @@ export function CustomerRouteList({ vehicleId, zones, routeDays, onSelect, noPur
     refetchOnWindowFocus: true,
     queryFn: () => customerService.listRoute(zones, routeDays, vehicleId, debouncedSearch),
   })
+  // La barra mide todo el recorrido, no lo que se está buscando (sin búsqueda es la misma consulta).
+  const fullRoute = useQuery({
+    queryKey: ['customers', 'route', vehicleId, zones, routeDays, ''],
+    refetchOnWindowFocus: true,
+    queryFn: () => customerService.listRoute(zones, routeDays, vehicleId, ''),
+  })
+  const progress = routeProgress((fullRoute.data ?? []).map((customer) => customer.id), visitedCustomerIds, Object.keys(noPurchaseReasons))
   const all = customers.data ?? []
   // La lista se va acortando con cada visita; el orden de recorrido no cambia.
   const { pending: list, later, visited } = splitRoute(all, visitedCustomerIds, laterCustomerIds)
   return (
     <section className="flex flex-col gap-3" aria-label="Clientes en orden de recorrido">
+      {fullRoute.isSuccess && <RouteProgressBar progress={progress} />}
       <div className="ui-card bg-surface p-3">
         <Field label="Buscar clientes del recorrido" name="route-search" type="search" placeholder="Nombre, dirección o teléfono" value={search} onChange={(event) => setSearch(event.target.value)} />
       </div>
