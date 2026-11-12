@@ -7,7 +7,7 @@ const source = readFileSync(new URL('../src/modules/reports/utils/salesPeriod.ts
 const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } })
 const module = { exports: {} }
 new Function('require', 'module', 'exports', outputText)(() => { throw new Error('No se permiten imports de runtime') }, module, module.exports)
-const { periodFor, shiftPeriod, periodTitle, isCurrentPeriod } = module.exports
+const { periodFor, shiftPeriod, periodTitle, isCurrentPeriod, rangeTitle, parsePercent, percentAmount } = module.exports
 
 test('semana de lunes a domingo, incluso al cruzar mes o año', () => {
   const october = { from: '2026-09-28', to: '2026-10-04' }
@@ -58,4 +58,27 @@ test('reconoce el período actual y descarta anteriores y siguientes', () => {
     assert.equal(isCurrentPeriod(kind, shiftPeriod(kind, current, -1), '2026-10-27'), false)
     assert.equal(isCurrentPeriod(kind, shiftPeriod(kind, current, 1), '2026-10-27'), false)
   }
+})
+
+test('título del rango: período exacto o fechas sueltas', () => {
+  assert.equal(rangeTitle('week', { from: '2025-10-20', to: '2025-10-26' }), 'Semana del 20/10 al 26/10')
+  assert.equal(rangeTitle('month', { from: '2026-11-01', to: '2026-11-30' }), 'Noviembre 2026')
+  assert.equal(rangeTitle('month', { from: '2026-11-03', to: '2026-11-10' }), 'Del 03/11/2026 al 10/11/2026')
+  assert.equal(rangeTitle('week', { from: '2026-11-05', to: '2026-11-05' }), 'El 05/11/2026')
+})
+
+test('porcentaje con coma o punto decimal, entre 0 y 100', () => {
+  assert.equal(parsePercent('1'), 1)
+  assert.equal(parsePercent(' 1,5 '), 1.5)
+  assert.equal(parsePercent('0.25'), 0.25)
+  assert.equal(parsePercent(',5'), 0.5)
+  assert.equal(parsePercent('100'), 100)
+  for (const invalid of ['', 'abc', '-1', '101', '1,2,3', '1e2', '1.']) assert.equal(parsePercent(invalid), null)
+})
+
+test('monto del porcentaje redondeado a centavos', () => {
+  assert.equal(percentAmount(1_234_567, 1), 12_345.67)
+  assert.equal(percentAmount(1000, 1.5), 15)
+  assert.equal(percentAmount(333.33, 0.5), 1.67)
+  assert.equal(percentAmount(0, 10), 0)
 })
