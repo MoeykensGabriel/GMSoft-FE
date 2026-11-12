@@ -6,23 +6,43 @@ import { isCurrentPeriod, parsePercent, percentAmount, periodFor, rangeTitle, sh
 import type { SalesPeriodKind, SalesPeriodRange } from '../utils/salesPeriod'
 
 const PERCENT_KEY = 'gmsoft.ventas.porcentaje'
+const COMMISSION_KEY = 'gmsoft.ventas.comision-choferes'
 
-function readStoredPercent(): string {
-  try { return localStorage.getItem(PERCENT_KEY) ?? '1' } catch { return '1' }
+function readStored(key: string, fallback: string): string {
+  try { return localStorage.getItem(key) ?? fallback } catch { return fallback }
+}
+
+/** Porcentaje que se recuerda por navegador. */
+function useStoredPercent(key: string, fallback: string) {
+  const [text, setText] = useState(() => readStored(key, fallback))
+  const change = (value: string) => {
+    setText(value)
+    try { localStorage.setItem(key, value) } catch { /* sin almacenamiento: queda solo en pantalla */ }
+  }
+  return [text, change, parsePercent(text)] as const
+}
+
+function PercentField({ label, text, percent, onChange }: { label: string; text: string; percent: number | null; onChange: (value: string) => void }) {
+  return <Field label={label} inputMode="decimal" autoComplete="off" value={text}
+    error={text.trim() && percent === null ? 'Entre 0 y 100' : undefined}
+    onChange={(event) => onChange(event.target.value)} />
 }
 
 export function SalesByPeriodView() {
   const today = currentBusinessDate()
   const [kind, setKind] = useState<SalesPeriodKind>('week')
   const [selectedRange, setSelectedRange] = useState<SalesPeriodRange | null>(null)
-  const [percentText, setPercentText] = useState(readStoredPercent)
+  const [percentText, changePercent, percent] = useStoredPercent(PERCENT_KEY, '1')
+  const [commissionText, changeCommission, commission] = useStoredPercent(COMMISSION_KEY, '')
   const range = selectedRange ?? periodFor(kind, today)
   const validation = rangeError(range)
   const current = isCurrentPeriod(kind, range, today)
   const report = useVehiclePerformance(range.from, range.to)
   const vehicles = report.data?.vehicles ?? []
   const total = vehicles.reduce((sum, vehicle) => sum + vehicle.sold, 0)
-  const percent = parsePercent(percentText)
+  const drivers = report.data?.drivers ?? []
+  const driversSold = drivers.reduce((sum, driver) => sum + driver.sold, 0)
+  const commissionOf = (sold: number) => commission === null ? '—' : formatMoney(percentAmount(sold, commission))
   const showReport = !validation && report.data && !report.isError
 
   const move = (delta: -1 | 1) => {
@@ -33,10 +53,6 @@ export function SalesByPeriodView() {
   const changeDate = (field: keyof SalesPeriodRange, value: string) => {
     const next = { ...range, [field]: value }
     setSelectedRange(isCurrentPeriod(kind, next, today) ? null : next)
-  }
-  const changePercent = (value: string) => {
-    setPercentText(value)
-    try { localStorage.setItem(PERCENT_KEY, value) } catch { /* sin almacenamiento: queda solo en pantalla */ }
   }
 
   return <Page className="mx-auto flex w-full min-w-0 max-w-xl flex-col gap-5 p-4 sm:p-6">
@@ -62,9 +78,7 @@ export function SalesByPeriodView() {
     </Panel>
     <Panel aria-label="Porcentaje sobre el total">
       <div className="grid grid-cols-[minmax(0,7rem)_minmax(0,1fr)] items-end gap-3">
-        <Field label="Porcentaje %" inputMode="decimal" autoComplete="off" value={percentText}
-          error={percentText.trim() && percent === null ? 'Entre 0 y 100' : undefined}
-          onChange={(event) => changePercent(event.target.value)} />
+        <PercentField label="Porcentaje %" text={percentText} percent={percent} onChange={changePercent} />
         <p className="min-h-11 rounded-lg bg-accent-soft px-3 py-2 text-right text-xl font-bold tabular-nums text-brand-dark" aria-live="polite">
           {showReport && percent !== null ? formatMoney(percentAmount(total, percent)) : '—'}
         </p>
@@ -89,5 +103,27 @@ export function SalesByPeriodView() {
         <td className="text-right tabular-nums">{formatMoney(total)}</td>
       </tr></tfoot>
     </DataTable>}
+    {showReport && <Panel title="Comisión de choferes">
+      <div className="max-w-[7rem]"><PercentField label="Comisión %" text={commissionText} percent={commission} onChange={changeCommission} /></div>
+      <DataTable label="Comisión por chofer" stack={false} className="table-fixed">
+        <thead><tr>
+          <th scope="col">Chofer</th>
+          <th scope="col" className="text-right">Vendido</th>
+          <th scope="col" className="text-right">Comisión</th>
+        </tr></thead>
+        <tbody>{drivers.length === 0
+          ? <tr><td colSpan={3} className="text-muted">Sin salidas en el período</td></tr>
+          : drivers.map((driver) => <tr key={driver.driverId}>
+            <th scope="row" className="font-normal">{driver.driverName}</th>
+            <td className={`text-right tabular-nums ${driver.sold === 0 ? 'text-muted' : ''}`}>{formatMoney(driver.sold)}</td>
+            <td className="text-right font-semibold tabular-nums text-success">{commissionOf(driver.sold)}</td>
+          </tr>)}</tbody>
+        <tfoot className="border-t-2 border-accent bg-accent-soft font-bold text-brand-dark"><tr>
+          <th scope="row">Total</th>
+          <td className="text-right tabular-nums">{formatMoney(driversSold)}</td>
+          <td className="text-right tabular-nums">{commissionOf(driversSold)}</td>
+        </tr></tfoot>
+      </DataTable>
+    </Panel>}
   </Page>
 }

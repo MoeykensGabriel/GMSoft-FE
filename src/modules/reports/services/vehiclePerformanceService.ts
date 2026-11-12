@@ -26,7 +26,9 @@ export interface VehiclePerformance {
   kilometers: number
   soldPerKilometer: number | null
 }
-export interface VehiclePerformanceReport { from: string; to: string; vehicles: VehiclePerformance[] }
+/** Lo que cargó cada chofer como venta (no lo cobrado): base de su comisión. */
+export interface DriverSales { driverId: string; driverName: string; sold: number; sales: number; sessions: number }
+export interface VehiclePerformanceReport { from: string; to: string; vehicles: VehiclePerformance[]; drivers: DriverSales[] }
 
 export const vehiclePerformanceService = {
   get: (from: string, to: string) => api.get<VehiclePerformanceReport>(
