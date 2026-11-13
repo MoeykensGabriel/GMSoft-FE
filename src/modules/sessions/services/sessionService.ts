@@ -20,7 +20,8 @@ export interface SalesSummary {
 export interface RegisterRestockRequest {
   confirmOutsideWorkingHours?: boolean
   clientRequestId: string
-  items: { productId: string; quantity: number }[]
+  /** refilledEmpties: de esos llenos, cuántos eran vacíos del camión que se llenaron. */
+  items: { productId: string; quantity: number; refilledEmpties?: number }[]
   notes: string | null
 }
 
@@ -37,7 +38,7 @@ export interface SessionRestock extends Omit<RegisterRestockRequest, 'confirmOut
   sessionId: string
   occurredAt: string
   registeredByUserId: string
-  items: { productId: string; productDetail: string; quantity: number }[]
+  items: { productId: string; productDetail: string; quantity: number; refilledEmpties?: number }[]
 }
 export interface DepartureStatus { id: string; vehicleId: string; status: SessionStatus; closedAt: string | null }
 

@@ -34,7 +34,9 @@ export function RestockNotice({ userId, session }: { userId: string; session: Se
       </div>
       <ul className="flex flex-col divide-y divide-warning/20 rounded border border-warning/30 bg-surface">
         {(restock.items ?? []).map((item) => <li key={item.productId} className="flex items-baseline justify-between gap-3 px-3 py-2">
-          <span className="text-base">{item.productDetail}</span>
+          <span className="text-base">{item.productDetail}
+            {Boolean(item.refilledEmpties) && <span className="block text-sm font-semibold text-accent">{item.refilledEmpties} eran tus vacíos</span>}
+          </span>
           <span className="text-xl font-semibold">{item.quantity}</span>
         </li>)}
       </ul>

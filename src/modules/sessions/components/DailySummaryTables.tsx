@@ -28,7 +28,10 @@ function StockCells({ stock, isClosed }: { stock: SummaryStock; isClosed: boolea
     <td className="text-right tabular-nums">{stock.fullSold}</td>
     <td className="text-right tabular-nums">{stock.fullReturned}</td>
     <SummaryDifference value={stock.fullDifference} isClosed={isClosed} />
-    <td className="border-l border-line text-right tabular-nums">{stock.emptyCollected}</td>
+    <td className="border-l border-line text-right tabular-nums">{stock.emptyCollected}
+      {/* Rellenados: se llenaron en una recarga, no tienen que volver como vacíos. */}
+      {Boolean(stock.emptyRefilled) && <span className="block text-xs font-semibold text-accent" title="Vacíos del camión que se llenaron en una recarga">−{stock.emptyRefilled} rellenados</span>}
+    </td>
     {/* Vacíos que el cliente tenía sin registrar: ya están dentro de los contabilizados. */}
     <td className="text-right tabular-nums text-success">{stock.emptyRecovered || '—'}</td>
     <td className="text-right tabular-nums">{stock.emptyReturned}</td>

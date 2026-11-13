@@ -30,6 +30,8 @@ interface Props {
   notes?: string | null
   backDisabled?: boolean
   notice?: string
+  /** Vacíos del camión que se llenan en esta recarga. */
+  refills?: { productId: string; productDetail: string; quantity: number }[]
 }
 
 /**
@@ -38,7 +40,7 @@ interface Props {
  */
 export function LoadConfirmModal({
   vehicleName, licensePlate, driverNames, routeDays, lines, openedAt, sending, error, onBack, onConfirm,
-  restock = false, notes, backDisabled = false, notice,
+  restock = false, notes, backDisabled = false, notice, refills = [],
 }: Props) {
   const outside = error instanceof ApiError && error.status === 409 && error.type === 'outside-working-hours'
   const yaTeniaCarga = lines.some((line) => line.totalOnBoard !== line.quantity)
@@ -92,6 +94,15 @@ export function LoadConfirmModal({
           ))}
         </tbody>
       </DataTable>
+
+      {refills.length > 0 && <section aria-label="Vacíos del camión que se llenan" className="rounded border-2 border-accent/40 bg-accent-soft p-3">
+        <p className="font-semibold text-accent">Vacíos del camión que se llenan</p>
+        <ul className="mt-1 flex flex-col gap-1">
+          {refills.map((r) => <li key={r.productId} className="flex justify-between gap-3">
+            <span>{r.productDetail}</span><span className="font-semibold tabular-nums text-accent">−{r.quantity} vacíos</span>
+          </li>)}
+        </ul>
+      </section>}
 
       {notes && <p className="whitespace-pre-wrap break-words">Notas: {notes}</p>}
       <p className="text-muted">

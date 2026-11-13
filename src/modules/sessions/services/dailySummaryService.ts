@@ -11,6 +11,8 @@ export interface SummaryStock {
   /** De los vacíos contabilizados, los que los clientes tenían sin registrar. */
   emptyRecovered?: number
   emptyReturned: number
+  /** Vacíos del camión que se llenaron en una recarga: no vuelven como vacíos. */
+  emptyRefilled?: number
   emptyDifference: number
 }
 
