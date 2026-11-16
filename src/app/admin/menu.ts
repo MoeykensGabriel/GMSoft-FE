@@ -14,21 +14,24 @@ export const groups: Group[] = [
     { to: '/panel/promociones', label: 'Promociones' },
   ] },
   { id: 'reparto', label: 'Reparto', items: [
-    // En el orden del día: de la agenda y la carga de la mañana a la recepción y los números.
+    // En el orden del día: de la agenda de la mañana a los números de la vuelta.
     { to: '/panel/agenda', label: 'Organizar reparto x zona' },
-    { to: '/panel/carga', label: 'Cargar' },
     { to: '/panel/salidas', label: 'Salidas' },
-    { to: '/panel/recargas', label: 'Recargar' },
-    { to: '/panel/pases', label: 'Pase entre camiones' },
-    { to: '/panel/recepcion', label: 'Recibir' },
     { to: '/panel/liquidacion', label: 'Liquidación' },
     { to: '/panel/rendiciones', label: 'Rendiciones' },
     { to: '/panel/resumen-diario', label: 'Resumen diario' },
     { to: '/panel/hoja-de-ruta', label: 'Hoja de ruta' },
-    { to: '/panel/ventas', label: 'Ventas' },
     { to: '/panel/estadisticas', label: 'Estadísticas', module: 'control' },
   ] },
+  { id: 'carga', label: 'Administrar carga', items: [
+    // Todo lo que sube o baja del camión, en el orden en que pasa.
+    { to: '/panel/carga', label: 'Cargar' },
+    { to: '/panel/recargas', label: 'Recargar' },
+    { to: '/panel/pases', label: 'Pase entre camiones' },
+    { to: '/panel/recepcion', label: 'Recibir' },
+  ] },
   { id: 'empresa', label: 'Empresa', items: [
+    { to: '/panel/ventas', label: 'Ventas' },
     { to: '/panel/configuracion', label: 'Configuración', children: [
       { to: '/panel/configuracion/horario-laboral', label: 'Horario laboral' },
       { to: '/panel/configuracion/actividad-clientes', label: 'Actividad de clientes' },
