@@ -24,6 +24,7 @@ import { CustomerActivityView, ExpectedLoadView, PromotionSettingsView, WorkingH
 import { AdminLayout } from './AdminLayout'
 import { AdminHomeView } from './AdminHomeView'
 import { AlertsView } from './AlertsView'
+import { ModuleRoute } from './ModuleRoute'
 
 // Estadísticas carga la librería de gráficos: se baja recién al entrar.
 const VehiclePerformanceView = lazy(() => import('../../modules/reports').then((module) => ({ default: module.VehiclePerformanceView })))
@@ -49,11 +50,9 @@ export function AdminRoutes() {
         <Route path="promociones" element={<PromotionListView />} />
         <Route path="promociones/:id" element={<PromotionDetailView />} />
         <Route path="vehiculos" element={<VehicleListView />} />
-        <Route path="control-vehiculos" element={<VehicleControlView />} />
         <Route path="vehiculos/nuevo" element={<VehicleFormView />} />
         <Route path="vehiculos/:id" element={<VehicleFormView />} />
         <Route path="choferes" element={<DriverListView />} />
-        <Route path="control-choferes" element={<Suspense fallback={<p role="status" className="p-6 text-muted">Cargando…</p>}><DriverControlView /></Suspense>} />
         <Route path="choferes/nuevo" element={<DriverFormView />} />
         <Route path="choferes/:id" element={<DriverFormView />} />
         <Route path="clientes" element={<CustomerListView />} />
@@ -71,7 +70,13 @@ export function AdminRoutes() {
         <Route path="resumen-diario" element={<DailySummaryView />} />
         <Route path="hoja-de-ruta" element={<Suspense fallback={<p className="p-6 text-muted">Cargando la hoja de ruta...</p>}><RouteSheetView /></Suspense>} />
         <Route path="ventas" element={<Suspense fallback={<p role="status" className="p-6 text-muted">Cargando…</p>}><SalesByPeriodView /></Suspense>} />
-        <Route path="estadisticas" element={<Suspense fallback={<p className="p-6 text-muted">Cargando estadísticas...</p>}><VehiclePerformanceView /></Suspense>} />
+
+        {/* Módulo extra "Control y estadísticas" (PLANES.md): sin el módulo, vuelven al Home. */}
+        <Route element={<ModuleRoute module="control" />}>
+          <Route path="control-vehiculos" element={<VehicleControlView />} />
+          <Route path="control-choferes" element={<Suspense fallback={<p role="status" className="p-6 text-muted">Cargando…</p>}><DriverControlView /></Suspense>} />
+          <Route path="estadisticas" element={<Suspense fallback={<p className="p-6 text-muted">Cargando estadísticas...</p>}><VehiclePerformanceView /></Suspense>} />
+        </Route>
 
         <Route path="salidas" element={<SessionListView />} />
         <Route path="recepcion" element={<ReceptionView />} />

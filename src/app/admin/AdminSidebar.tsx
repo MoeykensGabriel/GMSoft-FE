@@ -2,52 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { Button } from '../../modules/core'
 import { AlertsButton } from './AlertsButton'
-
-interface Item { to: string; label: string; end?: boolean; children?: Item[] }
-interface Group { id: string; label: string; items: Item[] }
+import { menuFor } from './menu'
+import type { Group, Item } from './menu'
+import { useModules } from './useModules'
 
 const home: Item = { to: '/panel', label: 'Home', end: true }
 
-// El menú se agrupa por tarea para no crecer hacia abajo con cada pantalla nueva.
-const groups: Group[] = [
-  { id: 'clientes', label: 'Clientes', items: [
-    { to: '/panel/clientes', label: 'Clientes' },
-    { to: '/panel/recorridos', label: 'Recorridos' },
-    { to: '/panel/bajas', label: 'Bajas pedidas' },
-    { to: '/panel/promociones', label: 'Promociones' },
-  ] },
-  { id: 'reparto', label: 'Reparto', items: [
-    // En el orden del día: de la agenda y la carga de la mañana a la recepción y los números.
-    { to: '/panel/agenda', label: 'Organizar reparto x zona' },
-    { to: '/panel/carga', label: 'Cargar' },
-    { to: '/panel/salidas', label: 'Salidas' },
-    { to: '/panel/recargas', label: 'Recargar' },
-    { to: '/panel/pases', label: 'Pase entre camiones' },
-    { to: '/panel/recepcion', label: 'Recibir' },
-    { to: '/panel/liquidacion', label: 'Liquidación' },
-    { to: '/panel/rendiciones', label: 'Rendiciones' },
-    { to: '/panel/resumen-diario', label: 'Resumen diario' },
-    { to: '/panel/hoja-de-ruta', label: 'Hoja de ruta' },
-    { to: '/panel/ventas', label: 'Ventas' },
-    { to: '/panel/estadisticas', label: 'Estadísticas' },
-  ] },
-  { id: 'empresa', label: 'Empresa', items: [
-    { to: '/panel/configuracion', label: 'Configuración', children: [
-      { to: '/panel/configuracion/horario-laboral', label: 'Horario laboral' },
-      { to: '/panel/configuracion/actividad-clientes', label: 'Actividad de clientes' },
-      { to: '/panel/configuracion/promociones', label: 'Promociones' },
-      { to: '/panel/configuracion/capacidad-vehiculo', label: 'Capacidad por vehículo' },
-    ] },
-    { to: '/panel/vehiculos', label: 'Vehículos' },
-    { to: '/panel/control-vehiculos', label: 'Control de vehículos' },
-    { to: '/panel/choferes', label: 'Choferes' },
-    { to: '/panel/control-choferes', label: 'Control de choferes' },
-    { to: '/panel/catalogo', label: 'Productos' },
-    { to: '/panel/zonas', label: 'Zonas de reparto' },
-  ] },
-]
-
-const groupOf = (pathname: string) =>
+const groupOf = (groups: Group[], pathname: string) =>
   groups.find((group) => group.items.some((item) => pathname === item.to || pathname.startsWith(`${item.to}/`)))?.id
 
 const linkClass = (isActive: boolean, depth = 0) =>
@@ -69,7 +30,9 @@ export function AdminSidebar({ userName, expanded, onClose, onLogout }: {
   useEffect(() => { if (expanded) closeButton.current?.focus() }, [expanded])
   const onNavigate = onClose
   const { pathname } = useLocation()
-  const current = groupOf(pathname)
+  // Las pantallas de un módulo extra solo aparecen si la instalación lo tiene.
+  const groups = menuFor(useModules().enabled)
+  const current = groupOf(groups, pathname)
   // El grupo de la página actual siempre está abierto; los demás los abre y cierra el usuario.
   const [open, setOpen] = useState<string[]>([])
   const isOpen = (id: string) => id === current || open.includes(id)
