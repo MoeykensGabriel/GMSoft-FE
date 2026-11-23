@@ -36,7 +36,7 @@ export function DriverSessionLayout() {
     window.sessionStorage.setItem(cancelled ? 'gmsoft.departure-cancelled' : 'gmsoft.reception-completed', '1')
     navigate('/login', { replace: true, state: cancelled ? { departureCancelled: true } : { receptionCompleted: true } })
     activeDepartureStorage.clear(userId)
-    logout()
+    logout(cancelled ? 'DepartureCancelled' : 'ReceptionCompleted')
   }, [userId, logout, navigate])
   const completeReception = useCallback(() => endDeparture(false), [endDeparture])
 

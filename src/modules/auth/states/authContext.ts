@@ -1,10 +1,10 @@
 import { createContext } from 'react'
-import type { CurrentUser, Role } from '../services/authService'
+import type { CurrentUser, LogoutReason, Role } from '../services/authService'
 
 export interface AuthContextValue {
   user: CurrentUser | null
   login: (userName: string, password: string) => Promise<CurrentUser>
-  logout: () => void
+  logout: (reason?: LogoutReason) => void
   hasRole: (role: Role) => boolean
 }
 

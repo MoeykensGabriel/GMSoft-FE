@@ -19,10 +19,12 @@ export interface DriverProfile {
   vehicleKilometers?: number | null
   /** El km del camión está sin revisar: al salir se lee del tablero y puede ser menor. */
   vehicleKilometersCheckPending?: boolean
+  /** Controlador en ruta: no reparte, controla. */
+  isInspector?: boolean
 }
 
 export type DriverInput = Pick<DriverProfile, 'firstName' | 'lastName' | 'documentNumber' | 'phone' | 'vehicleId' | 'isActive'>
-export type NewDriverInput = Omit<DriverInput, 'isActive'> & { userName: string; password: string; email: string | null }
+export type NewDriverInput = Omit<DriverInput, 'isActive'> & { userName: string; password: string; email: string | null; isInspector: boolean }
 
 export const driverService = {
   listPage: (page: number, search: string, active: string) => api.get<PagedResult<DriverProfile>>(
@@ -35,11 +37,14 @@ export const driverService = {
   listActive: async (): Promise<DriverProfile[]> => {
     const drivers: DriverProfile[] = []
     for (let page = 1; ; page += 1) {
-      const result = await api.get<PagedResult<DriverProfile>>(`/api/drivers?onlyActive=true&pageSize=100&page=${page}`)
+      // Solo choferes: un controlador no sale con un camión propio.
+      const result = await api.get<PagedResult<DriverProfile>>(`/api/drivers?onlyActive=true&inspectors=false&pageSize=100&page=${page}`)
       drivers.push(...result.items)
       if (!result.hasNextPage) return drivers
     }
   },
+  /** Los controladores, activos o no: su historial de controles sigue en pie. */
+  listInspectors: () => api.get<PagedResult<DriverProfile>>('/api/drivers?inspectors=true&pageSize=100').then((r) => r.items),
   /** El propio perfil, con el vehiculo asignado. El id sale del token. */
   getMe: () => api.get<DriverProfile>('/api/drivers/me'),
 }

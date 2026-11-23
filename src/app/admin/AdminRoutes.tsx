@@ -30,6 +30,8 @@ import { ModuleRoute } from './ModuleRoute'
 const VehiclePerformanceView = lazy(() => import('../../modules/reports').then((module) => ({ default: module.VehiclePerformanceView })))
 const SalesByPeriodView = lazy(() => import('../../modules/reports').then((module) => ({ default: module.SalesByPeriodView })))
 const DriverControlView = lazy(() => import('../../modules/driverControl/admin').then((module) => ({ default: module.DriverControlView })))
+const InspectionReportView = lazy(() => import('../../modules/inspections/admin').then((module) => ({ default: module.InspectionReportView })))
+const AccessControlView = lazy(() => import('../../modules/driverControl/admin').then((module) => ({ default: module.AccessControlView })))
 const RouteSheetView = lazy(() => import('../../modules/reports').then((module) => ({ default: module.RouteSheetView })))
 
 /**
@@ -71,10 +73,12 @@ export function AdminRoutes() {
         <Route path="hoja-de-ruta" element={<Suspense fallback={<p className="p-6 text-muted">Cargando la hoja de ruta...</p>}><RouteSheetView /></Suspense>} />
         <Route path="ventas" element={<Suspense fallback={<p role="status" className="p-6 text-muted">Cargando…</p>}><SalesByPeriodView /></Suspense>} />
 
+        <Route path="control-en-ruta" element={<Suspense fallback={<p role="status" className="p-6 text-muted">Cargando…</p>}><InspectionReportView /></Suspense>} />
         {/* Módulo extra "Control y estadísticas" (PLANES.md): sin el módulo, vuelven al Home. */}
         <Route element={<ModuleRoute module="control" />}>
           <Route path="control-vehiculos" element={<VehicleControlView />} />
           <Route path="control-choferes" element={<Suspense fallback={<p role="status" className="p-6 text-muted">Cargando…</p>}><DriverControlView /></Suspense>} />
+          <Route path="control-sesiones" element={<Suspense fallback={<p role="status" className="p-6 text-muted">Cargando…</p>}><AccessControlView /></Suspense>} />
           <Route path="estadisticas" element={<Suspense fallback={<p className="p-6 text-muted">Cargando estadísticas...</p>}><VehiclePerformanceView /></Suspense>} />
         </Route>
 

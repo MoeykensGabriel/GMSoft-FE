@@ -5,6 +5,7 @@ import { RegisterDeliveryView, CustomerVisitView } from '../modules/deliveries'
 import { DeliveryRouteView, DriverSessionLayout, OrganizeRouteView } from '../modules/sessions'
 import { HomeView } from './HomeView'
 import { PendingPromotions, RegisterPromotionView } from '../modules/promotions'
+import { ChooseDepartureView, InspectionLayout, InspectionRouteView } from '../modules/inspections'
 
 // El panel se baja recién al entrar: la app del chofer, que casi siempre es un
 // celular con datos móviles, no descarga las pantallas de administración.
@@ -31,6 +32,13 @@ export function AppRouter() {
           <Route path="/reparto/organizar" element={<OrganizeRouteView />} />
           <Route path="/reparto/visita" element={<RegisterDeliveryView />} />
           <Route path="/reparto/clientes/:id" element={<CustomerVisitView />} />
+        </Route>
+      </Route>
+
+      <Route element={<ProtectedRoute roles={[ROLES.inspector]} />}>
+        <Route element={<InspectionLayout />}>
+          <Route path="/control" element={<ChooseDepartureView />} />
+          <Route path="/control/:sessionId" element={<InspectionRouteView />} />
         </Route>
       </Route>
 

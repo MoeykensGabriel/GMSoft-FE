@@ -91,9 +91,23 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   return (texto ? JSON.parse(texto) : null) as T
 }
 
+/**
+ * Un aviso que no puede trabar a nadie: sale aunque la página se esté cerrando, no
+ * espera respuesta e ignora los errores. Lo usa el control de sesiones al salir.
+ */
+function notify(path: string, body: unknown) {
+  const token = tokenStorage.get()
+  if (!token) return
+  void fetch(BASE + path, {
+    method: 'POST', keepalive: true, body: JSON.stringify(body),
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+  }).catch(() => undefined)
+}
+
 export const api = {
   get: <T>(path: string) => request<T>('GET', path),
   post: <T>(path: string, body?: unknown) => request<T>('POST', path, body ?? {}),
   put: <T>(path: string, body?: unknown) => request<T>('PUT', path, body ?? {}),
   del: <T>(path: string) => request<T>('DELETE', path),
+  notify,
 }

@@ -30,7 +30,7 @@ export function DriverListView() {
           <td>{driver.password ? <span className="font-mono">{driver.password}</span>
             : <span className="text-sm text-muted" title="Se ve desde la próxima vez que se la cambies">Cambiala para verla</span>}</td>
           <td><div className="flex flex-wrap items-center gap-2"><span>{driver.phone}</span><WhatsAppButton phone={driver.phone} name={`${driver.firstName} ${driver.lastName}`} /></div></td>
-          <td>{driver.vehicleId ? <>{driver.vehicleName ?? 'Vehículo'}<span className="block text-xs text-muted">{driver.vehicleLicensePlate}</span></> : 'Sin asignar: no puede iniciar un reparto'}</td>
+          <td>{driver.isInspector ? <Badge tone="warning">Controlador</Badge> : driver.vehicleId ? <>{driver.vehicleName ?? 'Vehículo'}<span className="block text-xs text-muted">{driver.vehicleLicensePlate}</span></> : 'Sin asignar: no puede iniciar un reparto'}</td>
           <td><Badge tone={driver.isActive ? 'success' : 'neutral'}>{driver.isActive ? 'Activo' : 'Inactivo'}</Badge></td>
           <td><LinkButton to={`/panel/choferes/${driver.id}`} className="min-h-11 min-w-11 px-0" aria-label={`Editar chofer ${driver.firstName} ${driver.lastName}`} title="Editar">
             <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

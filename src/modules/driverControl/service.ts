@@ -1,5 +1,6 @@
 import { api } from '../core'
 import type { NoPurchaseReason } from '../customers'
+import type { AccessClient, AccessKind, AccessLoss, AccessReason } from './accessFormat'
 
 export interface DriverControlMark {
   /** Hora del celular si es confiable; si no, la de llegada al servidor. */
@@ -71,4 +72,28 @@ export interface DriverControlReport {
 export const driverControlService = {
   get: (from: string, to: string) =>
     api.get<DriverControlReport>(`/api/reports/driver-control?${new URLSearchParams({ from, to })}`),
+}
+
+export interface AccessEvent {
+  occurredAt: string
+  kind: AccessKind
+  reason: AccessReason | null
+  client: AccessClient
+  device: string | null
+  loss: AccessLoss
+}
+
+export interface AccessDriver {
+  driverId: string
+  driverName: string
+  logins: number
+  /** Veces que la app lo sacó sin que él ni la oficina lo decidieran. */
+  problems: number
+  events: AccessEvent[]
+}
+
+export interface AccessControlReport { day: string; drivers: AccessDriver[] }
+
+export const accessControlService = {
+  get: (day: string) => api.get<AccessControlReport>(`/api/reports/access-control?${new URLSearchParams({ day })}`),
 }

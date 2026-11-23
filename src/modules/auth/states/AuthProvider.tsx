@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { queryClient, setOnUnauthorized, tokenStorage } from '../../core'
 import { authService } from '../services/authService'
-import type { CurrentUser, Role } from '../services/authService'
+import { LOGOUT_REASONS } from '../services/authService'
+import type { CurrentUser, LogoutReason, Role } from '../services/authService'
 import { AuthContext } from './authContext'
 import type { AuthContextValue } from './authContext'
 
@@ -26,18 +27,24 @@ function leerUsuarioGuardado(): CurrentUser | null {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CurrentUser | null>(leerUsuarioGuardado)
 
-  const logout = useCallback(() => {
+  // Con motivo, la salida se avisa al control de sesiones (solo la de un chofer).
+  const end = useCallback((reason: LogoutReason | null) => {
+    if (reason && leerUsuarioGuardado()?.driverId) authService.logout(reason)
     tokenStorage.clear()
     localStorage.removeItem(USER_KEY)
     setUser(null)
     queryClient.clear()
   }, [])
 
+  // Un botón puede pasar su evento: sin un motivo conocido, es un cierre a mano.
+  const logout = useCallback((reason?: LogoutReason) =>
+    end(typeof reason === 'string' && LOGOUT_REASONS.includes(reason) ? reason : 'Manual'), [end])
+
   // Si el token vence en medio de una consulta, la sesion se cierra sola en vez de
-  // dejar al usuario en una pantalla que falla en cada click.
+  // dejar al usuario en una pantalla que falla en cada click. Ese rechazo lo anota el servidor.
   useEffect(() => {
-    setOnUnauthorized(logout)
-  }, [logout])
+    setOnUnauthorized(() => end(null))
+  }, [end])
 
   useEffect(() => {
     const synchronize = (event: StorageEvent) => {

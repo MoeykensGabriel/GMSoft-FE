@@ -8,5 +8,6 @@ export function HomeView() {
   if (!user) return <Navigate to="/login" replace />
   if (user.roles.includes(ROLES.admin)) return <Navigate to="/panel" replace />
   if (user.roles.includes(ROLES.driver)) return <Navigate to="/reparto" replace />
-  return <main className="p-6"><p>Tu usuario no tiene un perfil asignado.</p><Button variant="secondary" onClick={logout}>Cerrar sesión</Button></main>
+  if (user.roles.includes(ROLES.inspector)) return <Navigate to="/control" replace />
+  return <main className="p-6"><p>Tu usuario no tiene un perfil asignado.</p><Button variant="secondary" onClick={() => logout()}>Cerrar sesión</Button></main>
 }

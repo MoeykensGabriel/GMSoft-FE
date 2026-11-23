@@ -12,7 +12,7 @@ new Function('module', 'exports', outputText)(module, module.exports)
 const { groups, menuFor } = module.exports
 
 const paths = (menu) => menu.flatMap((group) => group.items.map((item) => item.to))
-const extra = ['/panel/control-choferes', '/panel/control-vehiculos', '/panel/estadisticas']
+const extra = ['/panel/control-choferes', '/panel/control-sesiones', '/panel/control-vehiculos', '/panel/estadisticas']
 
 test('el plan base no muestra las pantallas de Control y estadísticas', () => {
   const menu = paths(menuFor([]))

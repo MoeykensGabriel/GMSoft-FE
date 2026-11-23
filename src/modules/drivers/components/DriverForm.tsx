@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { LinkButton, Button, ErrorMessage, Field, Select } from '../../core'
+import { Badge, LinkButton, Button, ErrorMessage, Field, Select } from '../../core'
 import type { Vehicle } from '../../vehicles'
 import type { DriverInput, DriverProfile } from '../services/driverService'
 import { PasswordFields } from './PasswordFields'
 
-export type DriverFormValues = DriverInput & { userName: string; password: string; email: string | null }
+export type DriverFormValues = DriverInput & { userName: string; password: string; email: string | null; isInspector: boolean }
 
 export function DriverForm({ initial, vehicles, saving, error, onSubmit }: {
   initial?: DriverProfile; vehicles: Vehicle[]; saving: boolean; error: unknown; onSubmit: (values: DriverFormValues) => void
@@ -20,31 +20,39 @@ export function DriverForm({ initial, vehicles, saving, error, onSubmit }: {
   const [userName, setUserName] = useState(initial?.userName ?? '')
   const [email, setEmail] = useState(initial?.email ?? '')
   const [password, setPassword] = useState('')
+  // Se elige al crear y no cambia: el rol va en la cuenta.
+  const [isInspector, setIsInspector] = useState(initial?.isInspector ?? false)
   const assignedVehicleUnavailable = Boolean(vehicleId && !vehicles.some((vehicle) => vehicle.id === vehicleId))
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    if (saving || assignedVehicleUnavailable || (!initial && !password)) return
+    if (saving || (!isInspector && assignedVehicleUnavailable) || (!initial && !password)) return
     onSubmit({ firstName: firstName.trim(), lastName: lastName.trim(), documentNumber: documentNumber.trim(), phone: phone.trim(),
-      vehicleId: vehicleId || null, isActive, userName: userName.trim(), email: email.trim() || null, password })
+      vehicleId: isInspector ? null : vehicleId || null, isActive, userName: userName.trim(), email: email.trim() || null, password, isInspector })
   }
 
   return <form onSubmit={submit} className="ui-card p-4 flex flex-col gap-5">
     <fieldset disabled={saving} className="flex flex-col gap-4">
       <legend className="mb-3 font-semibold">Datos del chofer</legend>
+      {initial ? isInspector && <p><Badge tone="warning">Controlador</Badge></p>
+        : <div className="grid grid-cols-2 gap-2" role="group" aria-label="Tipo de usuario">
+          <Button type="button" variant={isInspector ? 'secondary' : 'navigation'} aria-pressed={!isInspector} onClick={() => setIsInspector(false)}>Chofer</Button>
+          <Button type="button" variant={isInspector ? 'warning' : 'secondary'} aria-pressed={isInspector} onClick={() => setIsInspector(true)}>Controlador</Button>
+        </div>}
+      {isInspector && !initial && <p className="text-sm text-muted">Elige el camión al entrar. Cuenta envases y confirma clientes. No vende ni ve plata.</p>}
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Nombre" name="firstName" required maxLength={100} value={firstName} onChange={(e) => setFirstName(e.target.value)} />
         <Field label="Apellido" name="lastName" required maxLength={100} value={lastName} onChange={(e) => setLastName(e.target.value)} />
         <Field label="Documento" name="documentNumber" required maxLength={50} value={documentNumber} onChange={(e) => setDocumentNumber(e.target.value)} />
         <Field label="Teléfono" name="phone" type="tel" required maxLength={30} value={phone} onChange={(e) => setPhone(e.target.value)} />
       </div>
-      <Select label="Vehículo asignado" name="vehicleId" value={vehicleId} onChange={(e) => setVehicleId(e.target.value)}>
+      {!isInspector && <><Select label="Vehículo asignado" name="vehicleId" value={vehicleId} onChange={(e) => setVehicleId(e.target.value)}>
         <option value="">Sin vehículo asignado</option>
         {assignedVehicleUnavailable && <option value={vehicleId} disabled>Vehículo anterior no disponible</option>}
         {vehicles.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.name} · {vehicle.licensePlate}</option>)}
       </Select>
       {!vehicleId && <p className="text-sm text-muted">Sin un vehículo asignado, el chofer no podrá iniciar el reparto. <Link to="/panel/vehiculos" className="underline">Administrar vehículos</Link></p>}
-      {assignedVehicleUnavailable && <p role="alert" className="text-sm text-danger">Seleccioná un vehículo disponible o quitá la asignación anterior.</p>}
+      {assignedVehicleUnavailable && <p role="alert" className="text-sm text-danger">Seleccioná un vehículo disponible o quitá la asignación anterior.</p>}</>}
       {initial && <label className="flex min-h-11 items-center gap-3"><input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />Chofer activo (puede iniciar sesión)</label>}
     </fieldset>
     <fieldset disabled={saving} className="flex flex-col gap-4 border-t border-line pt-4">
@@ -60,7 +68,7 @@ export function DriverForm({ initial, vehicles, saving, error, onSubmit }: {
     <ErrorMessage error={error} />
     <div className="flex flex-wrap items-center justify-end gap-4">
       <LinkButton to="/panel/choferes" variant="danger">Cancelar</LinkButton>
-      <Button type="submit" disabled={saving || assignedVehicleUnavailable}>{saving ? 'Guardando...' : initial ? 'Guardar chofer' : 'Crear chofer y usuario'}</Button>
+      <Button type="submit" disabled={saving || (!isInspector && assignedVehicleUnavailable)}>{saving ? 'Guardando...' : initial ? 'Guardar' : isInspector ? 'Crear controlador y usuario' : 'Crear chofer y usuario'}</Button>
     </div>
   </form>
 }

@@ -17,7 +17,7 @@ import { checkKilometers } from '../utils/kilometers'
  */
 function LogoutButton() {
   const { logout } = useAuth()
-  return <Button type="button" variant="secondary" className="self-start" onClick={logout}>Cerrar sesión</Button>
+  return <Button type="button" variant="secondary" className="self-start" onClick={() => logout()}>Cerrar sesión</Button>
 }
 
 /** «Sábado 25/10/2026», del día del negocio. */

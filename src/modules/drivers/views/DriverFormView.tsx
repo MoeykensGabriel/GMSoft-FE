@@ -20,11 +20,11 @@ export function DriverFormView() {
   const [creado, setCreado] = useState<{ userName: string; password: string; phone: string } | null>(null)
   const save = useMutation({
     mutationFn: async (values: DriverFormValues) => {
-      const { userName, password, email, ...profile } = values
+      const { userName, password, email, isInspector, ...profile } = values
       if (id) await driverService.update(id, profile)
       else {
         const { isActive: _isActive, ...newProfile } = profile
-        await driverService.create({ ...newProfile, userName, password, email })
+        await driverService.create({ ...newProfile, userName, password, email, isInspector })
         return { userName, password, phone: profile.phone }
       }
     },
