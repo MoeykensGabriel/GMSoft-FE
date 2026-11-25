@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
 import { Badge, Button, DataTable, Field, ErrorMessage, ManagementHeader, Pagination, Select, WEEKDAYS, Page } from '../../core'
@@ -15,13 +15,33 @@ const ACTIVITY_ROW: Record<Customer['activityStatus'], string> = {
   Black: 'bg-neutral-900 text-white',
 }
 
+// Los filtros sobreviven a entrar a un cliente y volver (por "Volver", Guardar o Cancelar).
+const FILTERS_KEY = 'gmsoft.customers.filters'
+type Filters = { vehicleId: string; visitDay: number | null; page: number; search: string }
+
+function loadFilters(): Filters {
+  const empty: Filters = { vehicleId: '', visitDay: null, page: 1, search: '' }
+  try {
+    const saved = JSON.parse(window.sessionStorage.getItem(FILTERS_KEY) ?? 'null') as Partial<Filters> | null
+    return saved ? { ...empty, ...saved } : empty
+  } catch {
+    return empty
+  }
+}
+
 export function CustomerListView() {
   const navigate = useNavigate()
-  const [vehicleId, setVehicleId] = useState('')
-  const [visitDay, setVisitDay] = useState<number | null>(null)
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState('')
-  const [draft, setDraft] = useState('')
+  const [initial] = useState(loadFilters)
+  const [vehicleId, setVehicleId] = useState(initial.vehicleId)
+  const [visitDay, setVisitDay] = useState<number | null>(initial.visitDay)
+  const [page, setPage] = useState(initial.page)
+  const [search, setSearch] = useState(initial.search)
+  const [draft, setDraft] = useState(initial.search)
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(FILTERS_KEY, JSON.stringify({ vehicleId, visitDay, page, search } satisfies Filters))
+    } catch { /* sin almacenamiento: los filtros solo duran mientras se ve la lista */ }
+  }, [vehicleId, visitDay, page, search])
   const vehicles = useQuery({ queryKey: ['vehicles', 'customer-options'], queryFn: () => vehicleService.listAll() })
   const ready = vehicleId !== ''
   const customers = useQuery({
