@@ -36,7 +36,7 @@ export function CustomerDetailView() {
             <Panel title="Envases en poder del cliente" actions={<Button variant="edit" onClick={() => setAdjusting(true)}>Corregir</Button>}>
               <p className="text-sm"><CustomerContainersSummary account={account.data} /></p>
             </Panel>
-            {adjusting && <AdjustContainersDialog account={account.data} onClose={() => setAdjusting(false)} />}
+            {adjusting && <AdjustContainersDialog customerId={account.data.customerId} containers={account.data.containers} onClose={() => setAdjusting(false)} />}
           </div>
         </div>
         <Panel aria-label="Movimientos de la cuenta">

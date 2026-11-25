@@ -9,6 +9,7 @@ export interface Group { id: string; label: string; items: Item[] }
 export const groups: Group[] = [
   { id: 'clientes', label: 'Clientes', items: [
     { to: '/panel/clientes', label: 'Clientes' },
+    { to: '/panel/corregir-envases', label: 'Corregir envases' },
     { to: '/panel/recorridos', label: 'Recorridos' },
     { to: '/panel/bajas', label: 'Bajas pedidas' },
     { to: '/panel/promociones', label: 'Promociones' },

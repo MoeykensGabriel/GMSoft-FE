@@ -33,6 +33,7 @@ const DriverControlView = lazy(() => import('../../modules/driverControl/admin')
 const InspectionReportView = lazy(() => import('../../modules/inspections/admin').then((module) => ({ default: module.InspectionReportView })))
 const AccessControlView = lazy(() => import('../../modules/driverControl/admin').then((module) => ({ default: module.AccessControlView })))
 const RouteSheetView = lazy(() => import('../../modules/reports').then((module) => ({ default: module.RouteSheetView })))
+const ContainerCorrectionView = lazy(() => import('../../modules/reports').then((module) => ({ default: module.ContainerCorrectionView })))
 
 /**
  * Las pantallas del panel, bajo /panel. El router las carga aparte (lazy): el admin
@@ -58,6 +59,7 @@ export function AdminRoutes() {
         <Route path="choferes/nuevo" element={<DriverFormView />} />
         <Route path="choferes/:id" element={<DriverFormView />} />
         <Route path="clientes" element={<CustomerListView />} />
+        <Route path="corregir-envases" element={<Suspense fallback={<p className="p-6 text-muted">Cargando...</p>}><ContainerCorrectionView /></Suspense>} />
         <Route path="recorridos" element={<RoutePlanningView />} />
         <Route path="clientes/nuevo" element={<CustomerFormView />} />
         <Route path="bajas" element={<RemovalRequestsView />} />

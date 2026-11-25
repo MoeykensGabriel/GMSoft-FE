@@ -1,5 +1,6 @@
 export { VehiclePerformanceView } from './views/VehiclePerformanceView'
 export { SalesByPeriodView } from './views/SalesByPeriodView'
 export { RouteSheetView } from './views/RouteSheetView'
+export { ContainerCorrectionView } from './views/ContainerCorrectionView'
 export { periodRange, rangeError } from './utils/period'
 export type { Period, DateRange } from './utils/period'
